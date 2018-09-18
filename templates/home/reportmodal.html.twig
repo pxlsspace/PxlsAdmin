@@ -1,0 +1,64 @@
+<div class="modal fade modal-default" id="report_info" tabindex="-1" role="dialog" aria-labelledby="report_info_label">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="report_info_label">Report Information (ID: <span id="rmd-g-id"></span>)</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <table class="table table-responsive">
+                            <tr><td colspan="2" class="text-center"><b>General</b></td></tr>
+                            <tr><td>Position:</td>   <td id="rmd-g-position"></td></tr>
+                            <tr><td>Time:</td>       <td id="rmd-g-time"></td></tr>
+                            <tr><td>Claimed by:</td> <td id="rmd-g-claimed"></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <table class="table table-responsive">
+                            <tr><td colspan="2" class="text-center"><b>Reporter</b></td></tr>
+                            <tr><td>Username:</td>          <td id="rmd-a-username"></td></tr>
+                            <tr><td>Login:</td>             <td id="rmd-a-login"></td></tr>
+                            <tr><td>Signup:</td>            <td id="rmd-a-signup"></td></tr>
+                            <tr><td>Role:</td>              <td id="rmd-a-role"></td></tr>
+                            <tr><td>Pixel Count:</td>       <td id="rmd-a-pixel"></td></tr>
+                            <tr><td>Bans:</td>              <td id="rmd-a-ban"></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <table class="table table-responsive">
+                            <tr><td colspan="2" class="text-center"><b>Reported</b></td></tr>
+                            <tr><td>Username:</td>          <td id="rmd-b-username"></td></tr>
+                            <tr><td>Login:</td>             <td id="rmd-b-login"></td></tr>
+                            <tr><td>Signup:</td>            <td id="rmd-b-signup"></td></tr>
+                            <tr><td>Role:</td>              <td id="rmd-b-role"></td></tr>
+                            <tr><td>Pixel Count:</td>       <td id="rmd-b-pixel"></td></tr>
+                            <tr><td>Bans:</td>              <td id="rmd-b-ban"></td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="box box-danger">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Report Message</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                    <span id="rmd-g-message">
+                                        Message goes here!
+                                    </span>
+                            </div>
+                            <div class="box-footer clearfix">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="modal-footer" class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>

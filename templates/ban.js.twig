@@ -1,0 +1,71 @@
+function askDiscord(uid) {
+    var api = "/api/report/discordinfo/";
+    $.ajax(api.concat(uid))
+    .done(function() {
+        $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Discord User Information</h4>The user information of ' + uid + ' have been sent to the #modlog channel.</div>');
+    }).fail(function() {
+        $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Error sending Discord Message</h4>Something strange happened. You might try it yourself. Send "!whois '+ uid + '" in the #staff-offtopic channel.</div>');
+    });
+}
+
+function banUser(self, path, s1, s2) {
+    $.ajaxSetup({
+        crossDomain: true,
+        xhrFields: {
+            withCredentials: true
+        }
+    });
+
+    var reason = prompt(s1);
+    if (!reason) {
+        if (reason !== null) {
+            alert("You need to enter a ban reason");
+        }
+        return;
+    }
+    var rollback = prompt("Rollback pixels of last hours:", 24);
+    var num = Number(rollback);
+    if (!rollback || isNaN(num)) {
+        alert("You need to enter a number");
+        return;
+    }
+
+    var data = {
+        'username': self.data("username"),
+        'reason': reason,
+        'rollback_time': num*3600,
+        'nolog': 1
+    };
+    $.post(path, data, function() {
+        $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i>' + data.username + ' has been banned with reason: ' + data.reason + '. <a href="#" onclick="window.refresh()">Reload Page</a></h4></div>');
+        jsLogger(s2, data.username);
+    }).fail(function() {
+        $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-times"></i>Uh Oh! That\'s an error!</h4>Banning ' + data.username + ' with reason  "' + data.reason + '" failed. Something strange happened.</div>');
+    });
+}
+
+function unbanUser(self, path) {
+    $.ajaxSetup({
+        crossDomain: true,
+        xhrFields: {
+            withCredentials: true
+        }
+    });
+
+    var data = { 'username': self.data("username"), 'nolog': 1 };
+    $.post(path, data, function() {
+        $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i>' + self.data("username") + ' has been unbanned. <a href="#" onclick="window.refresh()">Reload Page</a></h4></div>');
+        jsLogger("unban", data.username);
+    }).fail(function() {
+        $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-times"></i>Uh Oh! That\'s an error!</h4>Unbanning ' + self.data("username") + ' failed. Something strange happened.</div>');
+    });
+}
+$("a.permaban").click(function(e) {
+    banUser($(this), "{{ webroots.game }}/admin/permaban", "Reason:", "permaban");
+});
+$("a.shadowban").click(function(e) {
+    banUser($(this), "{{ webroots.game }}/admin/shadowban", "Reason:", "shadowban");
+});
+$("a.unban").click(function(e) {
+    unbanUser($(this), "{{ webroots.game }}/admin/unban");
+});

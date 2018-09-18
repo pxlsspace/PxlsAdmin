@@ -1,0 +1,76 @@
+var activityChartCanvas = $("#activityChart").get(0).getContext("2d");
+
+var activityChart = new Chart(activityChartCanvas);
+
+var activityChartData = {
+    labels: [
+        {% for timestamp in activity.timestamps %}
+            {% if not loop.last %}
+                "{{ timestamp|date("d.m.Y - H:i", "Europe/Berlin") }}",
+            {% else %}
+                "{{ timestamp|date("d.m.Y - H:i", "Europe/Berlin") }}"
+            {% endif %}
+        {% endfor %}
+        ],
+    datasets: [
+        {
+            label: "Hourly Pixels",
+            fillColor: "rgba(188,145,60,0.9)",
+            strokeColor: "rgba(188,145,60,0.8)",
+            pointColor: "#ff9b00",
+            pointStrokeColor: "rgba(188,145,60,1)",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(188,145,60,1)",
+            data: [
+                {% for data in activity.hourly_pixels %}
+                    {% if not loop.last %}
+                        "{{ data }}",
+                    {% else %}
+                        "{{ data }}"
+                    {% endif %}
+                {% endfor %}
+            ]
+        },
+        {
+            label: "Total Users",
+            fillColor: "rgba(60,141,188,0.9)",
+            strokeColor: "rgba(60,141,188,0.8)",
+            pointColor: "#3b8bba",
+            pointStrokeColor: "rgba(60,141,188,1)",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(60,141,188,1)",
+            data: [
+                {% for data in activity.total_users %}
+                {% if not loop.last %}
+                "{{ data }}",
+                {% else %}
+                "{{ data }}"
+                {% endif %}
+                {% endfor %}
+            ]
+        }
+    ]
+};
+
+var activityChartOptions = {
+    showScale: true,
+    scaleShowGridLines: false,
+    scaleGridLineColor: "rgba(0,0,0,.05)",
+    scaleGridLineWidth: 1,
+    scaleShowHorizontalLines: true,
+    scaleShowVerticalLines: true,
+    bezierCurve: true,
+    bezierCurveTension: 0.3,
+    pointDot: false,
+    pointDotRadius: 4,
+    pointDotStrokeWidth: 1,
+    pointHitDetectionRadius: 20,
+    datasetStroke: true,
+    datasetStrokeWidth: 2,
+    datasetFill: true,
+    legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){ %><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%=datasets[i].label%></li><% } %></ul>",
+    maintainAspectRatio: true,
+    responsive: true
+};
+
+activityChart.Line(activityChartData, activityChartOptions);

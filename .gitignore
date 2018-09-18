@@ -1,0 +1,6 @@
+/vendor/
+/logs/*
+!/logs/README.md
+pixels.log
+cache/
+src/settings.php

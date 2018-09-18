@@ -1,0 +1,119 @@
+{% extends "master.html.twig" %}
+
+{% set title = 'Search' %}
+
+{% block css %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.css">
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Search Results</h3>
+                </div>
+                <div class="box-body table-responsive">
+                    <table id="searchresults" class="table table-responsive table-bordered table-striped" width="100%">
+                        <thead>
+                            <tr>
+                                <th>id#</th>
+                                <th>Username</th>
+                                <th>Login</th>
+                                <th>Signup Time</th>
+                                <th>Cooldown Expiry</th>
+                                <th>Role</th>
+                                <th>Ban Expiry</th>
+                                <th>Ban Reason</th>
+                                <th>Signup IP</th>
+                                <th>Last IP</th>
+                                <th>Pixel Count</th>
+                                <th>Reason</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for user in result %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <a href="{{ base_url() }}{{ path_for('profile', {'identifier': user.username}) }}">
+                                            {{ user.username }}
+                                        </a>
+                                    </td>
+                                    <td><a href="{{ user.login_url|raw }}">{{ user.login }}</a></td>
+                                    <td>{{ user.signup_time }}</td>
+                                    <td>{{ user.cooldown_expiry }}</td>
+                                    <td>{{ user.role }}</td>
+                                    <td>{{ user.ban_expiry }}</td>
+                                    <td>{{ user.ban_reason }}</td>
+                                    <td>{{ user.signup_ip }}</td>
+                                    <td>{{ user.last_ip }}</td>
+                                    <td>{{ user.pixel_count }}</td>
+                                    <td>
+                                        {% for reason in user.reason %}
+                                            {{ reason }}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <div class="input-group-btn">
+                                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">Action
+                                                <span class="fa fa-caret-down"></span></button>
+                                            <ul class="dropdown-menu">
+                                                <li><a data-username="{{ user.username }}" class="permaban" href="#">Permaban</a></li>
+                                                {% if userdata.role == "ADMIN" %}
+                                                    <li><a data-username="{{ user.username }}" class="shadowban" href="#">Shadowban</a></li>
+                                                {% endif %}
+                                                {% if (user.ban_expiry|date() > date() or user.role == "BANNED" or user.role == "SHADOWBANNED") %}
+                                                    <li class="divider"></li>
+                                                    <li><a data-username="{{ user.username }}" class="unban" href="#">Unban</a></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                        <tfoot>
+                            <tr>
+                                <th>id#</th>
+                                <th>Username</th>
+                                <th>Login</th>
+                                <th>Signup Time</th>
+                                <th>Cooldown Expiry</th>
+                                <th>Role</th>
+                                <th>Ban Expiry</th>
+                                <th>Ban Reason</th>
+                                <th>Last IP</th>
+                                <th>Signup IP</th>
+                                <th>Pixel Count</th>
+                                <th>Reason</th>
+                                {# <th>Action</th> #}
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js %}
+    {{ parent() }}
+    <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $("#searchresults").DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false
+        });
+        {% include "ban.js.twig" %}
+    </script>
+{% endblock %}

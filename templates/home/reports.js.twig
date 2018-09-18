@@ -1,0 +1,83 @@
+var modal_footer = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' +
+    '<button id="rmd-unclaim" type="button" class="btn btn-primary">Unclaim</button>' +
+    '<button id="rmd-claim" type="button" class="btn btn-warning">Claim</button>' +
+    '<button id="rmd-resolve" type="button" class="btn btn-success">Resolve</button>';
+
+
+$('#report_info').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var modal = $(this);
+    modal.find('#modal-footer').html(modal_footer);
+    $.getJSON('{{ webroots.panel }}/api/report/details/'+button.data('reportid'),function(data){
+        var server = data.reporter.username === null;
+        // general
+        modal.find('#rmd-g-id').text(data.general.id.toString() + (server ? ' SERVER REPORT' : ''));
+        modal.find('#rmd-g-position').html(server ? 'N/A' : data.general.position);
+        modal.find('#rmd-g-message').html(data.general.message);
+        modal.find('#rmd-g-time').text(data.general.time);
+        modal.find('#rmd-g-claimed').text(data.general.claimed);
+
+        //reporter
+        if (server) {
+            modal.find('#rmd-a-username').closest('.col-md-4').hide();
+        } else {
+            modal.find('#rmd-a-username').closest('.col-md-4').show();
+            modal.find('#rmd-a-username').html('<a href="/userinfo/' + data.reporter.username + '">' + data.reporter.username + '</a>');
+            modal.find('#rmd-a-login').text(data.reporter.login);
+            modal.find('#rmd-a-signup').text(data.reporter.signup);
+            modal.find('#rmd-a-role').text(data.reporter.role);
+            modal.find('#rmd-a-pixel').text(data.reporter.pixelcount);
+            modal.find('#rmd-a-ban').html(data.reporter.ban.expiry + " (" + data.reporter.ban.reason + ")");
+        }
+
+        //reported
+        modal.find('#rmd-b-username').html('<a href="/userinfo/' + data.reported.username + '">' + data.reported.username + '</a>');
+        modal.find('#rmd-b-login').text(data.reported.login);
+        modal.find('#rmd-b-signup').text(data.reported.signup);
+        modal.find('#rmd-b-role').text(data.reported.role);
+        modal.find('#rmd-b-pixel').text(data.reported.pixelcount);
+        modal.find('#rmd-b-ban').html(data.reported.ban.expiry + " (" + data.reported.ban.reason + ")");
+
+        modal.find('#rmd-claim').data('reportid',data.general.id);
+        modal.find('#rmd-unclaim').data('reportid',data.general.id);
+        modal.find('#rmd-resolve').data('reportid',data.general.id);
+
+        modal.find('#rmd-claim').click(function(){
+            $.ajax({
+                url: "{{ webroots.panel }}/api/report/claim/" + $(this).data('reportid')
+            }).done(function() {
+                alert("Report claimed!");
+                setTimeout(function(){modal.modal("hide");reportList.ajax.reload()}, 500);
+            });
+        });
+        modal.find('#rmd-unclaim').click(function(){
+            var lmao = $("#modal-footer").clone();
+            $.ajax({
+                url: "{{ webroots.panel }}/api/report/unclaim/" + $(this).data('reportid')
+            }).done(function() {
+                alert("Report unclaimed!");
+                setTimeout(function(){modal.modal("hide");reportList.ajax.reload()}, 500);
+            });
+        });
+        modal.find('#rmd-resolve').click(function(){
+            var lmao = $("#modal-footer").clone();
+            $.ajax({
+                url: "{{ webroots.panel }}/api/report/resolve/" + $(this).data('reportid')
+            }).done(function() {
+                alert("Report was closed and marked as resolved!");
+                setTimeout(function(){modal.modal("hide");reportList.ajax.reload()}, 500);
+            });
+        });
+
+        if(data.general.claimed == "no one") {
+            modal.find('#rmd-unclaim').hide();
+            modal.find('#rmd-resolve').hide();
+        } else if(data.general.claimed = "{{ userdata.username }}") {
+            modal.find('#rmd-claim').hide();
+        } else {
+            modal.find('#rmd-claim').hide();
+            modal.find('#rmd-unclaim').hide();
+            modal.find('#rmd-resolve').hide();
+        }
+    });
+});

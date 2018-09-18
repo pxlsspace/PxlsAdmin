@@ -1,0 +1,242 @@
+{% extends "master.html.twig" %}
+
+{% set title = 'Dashboard' %}
+
+{% block content %}
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-green">
+                <div class="inner">
+                    <h3>{{ stats.total_pixels }}</h3>
+
+                    <p>Pixels placed</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-android-checkbox-outline-blank"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-teal">
+                <div class="inner">
+                    <h3>{{ stats.total_pixels_hour }}</h3>
+
+                    <p>Pixels placed (in the last hour)</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-android-checkbox"></i>
+                </div>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <h3>{{ stats.total_users }}</h3>
+
+                    <p>Registered Users</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-person-stalker"></i>
+                </div>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <h3>{{ stats.total_sessions }}</h3>
+
+                    <p>Active Sessions</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-earth"></i>
+                </div>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-purple">
+                <div class="inner">
+                    <h3>{{ stats.spu_ratio }}</h3>
+
+                    <p>Sessions-per-User Ratio</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-close"></i>
+                </div>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-light-blue">
+                <div class="inner">
+                    <h3>{{ stats.ppu_ratio }}</h3>
+
+                    <p>Pixels-per-User Ratio</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-person-add"></i>
+                </div>
+            </div>
+        </div>
+        <!-- ./col -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <input type="checkbox" id="autoreload"> <label id="autoreload_label" for="autoreload">Auto-Reload Tables?</label>
+        </div>
+    </div>
+    <div class="row">
+        {% if userdata.role == 'ADMIN' %}
+        <div class="{% if userdata.role == 'ADMIN' %}col-xs-6{% else %}col-xs-12{% endif %}">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Last Actions</h3>
+                </div>
+                <div class="box-body">
+                    <table id="actionlog" class="table table-responsive table-bordered table-striped" width="100%">
+                        <thead>
+                        <tr>
+                            <th>id#</th>
+                            <th>channel</th>
+                            <th>level</th>
+                            <th>message</th>
+                            <th>time</th>
+                            <th>user</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>id#</th>
+                            <th>channel</th>
+                            <th>level</th>
+                            <th>message</th>
+                            <th>time</th>
+                            <th>user</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-xs-6">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Latest Reports</h3>
+                </div>
+                <div class="box-body">
+                    <table id="reports" class="table table-responsive table-bordered table-striped" width="100%">
+                        <thead>
+                        <tr>
+                            <th>id#</th>
+                            <th>Reporter</th>
+                            <th>Position</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>id#</th>
+                            <th>Reporter</th>
+                            <th>Position</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include "home/activity.html.twig" %}
+
+    {% include "home/reportmodal.html.twig" %}
+{% endblock content %}
+
+{% block js %}
+    {{ parent() }}
+    <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/chartjs/Chart.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            var actionLog = $("#actionlog").DataTable({
+                "ajax": {
+                    "dataType": 'json',
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": '{{ webroots.panel }}/api/private/activitylog'
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "channel" },
+                    { "data": "level" },
+                    { "data": "message" },
+                    { "data": "time" },
+                    { "data": "username" }
+                    ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false
+            });
+
+            var reportList = $("#reports").DataTable({
+                "ajax": {
+                    "dataType": 'json',
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": '{{ webroots.panel }}/api/report/reload'
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "who_url" },
+                    { "data": "position_url" },
+                    { "data": "human_time" },
+                    { "data": "action" }
+                    ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false
+            });
+
+            var intervalListener = null;
+
+            $('#autoreload').change(function(){
+                if($('#autoreload').prop('checked')) {
+                    intervalListener = self.setInterval(function () {reportList.ajax.reload(); actionLog.ajax.reload();}, 500);
+                    $("#autoreload_label").html("Okay! Now reloading the tables every 5 seconds! Uncheck to stop!");
+                } else {
+                    window.clearInterval(intervalListener);
+                    $("#autoreload_label").html("Auto-Reload Tables?");
+                }
+            });
+
+            {% include "home/reports.js.twig" %}
+
+            {% include "home/activity.js.twig" %}
+        });
+    </script>
+{% endblock %}

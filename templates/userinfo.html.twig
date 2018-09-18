@@ -1,0 +1,332 @@
+{% extends "master.html.twig" %}
+{% set title = 'Profile' %}
+
+{% block content %}
+    {{ parent() }}
+    <div class="row">
+        <div class="col-md-3">
+
+            <!-- Profile Image -->
+            <div class="box box-primary">
+                <div class="box-body box-profile">
+                    <h3 class="profile-username text-center">
+                        <a href="{{ path_for('search') }}?q={{ userinfo.username }}">{{ userinfo.username }}</a></h3>
+
+                    <p class="text-muted text-center">{{ userinfo.role }}</p>
+
+                    <ul class="list-group list-group-unbordered">
+                        <li class="list-group-item">
+                            <b>Signup Time</b> <a class="pull-right">{{ userinfo.signup_time|date() }}</a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Cooldown Expiry</b> <a class="pull-right">{{ userinfo.cooldown_expiry|date() }}</a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Pixels placed</b> <a class="pull-right">{{ userinfo.pixel_count|number_format() }}</a>
+                        </li>
+                    </ul>
+
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-block btn-danger " data-toggle="dropdown">Action
+                            <span class="fa fa-caret-down"></span></button>
+                        <ul class="dropdown-menu btn-block">
+                            <li><a data-username="{{ userinfo.username }}" class="permaban" href="#">Permaban</a></li>
+                            {% if userdata.role == "ADMIN" %}
+                                <li><a data-username="{{ userinfo.username }}" class="shadowban" href="#">Shadowban</a></li>
+                            {% endif %}
+                            {% if (userinfo.ban_expiry|date() > date() or userinfo.role == "BANNED" or userinfo.role == "SHADOWBANNED") %}
+                                <li class="divider"></li>
+                                <li><a data-username="{{ userinfo.username }}" class="unban" href="#">Unban</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+
+            <!-- About Me Box -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">About {{ userinfo.username }}</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <strong><i class="fa fa-user margin-r-5"></i> User ID: {{ userinfo.id }}</strong>
+
+                    <hr />
+                    <strong><i class="fa fa-sign-in margin-r-5"></i> Login Type: <a href="{{ userinfo.login_url|raw }}">{{ userinfo.login }}</a></strong>
+
+                    <hr />
+                    <strong><i class="fa fa-globe margin-r-5"></i> Signup IP: {{ userinfo.signup_ip }}</strong>
+
+                    <hr />
+
+                    <strong><i class="fa fa-globe margin-r-5"></i> Last IP: {{ userinfo.last_ip }}</strong>
+
+                    <hr>
+
+                    <strong><i class="fa fa-map-marker margin-r-5"></i> Location (based on last IP)</strong>
+
+                    <p class="text-muted">{{ userinfo.last_ip_detail.city }}, {{ userinfo.last_ip_detail.region }}, {{ userinfo.last_ip_detail.country }}</p>
+
+                    <hr>
+
+                    <strong><i class="fa fa-pencil margin-r-5"></i> Reports</strong>
+
+                    <p>
+                        <span class="label label-danger">Received: {{ userinfo.reports_recv }}</span>
+                        <span class="label label-warning">Sent: {{ userinfo.reports_sent }}</span>
+                    </p>
+
+                    <hr>
+
+                    <strong><i class="fa fa-globe margin-r-5"></i> User-Agent</strong>
+                    <p class="text-muted"> {{ userinfo.user_agent }}</p>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+
+            {% if userdata.role == "ADMIN" %}
+                <!-- About Me Box -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Developer Information</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <strong><i class="fa fa-book margin-r-5"></i> Signup IP</strong>
+
+                        <ul class="text-muted">
+                            {% for key, value in userinfo.signup_ip_detail %}
+                                <li>{{ key }}: {{ value }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <hr>
+
+                        <strong><i class="fa fa-book margin-r-5"></i> Last IP</strong>
+
+                        <ul class="text-muted">
+                            {% for key, value in userinfo.last_ip_detail %}
+                                <li>{{ key }}: {{ value }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            {% endif %}
+        </div>
+        <!-- /.col -->
+        <div class="col-md-9">
+            <div class="nav-tabs-custom">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#timeline" data-toggle="tab">Timeline</a></li>
+                    <li><a href="#pixels" data-toggle="tab">Last Pixels</a></li>
+                    <li><a href="#notes" data-toggle="tab">Notes</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="active tab-pane" id="timeline">
+                        <!-- The timeline -->
+                        <ul class="timeline timeline-inverse">
+                            {% if userinfo.ban_expiry|date("t") > "now"|date("t") %}
+                                <li>
+                                    <i class="fa fa-user-times bg-red"></i>
+                                    <div class="timeline-item">
+                                        <span class="time"></span>
+                                        <h3 class="timeline-header"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> is banned until {{ userinfo.ban_expiry|date("d.m.Y H:i:s") }}</h3>
+                                        <div class="timeline-body">
+                                            {{ userinfo.ban_reason }}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endif %}
+
+                            {% if (userinfo.role == "BANNED" or userinfo.role == "SHADOWBANNED") %}
+                                <li>
+                                    <i class="fa fa-user-times bg-red"></i>
+                                    <div class="timeline-item">
+                                        <span class="time"></span>
+                                        <h3 class="timeline-header"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> was {{ userinfo.role|lower }} {% if userinfo.role == "BANNED" %}permanently{% endif %}</h3>
+                                        <div class="timeline-body">
+                                            {{ userinfo.ban_reason }}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endif %}
+
+                            {% for key, item in timeline %}
+                                <li>
+                                    {% if item.scope == "report_sent" %}
+                                        <i class="fa fa-question bg-yellow"></i>
+                                    {% elseif item.scope == "report_recv" %}
+                                        <i class="fa fa-exclamation bg-red"></i>
+                                    {% elseif item.scope == "signup" %}
+                                        <i class="fa fa-user-plus bg-green"></i>
+                                    {% endif %}
+                                    <div class="timeline-item">
+                                        <span class="time"><i class="fa fa-clock-o"></i> {{ key|date() }}</span>
+                                        {% if item.scope == "report_sent" %}
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> reported <a href="{{ path_for('profile',{'identifier': item.id.reported.username }) }}">{{ item.id.reported.username }}</a>. (Report ID: {{ item.id.id }})</h3>
+                                        {% elseif item.scope == "report_recv" %}
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> was reported by <a href="{{ path_for('profile',{'identifier': item.id.reporter.username }) }}">{{ item.id.reporter.username }}</a>. (Report ID: {{ item.id.id }})</h3>
+                                        {% elseif item.scope == "signup" %}
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> signed up.</h3>
+                                        {% endif %}
+
+                                        {% if item.entry != "" %}
+                                            <div class="timeline-body">
+                                                {{ item.entry }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                            {% endfor %}
+
+                            <li>
+                                <i class="fa fa-clock-o bg-gray"></i>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane" id="pixels">
+                        <b>Last 50 Pixels placed by {{ userinfo.username }}</b>
+                        <table class="table table-hover">
+                            <tr>
+                                <th>#</th>
+                                <th>Position</th>
+                                <th>Color</th>
+                                <th>Overwrites Pixel</th>
+                                <th>Time</th>
+                                <th>Is Undo?</th>
+                            </tr>
+                            {% for pixel in pixels %}
+                                <tr onClick="window.open('https://{{ webroots.game }}/#x={{ pixel.x }}&y={{ pixel.y }}&scale=32');">
+                                    <td>{{ pixel.id }}</td>
+                                    <td>{{ pixel.x }} | {{ pixel.y }}</td>
+                                    <td>{{ pixel.color }}</td>
+                                    <td>{{ pixel.secondary_id }}</td>
+                                    <td>{{ pixel.time|date("d.m.Y - H:i:s") }}</td>
+                                    <td>{% if pixel.undo_action == '1' %}yes{% else %}no{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="notes">
+                        {% for note in userinfo.notes %}
+                            <div class="post">
+                                <div class="user-block">
+                                    <img class="img-circle img-bordered-sm" src="{{ base_url() }}/assets/img/image-78.png" alt="user image">
+                                    <span class="username">
+                                        <a href="{{ path_for('profile', {'identifier': note.user_name}) }}">{{ note.user_name }}</a>
+                                        <a href="#" class="pull-right btn-box-tool deletenote" data-targetid="{{ note.id }}"><i class="fa fa-times"></i></a>
+                                    </span>
+                                    <span class="description">{{ note.timestamp|date("d.m.Y - H:i:s") }}</span>
+                                </div>
+                                <!-- /.user-block -->
+                                <p>
+                                    {{ note.message }}
+                                </p>
+
+                                <div class="box-footer box-comments">
+                                    {% for reply in note.replys %}
+                                        <div class="box-comment">
+                                            <img class="img-circle img-sm" src="{{ base_url() }}/assets/img/image-78.png" alt="User Image">
+
+                                            <div class="comment-text">
+                                                <span class="username">
+                                                    {{ reply.user_name }}
+                                                    <span class="text-muted pull-right">
+                                                        {{ reply.timestamp|date("d.m.Y - H:i:s") }}
+
+                                                        <a href="#" class="btn-box-tool deletecomment" data-targetid="{{ reply.id }}"><i class="fa fa-times"></i></a>
+                                                    </span>
+                                                </span>
+                                                {{ reply.message }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <input class="form-control input-sm addcomment" data-noteid="{{ note.id }}" data-targetid="{{ note.target_id }}" type="text" placeholder="Type a comment">
+                            </div>
+                        {% endfor %}
+                        <hr/>
+                        <input class="form-control input-sm addnote" data-targetid="{{ userinfo.id }}" type="text" placeholder="Add a new note">
+                    </div>
+                </div>
+            </div>
+            <!-- /.nav-tabs-custom -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script type="text/javascript">
+
+        {% include "ban.js.twig" %}
+
+        function deleteNote(self,parent) {
+            $.ajax({
+                method: "POST",
+                url: "/api/private/user/note/delete",
+                data: {targetid: self.data("targetid")}
+            }).done(function(msg) {
+                $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Note deleted</h4>You\'ve deleted a note. <a href="#" onClick="window.location.reload()">Reload!</a></div>');
+                self.parents().eq(parent).hide('slow');
+            }).fail(function(msg) {
+                $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> An error occured</h4>Couldn\'t add note.</div>');
+            });
+        }
+
+        function addNote(self) {
+            $.ajax({
+                method: "POST",
+                url: "/api/private/user/note/add",
+                data: {targetid: self.data("targetid"), message: self.val()}
+            }).done(function(msg) {
+                $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Note added</h4>You\'ve added a note! <a href="#" onClick="window.location.reload()">Reload to see it!</a></div>');
+            }).fail(function(msg) {
+                $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> An error occured</h4>Couldn\'t add note.</div>');
+                console.log(msg);
+            });
+        }
+        function addComment(self) {
+            $.ajax({
+                method: "POST",
+                url: "/api/private/user/note/comment",
+                data: {targetid: self.data("targetid"), noteid: self.data("noteid"), message: self.val()}
+            }).done(function(msg) {
+                $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Comment added</h4>You added a comment to ' + self.data("noteid") + '.  <a href="#" onClick="window.location.reload()">Reload to see it!</a></div>');
+            }).fail(function(msg) {
+                $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> An error occured</h4>Couldn\'t add comment to note id ' + self.data("noteid") + '</div>');
+                console.log(msg);
+            });
+        }
+
+        $("a.deletenote").click(function(e) {
+            deleteNote($(this),2);
+        });
+        $("a.deletecomment").click(function(e) {
+            deleteNote($(this),3);
+        });
+
+        $("input.addcomment").keypress(function(e) {
+            if(e.which == 13) {
+                addComment($(this));
+                return false;
+            }
+        })
+
+        $("input.addnote").keypress(function(e) {
+            if(e.which == 13) {
+                addNote($(this));
+                return false;
+            }
+        })
+    </script>
+{% endblock %}

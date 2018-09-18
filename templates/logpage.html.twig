@@ -1,0 +1,160 @@
+{% extends "master.html.twig" %}
+
+{% set title = 'Logs' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Admin Logs</h3>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        {% block adminlog %} {% include "logs/adminlog.html.twig" %} {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Canvas Logs</h3>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        {% block canvaslog %} {% include "logs/canvaslog.html.twig" %} {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">API Logs</h3>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        {% block apilog %} {% include "logs/apilog.html.twig" %} {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Console Logs</h3>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        {% block consolelog %} {% include "logs/consolelog.html.twig" %} {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            var adminlog = $("#adminlog").DataTable({
+                "ajax": {
+                    "dataType": 'json',
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": '{{ webroots.panel }}/api/private/activitylog/adminlog'
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "channel" },
+                    { "data": "level" },
+                    { "data": "message" },
+                    { "data": "time" },
+                    { "data": "username" }
+                ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false
+            });
+            var canvaslog = $("#canvaslog").DataTable({
+                "ajax": {
+                    "dataType": 'json',
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": '{{ webroots.panel }}/api/private/activitylog/canvaslog'
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "channel" },
+                    { "data": "level" },
+                    { "data": "message" },
+                    { "data": "time" },
+                    { "data": "username" }
+                ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false
+            });
+            var consolelog = $("#consolelog").DataTable({
+                "ajax": {
+                    "dataType": 'json',
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": '{{ webroots.panel }}/api/private/activitylog/consolelog'
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "channel" },
+                    { "data": "level" },
+                    { "data": "message" },
+                    { "data": "time" },
+                    { "data": "username" }
+                ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false
+            });
+            var apilog = $("#apilog").DataTable({
+                "ajax": {
+                    "dataType": 'json',
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": '{{ webroots.panel }}/api/private/activitylog/apilog'
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "channel" },
+                    { "data": "level" },
+                    { "data": "message" },
+                    { "data": "time" },
+                    { "data": "username" }
+                ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false
+            });
+        });
+    </script>
+{% endblock %}
