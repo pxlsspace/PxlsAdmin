@@ -205,7 +205,7 @@
                                 <th>Is Undo?</th>
                             </tr>
                             {% for pixel in pixels %}
-                                <tr onClick="window.open('https://{{ webroots.game }}/#x={{ pixel.x }}&y={{ pixel.y }}&scale=32');">
+                                <tr onClick="window.open('{{ webroots.game }}/#x={{ pixel.x }}&y={{ pixel.y }}&scale=32');">
                                     <td>{{ pixel.id }}</td>
                                     <td>{{ pixel.x }} | {{ pixel.y }}</td>
                                     <td>{{ pixel.color }}</td>
