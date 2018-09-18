@@ -57,8 +57,8 @@ class ReportHandler {
         while($report = $qReports->fetch(\PDO::FETCH_ASSOC)) {
             $report['who_name'] = $report['who'] ? $this->getUserdataById($report['who'])->username : 'Server';
             $report['claimed_name'] = ($report['claimed_by']==0)?'':$this->getUserdataById($report['claimed_by'])->username;
-            $report['position_url'] = $report['who'] ? '<a href="'.$this->formatCoordsLink($report['x'], $report['y']).'">X:'.$report['x'].'; Y:'.$report['y'].'</a>' : 'N/A';
-            $report['who_url'] = $report['who'] ? '<a href="/userinfo/'.$report['who_name'].'">'.$report['who_name'].'</a>' : 'Server';
+            $report['position_url'] = $report['who'] ? '<a href="'.$this->formatCoordsLink($report['x'], $report['y']).'" target="_blank">X:'.$report['x'].'; Y:'.$report['y'].'</a>' : 'N/A';
+            $report['who_url'] = $report['who'] ? '<a href="/userinfo/'.$report['who_name'].'" target="_blank">'.$report['who_name'].'</a>' : 'Server';
             $report['human_time'] = date("d.m.Y - H:i:s",$report['time']);
             if($report['claimed_by'] == 0) {
                 $report['action'] = '<button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-reportid="'.$report['id'].'" data-target="#report_info">Details</button>';
@@ -113,7 +113,7 @@ class ReportHandler {
             $report['general']['id'] = $gData->id;
             $report['general']['pixel'] = $gData->pixel_id;
             $report['general']['claimed'] = ($gData->claimed_by == 0)?'no one':$this->getUserdataById($gData->claimed_by)->username;
-            $report['general']['position'] = '<a href="'.$this->formatCoordsLink($gData->x, $gData->y).'">X: ' . $gData->x . ' &mdash; Y: ' . $gData->y . '</a>';
+            $report['general']['position'] = '<a href="'.$this->formatCoordsLink($gData->x, $gData->y).'" target="_blank">X: ' . $gData->x . ' &mdash; Y: ' . $gData->y . '</a>';
             $report['general']['message'] = htmlentities($gData->message);
             $report['general']['time'] = date("d.m.Y - H:i:s", $gData->time);
 

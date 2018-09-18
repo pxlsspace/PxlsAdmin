@@ -76,13 +76,13 @@ class LogParser {
     public function humanLogMessage($messageArray,$user_name) {
         $m = $messageArray; $messageTpl = [];
         // Scope: ModAction
-        $messageTpl["modaction"]["selfshadow"]  = '<a href="/userinfo/%user_name%">%user_name%</a> was shadowbanned automatically. (%extra%)';
-        $messageTpl["modaction"]["selfban"]     = '<a href="/userinfo/%user_name%">%user_name%</a> was banned automatically. (Scripting)';
-        $messageTpl["modaction"]["permaban"]    = '<a href="/userinfo/%target%">%target%</a> was banned permanently.';
-        $messageTpl["modaction"]["shadowban"]   = '<a href="/userinfo/%target%">%target%</a> was shadowbanned.';
-        $messageTpl["modaction"]["ban"]         = '<a href="/userinfo/%target%">%target%</a> was time-banned.';
-        $messageTpl["modaction"]["unban"]       = '<a href="/userinfo/%target%">%target%</a> was unbanned.';
-        $messageTpl["modaction"]["setrole"]     = '<a href="/userinfo/%target%">%target%</a> was pro/demoted to %extra%.';
+        $messageTpl["modaction"]["selfshadow"]  = '<a href="/userinfo/%user_name%" target="_blank">%user_name%</a> was shadowbanned automatically. (%extra%)';
+        $messageTpl["modaction"]["selfban"]     = '<a href="/userinfo/%user_name%" target="_blank">%user_name%</a> was banned automatically. (Scripting)';
+        $messageTpl["modaction"]["permaban"]    = '<a href="/userinfo/%target%" target="_blank">%target%</a> was banned permanently.';
+        $messageTpl["modaction"]["shadowban"]   = '<a href="/userinfo/%target%" target="_blank">%target%</a> was shadowbanned.';
+        $messageTpl["modaction"]["ban"]         = '<a href="/userinfo/%target%" target="_blank">%target%</a> was time-banned.';
+        $messageTpl["modaction"]["unban"]       = '<a href="/userinfo/%target%" target="_blank">%target%</a> was unbanned.';
+        $messageTpl["modaction"]["setrole"]     = '<a href="/userinfo/%target%" target="_blank">%target%</a> was pro/demoted to %extra%.';
         // Scope: Report
         $messageTpl["report"]["claim"]       = 'Report <a href="#" data-toggle="modal" data-reportid="%target%" data-target="#report_info">ID %target%</a> has been claimed';
         $messageTpl["report"]["unclaim"]     = 'Report <a href="#" data-toggle="modal" data-reportid="%target%" data-target="#report_info">ID %target%</a> has been unclaimed';

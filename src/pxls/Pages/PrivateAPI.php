@@ -136,7 +136,7 @@ final class PrivateAPI
             }
             $log["message"] = $logParser->humanLogMessage($logParser->parse($log["message"]),$log["username"]);
             $log["time"] = date("d.m.Y H:i:s",$log["time"]);
-            $log["username"] = '<a href="/userinfo/'.$log["username"].'">'.$log["username"].'</a>';
+            $log["username"] = '<a href="/userinfo/'.$log["username"].'" target="_blank">'.$log["username"].'</a>';
             $logs[] = $log;
         }
         return $logs;
