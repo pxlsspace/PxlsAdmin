@@ -162,6 +162,41 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Last 100 Signups</h3>
+                </div>
+                <div class="box-body">
+                    <table id="signups" class="table table-responsive table-bordered table-striped" width="100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Signup Time</th>
+                                <th>Login</th>
+                                <th>Pixels (this canvas)</th>
+                                <th>Pixels (all-time)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Signup Time</th>
+                                <th>Login</th>
+                                <th>Pixels (this canvas)</th>
+                                <th>Pixels (all-time)</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% include "home/activity.html.twig" %}
 
@@ -174,6 +209,7 @@
     <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
     <script src="{{ base_url() }}/assets/plugins/chartjs/Chart.min.js"></script>
     <script type="text/javascript">
+        {% include "ban.js.twig" %}
         $(function() {
             var actionLog = $("#actionlog").DataTable({
                 "ajax": {
@@ -213,6 +249,30 @@
                     { "data": "human_time" },
                     { "data": "action" }
                     ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false
+            });
+
+            var lastSignups = $("#signups").DataTable({
+                "ajax": {
+                    "dataType": 'json',
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": '{{ xhr_base }}/api/private/lastSignups'
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "username" },
+                    { "data": "signup_time" },
+                    { "data": "login" },
+                    { "data": "pixel_count" },
+                    { "data": "pixel_count_alltime" }
+                ],
                 "paging": true,
                 "lengthChange": false,
                 "searching": true,

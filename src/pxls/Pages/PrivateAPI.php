@@ -44,8 +44,10 @@ final class PrivateAPI
                     if(!isset($params[1])) { $user = null; } else { $user = $params[1]; }
                     return $response->withStatus(200)->withJson(["data"=>$this->getUserInfo($user)]);
                     break;
+                case "lastSignups":
+                    return $response->withStatus(200)->withJson(["data"=>$this->lastSignups()]);
+                    break;
             }
-
         }
         return $response;
     }
@@ -81,6 +83,40 @@ final class PrivateAPI
                 }
         }
         return false;
+    }
+
+    protected function lastSignups() {
+        $toRet = [];
+        $qSignups = $this->database->query("SELECT id,username,signup_time,login,pixel_count,pixel_count_alltime FROM users WHERE 1 ORDER BY signup_time DESC LIMIT 100");
+        $qSignups->execute();
+
+        $replacers = [
+            "reddit" => "https://reddit.com/u/%%LOGIN",
+            "google" => "https://plus.google.com/%%LOGIN",
+            "discord" => "javascript:askDiscord('%%LOGIN');",
+            "tumblr" => "https://%%LOGIN.tumblr.com/"
+        ];
+
+        while ($signup = $qSignups->fetch(\PDO::FETCH_ASSOC)) {
+            $parsedTime = $signup["signup_time"];
+
+            $splitPos = strpos($signup["login"], ":");
+            $loginData = [
+                "service" => substr($signup["login"], 0, $splitPos),
+                "ID" => substr($signup["login"], $splitPos+1)
+            ];
+            if (array_key_exists($loginData["service"], $replacers)) {
+                $loginLink = str_replace("%%LOGIN", $loginData["ID"], $replacers[$loginData["service"]]);
+                $signup["login"] = '<a href="'.$loginLink.'" target="_blank">'.$loginData["service"].':'.$loginData["ID"].'</a>';
+            }
+
+            $username = $signup["username"];
+            $signup["username"] = '<a href="userinfo/'.$username.'" target="_blank">'.$username.'</a>';
+
+            $toRet[] = $signup;
+        }
+
+        return $toRet;
     }
 
     protected function lastActionLog($scope=null) {
