@@ -7,6 +7,7 @@ use Slim\Views\Twig;
 use Psr\Log\LoggerInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use pxls\Utils;
 
 final class Search
 {
@@ -46,15 +47,8 @@ final class Search
             }
         }
         if(!$resultExists) {
-            $replace = [
-                "reddit:"=>"https://reddit.com/u/",
-                "google:"=>"https://plus.google.com/",
-                "discord:"=>'#" onclick="askDiscord(\'',
-            ];
-            $newUser['login_url'] = strtr($newUser['login'],$replace);
-            if(strpos($newUser['login'],"discord") !== false) $newUser['login_url'] .= "');";
-            //$newUser['last_ip'] = inet_ntop($newUser['last_ip']);
-            //$newUser['signup_ip'] = inet_ntop($newUser['signup_ip']);
+            $newUser["login_url"] = Utils::MakeUserLoginURL($newUser["login"]);
+
             $newUser['reason'] = [$reason];
             $this->result[] = $newUser;
         }

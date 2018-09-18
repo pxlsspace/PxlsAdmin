@@ -3,6 +3,7 @@
 namespace pxls\Action;
 
 use pxls\DiscordHook;
+use pxls\Utils;
 use Slim\Views\Twig;
 use Psr\Log\LoggerInterface;
 use Slim\Http\Request;
@@ -62,15 +63,7 @@ final class Profile
         $userinfo = $user->getUserByName($needle);
 
         if(!is_null($userinfo) && $userinfo) {
-            $replacePairs = [
-                "reddit:"=>"https://reddit.com/u/",
-                "google:"=>"https://plus.google.com/",
-                "discord:"=>'#" onclick="askDiscord(\'',
-            ];
-            $userinfo['login_url'] = strtr($userinfo['login'],$replacePairs);
-            if(strpos($userinfo['login'],"discord") !== false) $userinfo['login_url'] .= '\');';
-
-
+            $userinfo["login_url"] = Utils::MakeUserLoginURL($userinfo["login"]);
             $userinfo["signup_ip_detail"] = $this->ip2loc($userinfo['signup_ip']);
             $userinfo["last_ip_detail"] = $this->ip2loc($userinfo['last_ip']);
             $userinfo["reports_sent"] = $this->reportsSentByUser($userinfo["id"]);
