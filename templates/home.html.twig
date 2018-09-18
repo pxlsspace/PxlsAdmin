@@ -176,6 +176,8 @@
                                 <th>Username</th>
                                 <th>Signup Time</th>
                                 <th>Login</th>
+                                <th>Signup IP</th>
+                                <th>Last IP</th>
                                 <th>Pixels (this canvas)</th>
                                 <th>Pixels (all-time)</th>
                             </tr>
@@ -188,6 +190,8 @@
                                 <th>Username</th>
                                 <th>Signup Time</th>
                                 <th>Login</th>
+                                <th>Signup IP</th>
+                                <th>Last IP</th>
                                 <th>Pixels (this canvas)</th>
                                 <th>Pixels (all-time)</th>
                             </tr>
@@ -270,6 +274,8 @@
                     { "data": "username" },
                     { "data": "signup_time" },
                     { "data": "login" },
+                    { "data": "signup_ip" },
+                    { "data": "last_ip" },
                     { "data": "pixel_count" },
                     { "data": "pixel_count_alltime" }
                 ],
@@ -286,7 +292,7 @@
 
             $('#autoreload').change(function(){
                 if($('#autoreload').prop('checked')) {
-                    intervalListener = self.setInterval(function () {reportList.ajax.reload(); actionLog.ajax.reload();}, 500);
+                    intervalListener = self.setInterval(function () {reportList.ajax.reload(); actionLog.ajax.reload(); lastSignups.ajax.reload()}, 500);
                     $("#autoreload_label").html("Okay! Now reloading the tables every 5 seconds! Uncheck to stop!");
                 } else {
                     window.clearInterval(intervalListener);
