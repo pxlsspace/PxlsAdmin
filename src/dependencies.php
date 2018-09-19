@@ -35,8 +35,8 @@ $container['logger'] = function ($c) {
 
 $container['discord'] = function($c) {
     $settings = $c->get('settings')['discord'];
-    $discord = new pxls\DiscordHook($settings['url']);
-    $discord->setName($settings['name']);
+    $discord = new pxls\DiscordHook($settings['general']['url']);
+    $discord->setName($settings['general']['name']);
     return $discord;
 };
 

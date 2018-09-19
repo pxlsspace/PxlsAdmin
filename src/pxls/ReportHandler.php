@@ -38,8 +38,8 @@ class ReportHandler {
 
     public function discordinfo($uid) {
         $execUser = $this->getUserdataById($_SESSION['user_id'])->username;
-        $this->discord->setName($this->settings["discord"]["name"]);
-        $this->discord->setUrl($this->settings["discord"]["url"]);
+        $this->discord->setName($this->settings["discord"]["whois"]["name"]);
+        $this->discord->setUrl($this->settings["discord"]["whois"]["url"]);
         $this->discord->setMessage("!whois $uid $execUser");
         $this->discord->execute();
         return true;

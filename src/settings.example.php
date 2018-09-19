@@ -18,8 +18,14 @@ return [
         ],
 
         'discord' => [
-            'name'   => "discord webhook name",
-            'url'   => "discord webhook URL"
+            'general' => [ //general webhook
+                'name'   => "discord webhook name",
+                'url'   => "discord webhook URL"
+            ],
+            'whois' => [ //!whois webhook
+                'name'   => "discord webhook name",
+                'url'   => "discord webhook URL"
+            ]
         ],
 
         'db' => [
