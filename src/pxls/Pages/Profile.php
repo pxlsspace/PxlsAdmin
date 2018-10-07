@@ -76,7 +76,7 @@ final class Profile
     }
 
     protected function reportsSentByUser($uid) {
-        $query = $this->db->prepare("SELECT r.id AS rid, p.who AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r INNER JOIN pixels p ON r.pixel_id = p.id WHERE r.who = :uid");
+        $query = $this->db->prepare("SELECT r.id AS rid, r.who AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r WHERE reported IS NOT NULL AND r.who = :uid");
         $query->bindParam(":uid", $uid, \PDO::PARAM_INT);
         $query->execute();
         while($row = $query->fetch(\PDO::FETCH_OBJ)) {
@@ -87,7 +87,7 @@ final class Profile
         return $query->rowCount();
     }
     protected function reportsRecvbyUser($uid) {
-        $query = $this->db->prepare("SELECT r.id AS rid, r.who AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r INNER JOIN pixels ON r.pixel_id = pixels.id WHERE pixels.who = :uid");
+        $query = $this->db->prepare("SELECT r.id AS rid, r.who AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r WHERE reported IS NOT NULL AND r.reported = :uid;");
         $query->bindParam(":uid", $uid, \PDO::PARAM_INT);
         $query->execute();
         while($row = $query->fetch(\PDO::FETCH_OBJ)) {

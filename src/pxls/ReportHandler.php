@@ -49,9 +49,9 @@ class ReportHandler {
         global $app;
         $reports = [];
         if($onlyOpen==1) {
-            $qReports = $this->db->query("SELECT id,who,x,y,claimed_by,time,reported FROM reports WHERE closed = 0");
+            $qReports = $this->db->query("SELECT id,who,x,y,claimed_by,time,reported FROM reports WHERE closed = 0 AND reported IS NOT NULL");
         } else {
-            $qReports = $this->db->query("SELECT id,who,x,y,claimed_by,time,reported FROM reports");
+            $qReports = $this->db->query("SELECT id,who,x,y,claimed_by,time,reported FROM reports WHERE reported IS NOT NULL");
         }
 
         while($report = $qReports->fetch(\PDO::FETCH_ASSOC)) {
