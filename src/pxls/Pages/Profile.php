@@ -76,7 +76,7 @@ final class Profile
     }
 
     protected function reportsSentByUser($uid) {
-        $query = $this->db->prepare("SELECT r.id AS rid, r.who AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r WHERE reported IS NOT NULL AND r.who = :uid");
+        $query = $this->db->prepare("SELECT r.id AS rid, r.reported AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r WHERE reported IS NOT NULL AND r.who = :uid");
         $query->bindParam(":uid", $uid, \PDO::PARAM_INT);
         $query->execute();
         while($row = $query->fetch(\PDO::FETCH_OBJ)) {
