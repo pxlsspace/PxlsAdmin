@@ -178,8 +178,8 @@
                                 <th>Login</th>
                                 <th>Signup IP</th>
                                 <th>Last IP</th>
-                                <th>Pixels (this canvas)</th>
-                                <th>Pixels (all-time)</th>
+                                <th>Banned?</th>
+                                <th>Ban Reason</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -192,8 +192,8 @@
                                 <th>Login</th>
                                 <th>Signup IP</th>
                                 <th>Last IP</th>
-                                <th>Pixels (this canvas)</th>
-                                <th>Pixels (all-time)</th>
+                                <th>Banned?</th>
+                                <th>Ban Reason</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -236,7 +236,8 @@
                 "ordering": true,
                 "order": [[ 0, "desc" ]],
                 "info": true,
-                "autoWidth": false
+                "autoWidth": false,
+                "scrollX": true
             });
 
             var reportList = $("#reports").DataTable({
@@ -259,7 +260,8 @@
                 "ordering": true,
                 "order": [[ 0, "desc" ]],
                 "info": true,
-                "autoWidth": false
+                "autoWidth": false,
+                "scrollX": true
             });
 
             var lastSignups = $("#signups").DataTable({
@@ -276,8 +278,18 @@
                     { "data": "login" },
                     { "data": "signup_ip" },
                     { "data": "last_ip" },
-                    { "data": "pixel_count" },
-                    { "data": "pixel_count_alltime" }
+                    {
+                        "data": "banned",
+                        "render": function(data, type, row) {
+                            return data == 1 ? "Yes" : "No";
+                        }
+                    },
+                    {
+                        "data": "ban_reason",
+                        "render": function(data) {
+                            return (data && data.length) ? data : "NO_BAN_REASON";
+                        }
+                    }
                 ],
                 "paging": true,
                 "lengthChange": false,
@@ -285,7 +297,8 @@
                 "ordering": true,
                 "order": [[ 0, "desc" ]],
                 "info": true,
-                "autoWidth": false
+                "autoWidth": false,
+                "scrollX": true
             });
 
             var intervalListener = null;
