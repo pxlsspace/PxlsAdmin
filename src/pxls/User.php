@@ -30,7 +30,7 @@ class User {
     }
 
     protected function checkRole($uid) {
-        $allowRoles = ["ADMIN","MODERATOR","TRIALMOD"];
+        $allowRoles = ["DEVELOPER", "ADMIN","MODERATOR","TRIALMOD"];
 
         $getRole = $this->db->prepare("SELECT * FROM users WHERE id = :uid");
         $getRole->bindParam(":uid",$uid,\PDO::PARAM_INT);

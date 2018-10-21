@@ -168,7 +168,7 @@
             </div>
         </div>
     </div>
-{% if userdata.role == 'ADMIN' %}
+{% if (userdata.role == 'ADMIN' or userdata.role == 'DEVELOPER') %}
     <div class="row">
         <div class="col-xs-12">
             <div class="box">

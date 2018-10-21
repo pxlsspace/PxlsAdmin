@@ -35,7 +35,7 @@ final class LogPage
         $data['userdata'] = $user->getUserById($_SESSION['user_id']);
         //endregion
 
-        if($data['userdata']['role'] != "ADMIN") return $response->withStatus(403)->getBody()->write("lol, nope. you don't belong here.");
+        if($data['userdata']['role'] != "ADMIN" || $data['userdata']['role'] != "DEVELOPER") return $response->withStatus(403)->getBody()->write("lol, nope. you don't belong here.");
 
         $data['logs'] = [];
         $data['logs']['total']      = $this->getTotal();

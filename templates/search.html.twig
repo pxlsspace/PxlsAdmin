@@ -63,7 +63,7 @@
                                                 <span class="fa fa-caret-down"></span></button>
                                             <ul class="dropdown-menu">
                                                 <li><a data-username="{{ user.username }}" class="permaban" href="#">Permaban</a></li>
-                                                {% if userdata.role == "ADMIN" %}
+                                                {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
                                                     <li><a data-username="{{ user.username }}" class="shadowban" href="#">Shadowban</a></li>
                                                 {% endif %}
                                                 {% if (user.ban_expiry|date() > date() or user.role == "BANNED" or user.role == "SHADOWBANNED") %}

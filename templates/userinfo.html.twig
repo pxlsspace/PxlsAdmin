@@ -34,7 +34,7 @@
                             <span class="fa fa-caret-down"></span></button>
                         <ul class="dropdown-menu btn-block">
                             <li><a data-username="{{ userinfo.username }}" class="permaban" href="#">Permaban</a></li>
-                            {% if userdata.role == "ADMIN" %}
+                            {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
                                 <li><a data-username="{{ userinfo.username }}" class="shadowban" href="#">Shadowban</a></li>
                             {% endif %}
                             {% if (userinfo.ban_expiry|date() > date() or userinfo.role == "BANNED" or userinfo.role == "SHADOWBANNED") %}
@@ -91,7 +91,7 @@
             </div>
             <!-- /.box -->
 
-            {% if userdata.role == "ADMIN" %}
+            {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
                 <!-- About Me Box -->
                 <div class="box box-primary">
                     <div class="box-header with-border">
