@@ -96,23 +96,46 @@ class ReportHandler {
         $updateReport->bindParam(":rid",$rid,\PDO::PARAM_INT);
         $updateReport->execute();
     }
-    public function resolve($rId) {
+    private function _resolve($rId) {
         $rid = intval($rId);
         $updateReport = $this->db->prepare("UPDATE reports SET closed = 1 WHERE id = :rid");
         $updateReport->bindParam(":rid",$rid,\PDO::PARAM_INT);
         $updateReport->execute();
+        return true;
+    }
+    public function resolve($rId) {
+        $execUser = $this->getUserdataById($_SESSION['user_id']);
+        if ($execUser->role == "ADMIN") return $this->_resolve($rId);
+        if ($this->whoClaimedReport($rId) != $_SESSION['user_id']) return false;
+        return $this->_resolve($rId);
+    }
+
+    private function whoClaimedReport($rId) {
+        $reportQuery = $this->db->prepare("SELECT claimed_by FROm reports WHERE id = :id LIMIT 1");
+        $reportQuery->bindParam(":id", $rId, \PDO::PARAM_INT);
+        $reportQuery->execute();
+
+        $reportResult = $reportQuery->fetch(\PDO::FETCH_OBJ);
+        return $reportResult ? $reportResult->claimed_by : false;
     }
 
     public function getReportDetails($reportid) {
         $report = [];
+        $self = $this->getUserdataById($_SESSION['user_id']);
 
         $qR = $this->db->prepare("SELECT id,who,x,y,claimed_by,time,pixel_id,message,reported FROM reports WHERE id = :id LIMIT 1");
         $qR->bindParam(":id",$reportid,\PDO::PARAM_INT);
         $qR->execute();
         while($gData = $qR->fetch(\PDO::FETCH_OBJ)) {
+            $report['self'] = [
+                'id' => $self->id,
+                'username' => $self->username,
+                'role' => $self->role
+            ];
             $report['general']['id'] = $gData->id;
             $report['general']['pixel'] = $gData->pixel_id;
             $report['general']['claimed'] = ($gData->claimed_by == 0)?'no one':$this->getUserdataById($gData->claimed_by)->username;
+            $report['general']['claimed_by_you']=$gData->claimed_by == $self->id;
             $report['general']['position'] = '<a href="'.$this->formatCoordsLink($gData->x, $gData->y).'" target="_blank">X: ' . $gData->x . ' &mdash; Y: ' . $gData->y . '</a>';
             $report['general']['message'] = htmlentities($gData->message);
             $report['general']['time'] = date("d.m.Y - H:i:s", $gData->time);

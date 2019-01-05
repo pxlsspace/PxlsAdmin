@@ -54,9 +54,13 @@ final class Report
             case 'resolve':
                 if(isset($params[1])) {
                     $reportId = intval($params[1]);
-                    $this->reportInterface->resolve($reportId);
-                    $this->logger->info("resolved report $reportId",array('userid'=>$_SESSION['user_id']));
-                    return $response->withStatus(200)->withJson(["status"=>"success"]);
+                    if ($this->reportInterface->resolve($reportId)) {
+                        $this->logger->info("resolved report $reportId",array('userid'=>$_SESSION['user_id']));
+                        return $response->withStatus(200)->withJson(["status"=>"success"]);
+                    } else {
+                        $this->logger->info("failed to resolve a report because they did not own it ($reportId)",array('userid'=>$_SESSION['user_id']));
+                        return $response->withStatus(400)->withJson(["status"=>"failed","reason"=>"claimed by someone else"]);
+                    }
                 }
                 break;
             case 'details':

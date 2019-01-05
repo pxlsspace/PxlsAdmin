@@ -38,9 +38,10 @@ $('#report_info').on('show.bs.modal', function (event) {
         modal.find('#rmd-b-pixel').text(data.reported.pixelcount);
         modal.find('#rmd-b-ban').html(data.reported.ban.expiry + " (" + data.reported.ban.reason + ")");
 
+        let cannotOverwrite = (data.self.role != "ADMIN" && data.self.role != "DEVELOPER") && !data.general.claimed_by_you;
         modal.find('#rmd-claim').data('reportid',data.general.id);
-        modal.find('#rmd-unclaim').data('reportid',data.general.id);
-        modal.find('#rmd-resolve').data('reportid',data.general.id);
+        modal.find('#rmd-unclaim').data('reportid',data.general.id)[0].disabled=cannotOverwrite;
+        modal.find('#rmd-resolve').data('reportid',data.general.id)[0].disabled=cannotOverwrite;
 
         modal.find('#rmd-claim').click(function(){
             $.ajax({
