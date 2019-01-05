@@ -252,7 +252,12 @@
                     "url": '{{ webroots.panel }}/api/report/reload'
                 },
                 "columns": [
-                    { "data": "id" },
+                    {
+                        "data": "id",
+                        "render": function(data, type, row) {
+                            return `<a href="#" data-toggle="modal" data-reportid="${data}" data-target="#report_info">${data}</a>`;
+                        }
+                    },
                     { "data": "who_url" },
                     { "data": "position_url" },
                     { "data": "human_time" },
