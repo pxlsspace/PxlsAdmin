@@ -149,7 +149,7 @@ class ReportHandler {
             $report['reporter']['ip']               = ["last"=>inet_ntop($reporterData->last_ip),"signup"=>inet_ntop($reporterData->signup_ip)];
             $report['reporter']['ban']              = ["expiry"=>$reporterData->ban_expiry,"reason"=>$reporterData->ban_reason];
 
-            $reportedData = $gData->who ? $this->getUserdataByPixel($gData->pixel_id) : $this->getUserdataById($gData->reported);
+            $reportedData = $this->getUserdataById($gData->reported);
             $report['reported']['username']         = $reportedData->username;
             $report['reported']['login']            = $reportedData->login;
             $report['reported']['signup']           = $reportedData->signup_time;
