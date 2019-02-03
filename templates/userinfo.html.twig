@@ -134,7 +134,7 @@
                     <div class="active tab-pane" id="timeline">
                         <!-- The timeline -->
                         <ul class="timeline timeline-inverse">
-                            {% if userinfo.ban_expiry|date("t") > "now"|date("t") %}
+                            {% if userinfo.ban_expiry|date("U") > "now"|date("U") %}
                                 <li>
                                     <i class="fa fa-user-times bg-red"></i>
                                     <div class="timeline-item">
