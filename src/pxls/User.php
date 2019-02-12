@@ -50,7 +50,7 @@ class User {
         if (isset($userBufferId[$uid])) {
             return $userBufferId[$uid];
         }
-        $getUser = $this->db->prepare("SELECT * FROM users WHERE id = :uid LIMIT 1");
+        $getUser = $this->db->prepare("SELECT *,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS 'banned' FROM users WHERE id = :uid LIMIT 1");
         $getUser->bindParam(":uid",$uid,\PDO::PARAM_INT);
         $getUser->execute();
         if($getUser->rowCount() == 1) {
@@ -70,7 +70,7 @@ class User {
         if (isset($userBufferName[$uname])) {
             return $userBufferName[$uname];
         }
-        $getUser = $this->db->prepare("SELECT * FROM users WHERE username = :uname");
+        $getUser = $this->db->prepare("SELECT *,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS 'banned' FROM users WHERE username = :uname");
         $getUser->bindParam(":uname",$uname,\PDO::PARAM_STR);
         $getUser->execute();
         if($getUser->rowCount() == 1) {
@@ -100,6 +100,22 @@ class User {
             return $notes;
         }
         return false;
+    }
+
+    public function getBanlogFromAdminLog($uid) {
+        $uid = intval($uid); $bans = []; $reply = 0;
+        $_user = $this->getUserById($uid);
+        if ($_user) {
+            $uname = $_user["username"]; //not sure if necessary, but forcing a UID here since we can't bindParam to a string for 'LIKE'. forcing a UID means that we do a user lookup before attempting to pull from database. flimsy and probably unnecessary attempt at sanitzation. -Socc
+
+            $getBansQuery = $this->db->prepare('SELECT a.*,COALESCE(u.username, "console") AS \'who\',LEFT(message, 2) = \'un\' AS \'is_unban\' FROM admin_log a LEFT OUTER JOIN users u ON u.id = a.userid WHERE a.message LIKE "%ban '.$uname.'" OR a.message LIKE "%ban '.$uname.' %";');
+            $getBansQuery->execute();
+            $toRet = [];
+            if($getBansQuery->rowCount() > 0) {
+                $toRet = $getBansQuery->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        }
+        return $toRet;
     }
 
     public function getNoteReplysById($nid) {

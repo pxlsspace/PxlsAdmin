@@ -37,7 +37,7 @@
                             {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
                                 <li><a data-username="{{ userinfo.username }}" class="shadowban" href="#">Shadowban</a></li>
                             {% endif %}
-                            {% if (userinfo.ban_expiry|date() > date() or userinfo.role == "BANNED" or userinfo.role == "SHADOWBANNED") %}
+                            {% if (userinfo.banned == "1") %}
                                 <li class="divider"></li>
                                 <li><a data-username="{{ userinfo.username }}" class="unban" href="#">Unban</a></li>
                             {% endif %}
@@ -128,7 +128,8 @@
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#timeline" data-toggle="tab">Timeline</a></li>
                     <li><a href="#pixels" data-toggle="tab">Last Pixels</a></li>
-                    <li><a href="#notes" data-toggle="tab">Notes</a></li>
+                    <li><a href="#banlog" data-toggle="tab">Ban log {% if userinfo.banlog|length > 0 %}<span class="badge label-danger">{{ userinfo.banlog|length }}</span>{% endif %}</a></li>
+                    <li><a href="#notes" data-toggle="tab">Notes {% if userinfo.notes|length > 0 %}<span class="badge label-warning">{{ userinfo.notes|length }}</span>{% endif %}</a></li>
                 </ul>
                 <div class="tab-content">
                     <div class="active tab-pane" id="timeline">
@@ -215,6 +216,31 @@
                                 </tr>
                             {% endfor %}
                         </table>
+                    </div>
+                    <div class="tab-pane" id="banlog">
+                        {% if userinfo.banlog|length == 0 %}
+                            <strong>No bans on record</strong>
+                        {% endif %}
+                        <ul class="timeline timeline-inverse">
+                            {% for key,item in userinfo.banlog|reverse %}
+                            <li>
+                                {% if item.is_unban == "0" %}
+                                    <i class="fa fa-user-times bg-red"></i>
+                                {% else %}
+                                    <i class="fa fa-user-plus bg-green"></i>
+                                {% endif %}
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fa fa-clock-o"></i> {{ item.time|date() }}</span>
+                                    <div class="timeline-body">
+                                        {{item.who}}: {{item.message}}
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                            <li>
+                                <i class="fa fa-clock-o bg-gray"></i>
+                            </li>
+                        </ul>
                     </div>
                     <div class="tab-pane" id="notes">
                         {% for note in userinfo.notes %}

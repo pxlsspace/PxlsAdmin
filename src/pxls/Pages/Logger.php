@@ -24,7 +24,19 @@ final class Logger
     {
         $action = $request->getParam("action");
         $target = $request->getParam("target");
-        $this->logger->info("$action $target",array('userid'=>$_SESSION['user_id']));
+
+        $logLine = "$action $target";
+
+        switch($action) {
+            case "ban":
+            case "permaban":
+            case "shadowban":
+                $reason = $request->getParam("reason");
+                if (!$reason) $reason = "";
+                $logLine = "$action $target with reason: $reason";
+                break;
+        }
+        $this->logger->info($logLine,array('userid'=>$_SESSION['user_id']));
     }
 
 }

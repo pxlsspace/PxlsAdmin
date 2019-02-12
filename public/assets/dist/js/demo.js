@@ -1,10 +1,11 @@
-function jsLogger(action,target) {
+function jsLogger(action,target,reason=null) {
     var data = {
         'action': action,
         'target': target
     };
+    if (reason) data.reason = reason;
     $.post("/api/log", data, function () {
-        console.log("logged");
+        console.log("logged data: %o", data);
     }).fail(function () {
         console.log("Something went wrong!");
     });

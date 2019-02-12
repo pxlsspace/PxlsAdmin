@@ -69,6 +69,7 @@ final class Profile
             $userinfo["reports_sent"] = $this->reportsSentByUser($userinfo["id"]);
             $userinfo["reports_recv"] = $this->reportsRecvbyUser($userinfo["id"]);
             $userinfo["notes"] = $user->getUserNotesById($userinfo["id"]);
+            $userinfo["banlog"] = $user->getBanlogFromAdminLog($userinfo["id"]);
             $this->addToTimeline(strtotime($userinfo['signup_time']), "signup", "", 0);
             return $userinfo;
         }
