@@ -2,6 +2,7 @@
 
 namespace pxls;
 
+error_reporting(E_ERROR);
 class ReportHandler {
     private $db;
     private $discord;
