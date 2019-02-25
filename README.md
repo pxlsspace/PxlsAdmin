@@ -15,9 +15,9 @@ This is built specifically for pxls.space. If your pxls.space install is older t
     * `composer i`
 ## Running
 There are two ways to get this working.
-    1) Use the php CLI to run (for debugging)
-        * `php -S 0.0.0.0:5000 -t public public/index.php`
-    2) Serve the PHP with something like nginx/apache (for production)
+1) Use the php CLI to run (for debugging)
+    * `php -S 0.0.0.0:5000 -t public public/index.php`
+2) Serve the PHP with something like nginx/apache (for production)
 
 # Frameworks used
 * Backend:
