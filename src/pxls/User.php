@@ -107,6 +107,8 @@ class User {
         $_user = $this->getUserById($uid);
         if ($_user) {
             $uname = $_user["username"]; //not sure if necessary, but forcing a UID here since we can't bindParam to a string for 'LIKE'. forcing a UID means that we do a user lookup before attempting to pull from database. flimsy and probably unnecessary attempt at sanitzation. -Socc
+            $uname = str_replace("_", "\\_", $uname);
+            $uname = str_replace("%", "\\%", $uname);
 
             $getBansQuery = $this->db->prepare('SELECT a.*,COALESCE(u.username, "console") AS \'who\',LEFT(message, 2) = \'un\' AS \'is_unban\' FROM admin_log a LEFT OUTER JOIN users u ON u.id = a.userid WHERE a.message LIKE "%ban '.$uname.'" OR a.message LIKE "%ban '.$uname.' %";');
             $getBansQuery->execute();
