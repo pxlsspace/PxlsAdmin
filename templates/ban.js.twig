@@ -33,12 +33,10 @@ function banUser(self, path, s1, s2) {
     var data = {
         'username': self.data("username"),
         'reason': reason,
-        'rollback_time': num*3600,
-        'nolog': 1
+        'rollback_time': num*3600
     };
     $.post(path, data, function() {
         $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i>' + data.username + ' has been banned with reason: ' + data.reason + '. <a href="#" onclick="window.refresh()">Reload Page</a></h4></div>');
-        jsLogger(s2, data.username, data.reason);
     }).fail(function() {
         $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-times"></i>Uh Oh! That\'s an error!</h4>Banning ' + data.username + ' with reason  "' + data.reason + '" failed. Something strange happened.</div>');
     });
@@ -52,10 +50,9 @@ function unbanUser(self, path) {
         }
     });
 
-    var data = { 'username': self.data("username"), 'nolog': 1 };
+    var data = { 'username': self.data("username") };
     $.post(path, data, function() {
         $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i>' + self.data("username") + ' has been unbanned. <a href="#" onclick="window.refresh()">Reload Page</a></h4></div>');
-        jsLogger("unban", data.username);
     }).fail(function() {
         $("#alertarea").append('<div class="alert alert-danger alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-times"></i>Uh Oh! That\'s an error!</h4>Unbanning ' + self.data("username") + ' failed. Something strange happened.</div>');
     });
