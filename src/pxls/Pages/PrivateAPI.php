@@ -95,7 +95,11 @@ final class PrivateAPI
             $parsedTime = $signup["signup_time"];
 
             $loginData = Utils::MakeUserLoginURL($signup["login"], true);
-            $signup["login"] = '<a href="'.$loginData["URL"].'" target="_blank">'.$loginData["service"].':'.$loginData["ID"].'</a>';
+            if ($loginData["service"] == "discord") {
+                $signup["login"] = '<button class="btn btn-link" style="padding: 0; margin: 0;" data-discord-id="'.$loginData["id"].'" onclick="askDiscord(\''.$loginData["ID"].'\');" target="_blank">'.$loginData["service"].':'.$loginData["ID"].'</a>';;
+            } else {
+                $signup["login"] = '<a href="'.$loginData["URL"].'" target="_blank">'.$loginData["service"].':'.$loginData["ID"].'</a>';
+            }
 
             $signup["signup_ip"] = inet_ntop($signup["signup_ip"]);
             $signup["last_ip"] = inet_ntop($signup["last_ip"]);

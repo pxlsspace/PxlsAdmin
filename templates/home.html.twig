@@ -322,5 +322,9 @@
 
             {% include "home/activity.js.twig" %}
         });
+        //placed outside of onload so that we're scoped correctly for onclick handlers
+        function discordLookup(id) {
+            console.info(id);
+        }
     </script>
 {% endblock %}
