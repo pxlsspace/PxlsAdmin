@@ -23,20 +23,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                        {% for report in reports %}
-                            <tr>
-                                <td><a href="#" target="_blank" data-toggle="modal" data-reportid="{{ report.id }}" data-target="#report_info">{{ report.id }}</a></td>
-                                <td>{{ report.who_url|raw }}</td>
-                                <td>{{ report.reported_url|raw }}</td>
-                                <td>{{ report.human_time }}</td>
-                                <td>{{ report.position_url|raw }}</td>
-                                <td>{{ report.claimed_name ?: 'N/A' }}</td>
-                                <td>{{ report.closed ? 'Yes' : 'No' }}</td>
-                                <td><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-reportid="{{ report.id }}" data-target="#report_info">View</button></td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
@@ -49,13 +36,41 @@
     {{ parent() }}
     <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/extensions/Scroller/js/dataTables.scroller.js"></script>
     <script type="text/javascript">
         {% include "ban.js.twig" %}
         {% include "home/reports.js.twig" %}
         window.__dynVars = Object.assign(window.__dynVars || {}, {viewOnly: true});
-        $("#tblReports").on("init.dt", () => {
+        var reportList = $("#tblReports").on("init.dt", () => {
             $("#loading").fadeOut(200);
         }).DataTable({
+            "ajax": {
+                "dataType": "json",
+                "contentType": "application/json; charset=utf-8",
+                "type": "GET",
+                "url": "{{ xhr_base }}/api/report/reload?all"
+            },
+            "columns": [
+                {data: "id"},
+                {data: "who_url"},
+                {data: "reported_url"},
+                {data: "human_time"},
+                {data: "position_url"},
+                {
+                    data: "claimed_name",
+                    render: data => data ? data : 'N/A'
+                },
+                {
+                    data: "closed",
+                    render: data => data ? 'Yes' : 'No'
+                },
+                {
+                    data: "id",
+                    render: (data, type, row) => {
+                        return `<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-reportid="${data}" data-target="#report_info">View</button>`
+                    }
+                },
+            ],
             "paging": true,
             "searching": true,
             "ordering": true,

@@ -92,7 +92,7 @@ final class Report
                 break;
 
             case 'reload':
-                return $response->withStatus(200)->withJson(["data"=>$this->reportInterface->getReports(1)]);
+                return $response->withStatus(200)->withJson(["data"=>$this->reportInterface->getReports(!isset($_REQUEST['all']))]);
                 break;
 
         }
