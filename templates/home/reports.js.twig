@@ -9,6 +9,9 @@ $('#report_info').on('show.bs.modal', function (event) {
     var modal = $(this);
     modal.find('#modal-footer').html(modal_footer);
     $.getJSON('{{ webroots.panel }}/api/report/details/'+button.data('reportid'),function(data){
+        if (window.__dynVars && window.__dynVars.viewOnly === true) {
+            modal.find('#rmd-claim,#rmd-unclaim,#rmd-resolve').hide();
+        }
         var server = data.reporter.username === null;
         // general
         modal.find('#rmd-g-id').text(data.general.id.toString() + (server ? ' SERVER REPORT' : ''));

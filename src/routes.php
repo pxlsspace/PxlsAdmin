@@ -3,6 +3,7 @@
 
 $app->get('/', \pxls\Action\Home::class)->setName('home');
 $app->get('/logs', \pxls\Action\LogPage::class)->setName('logs');
+$app->get('/reports', \pxls\Action\ReportList::class)->setName('reportList');
 
 $app->map(['GET', 'POST'], '/search', \pxls\Action\Search::class)->setName('search');
 $app->map(['GET', 'POST'], '/userinfo/{identifier}', \pxls\Action\Profile::class)->setName('profile');

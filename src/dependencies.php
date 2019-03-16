@@ -67,5 +67,8 @@ $container[\pxls\Action\PrivateAPI::class] = function ($c) {
 $container[\pxls\Action\Profile::class] = function ($c) {
     return new \pxls\Action\Profile($c->get('renderer'), $c->get('logger'), $c->get('database'),$c->get('discord'));
 };
+$container[\pxls\Action\ReportList::class] = function ($c) {
+    return new \pxls\Action\ReportList($c->get('renderer'), $c->get('logger'), $c->get('database'),$c->get('discord'));
+};
 
 //endregion

@@ -50,9 +50,9 @@ class ReportHandler {
         global $app;
         $reports = [];
         if($onlyOpen==1) {
-            $qReports = $this->db->query("SELECT id,who,x,y,claimed_by,time,reported FROM reports WHERE closed = 0 AND reported IS NOT NULL");
+            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE closed = 0 AND reported IS NOT NULL");
         } else {
-            $qReports = $this->db->query("SELECT id,who,x,y,claimed_by,time,reported FROM reports WHERE reported IS NOT NULL");
+            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported,r.closed FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE reported IS NOT NULL");
         }
 
         while($report = $qReports->fetch(\PDO::FETCH_ASSOC)) {
@@ -60,6 +60,7 @@ class ReportHandler {
             $report['claimed_name'] = ($report['claimed_by']==0)?'':$this->getUserdataById($report['claimed_by'])->username;
             $report['position_url'] = $report['who'] ? '<a href="'.$this->formatCoordsLink($report['x'], $report['y']).'" target="_blank">X:'.$report['x'].'; Y:'.$report['y'].'</a>' : 'N/A';
             $report['who_url'] = $report['who'] ? '<a href="/userinfo/'.$report['who_name'].'" target="_blank">'.$report['who_name'].'</a>' : 'Server';
+            $report['reported_url'] = $report['reported'] ? '<a href="/userinfo/'.$report['reported_name'].'" target="_blank">'.$report['reported_name'].'</a>' : 'Server';
             $report['human_time'] = date("d.m.Y - H:i:s",$report['time']);
             if($report['claimed_by'] == 0) {
                 $report['action'] = '<button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-reportid="'.$report['id'].'" data-target="#report_info">Details</button>';

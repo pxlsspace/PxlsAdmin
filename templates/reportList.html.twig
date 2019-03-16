@@ -1,0 +1,68 @@
+{% extends "master.html.twig" %}
+
+{% set title = 'Report List' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Reports <span id="loading">(Loading... This will take a sec or 60)</span></h3>
+                </div>
+                <div class="box-body">
+                    <table id="tblReports" class="table table-responsive table-bordered table-striped nowrap">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Reporter</th>
+                                <th>Reported</th>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>Claimed By</th>
+                                <th>Resolved</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for report in reports %}
+                            <tr>
+                                <td><a href="#" target="_blank" data-toggle="modal" data-reportid="{{ report.id }}" data-target="#report_info">{{ report.id }}</a></td>
+                                <td>{{ report.who_url|raw }}</td>
+                                <td>{{ report.reported_url|raw }}</td>
+                                <td>{{ report.human_time }}</td>
+                                <td>{{ report.position_url|raw }}</td>
+                                <td>{{ report.claimed_name ?: 'N/A' }}</td>
+                                <td>{{ report.closed ? 'Yes' : 'No' }}</td>
+                                <td><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-reportid="{{ report.id }}" data-target="#report_info">View</button></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "home/reportmodal.html.twig" %}
+{% endblock content %}
+
+{% block js %}
+    {{ parent() }}
+    <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript">
+        {% include "ban.js.twig" %}
+        {% include "home/reports.js.twig" %}
+        window.__dynVars = Object.assign(window.__dynVars || {}, {viewOnly: true});
+        $("#tblReports").on("init.dt", () => {
+            $("#loading").fadeOut(200);
+        }).DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "order": [[ 0, "desc" ]],
+            "info": true,
+            "autoWidth": false,
+            "scrollX": true
+        });
+    </script>
+{% endblock %}
