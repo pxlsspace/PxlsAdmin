@@ -22,10 +22,10 @@ class Statistics {
 
     public function pixelsPlaced($time=0) {
         if($time == 0) {
-            return $this->db->query("SELECT COUNT(id) AS total FROM pixels WHERE NOT rollback_action AND NOT mod_action AND NOT undo_action")->fetch(\PDO::FETCH_OBJ)->total;
+            return $this->db->query("SELECT COUNT(id) AS total FROM pixels WHERE NOT rollback_action AND NOT mod_action AND NOT undo_action AND NOT undone")->fetch(\PDO::FETCH_OBJ)->total;
         } else {
             $time = date("Y-m-d H:i:s",strtotime($time));
-            $pixels = $this->db->prepare("SELECT COUNT(id) AS total FROM pixels WHERE NOT rollback_action AND NOT mod_action AND NOT undo_action AND time > :time");
+            $pixels = $this->db->prepare("SELECT COUNT(id) AS total FROM pixels WHERE NOT rollback_action AND NOT mod_action AND NOT undo_action AND NOT undone AND time > :time");
             $pixels->bindParam(":time",$time,\PDO::PARAM_STR);
             $pixels->execute();
             return $pixels->fetch(\PDO::FETCH_OBJ)->total;
