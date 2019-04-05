@@ -8,7 +8,8 @@ class Utils {
             "reddit" => "https://reddit.com/u/%%LOGIN",
             "google" => "https://plus.google.com/%%LOGIN",
             "discord" => "javascript:askDiscord('%%LOGIN');",
-            "tumblr" => "https://%%LOGIN.tumblr.com/"
+            "tumblr" => "https://%%LOGIN.tumblr.com/",
+            "vk" => "https://vk.com/id%%LOGIN"
         ];
         $toRet = "#";
 
