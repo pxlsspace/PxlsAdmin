@@ -102,9 +102,25 @@ class User {
         return false;
     }
 
+    public function getBanlogFromDB($uid) {
+        $uid = intval($uid);
+        $toRet = [];
+        $user = $this->getUserById($uid);
+        if ($user) {
+            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as \'when_timestamp\', from_unixtime(b.when) as \'when\', b.banner as \'banner_id\', COALESCE(u.username, \'console\') as \'banner\', b.banned as \'banned_id\', u1.username as \'banned\', b.ban_expiry as \'ban_expiry_timestamp\', IF(b.ban_expiry, from_unixtime(b.ban_expiry), 0) as \'ban_expiry_date\', IF(b.ban_expiry-b.when > 0, b.ban_expiry-b.when, -1) as \'length\', b.action, b.ban_reason FROM banlogs b LEFT OUTER JOIN users u ON u.id = b.banner INNER JOIN users u1 ON u1.id = b.banned WHERE b.banned = :id');
+            $getBansQuery->bindParam(':id', $uid);
+            $getBansQuery->execute();
+            if ($getBansQuery->rowCount() > 0) {
+                $toRet = $getBansQuery->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        }
+        return $toRet;
+    }
+
     public function getBanlogFromAdminLog($uid) {
-        $uid = intval($uid); $bans = []; $reply = 0;
+        $uid = intval($uid);
         $_user = $this->getUserById($uid);
+        $toRet = [];
         if ($_user) {
             $uname = $_user["username"]; //not sure if necessary, but forcing a UID here since we can't bindParam to a string for 'LIKE'. forcing a UID means that we do a user lookup before attempting to pull from database. flimsy and probably unnecessary attempt at sanitzation. -Socc
             $uname = str_replace("_", "\\_", $uname);
@@ -112,7 +128,6 @@ class User {
 
             $getBansQuery = $this->db->prepare('SELECT a.*,COALESCE(u.username, "console") AS \'who\',LEFT(message, 2) = \'un\' AS \'is_unban\' FROM admin_log a LEFT OUTER JOIN users u ON u.id = a.userid WHERE a.message LIKE "%ban '.$uname.'" OR a.message LIKE "%ban '.$uname.' %";');
             $getBansQuery->execute();
-            $toRet = [];
             if($getBansQuery->rowCount() > 0) {
                 $toRet = $getBansQuery->fetchAll(\PDO::FETCH_ASSOC);
             }

@@ -1,3 +1,8 @@
 .table.nowrap th, .table.nowrap td {
     white-space: nowrap;
 }
+
+.timeline-item p {
+    margin: 0;
+    text-indent: 2rem;
+}

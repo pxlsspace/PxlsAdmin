@@ -69,7 +69,17 @@ final class Profile
             $userinfo["reports_sent"] = $this->reportsSentByUser($userinfo["id"]);
             $userinfo["reports_recv"] = $this->reportsRecvbyUser($userinfo["id"]);
             $userinfo["notes"] = $user->getUserNotesById($userinfo["id"]);
-            $userinfo["banlog"] = $user->getBanlogFromAdminLog($userinfo["id"]);
+            $_legacy = $user->getBanlogFromAdminLog($userinfo["id"]);
+            $_current = $user->getBanlogFromDB($userinfo['id']);
+            $sizes = [
+                'legacy' => sizeof($_legacy),
+                'current' => sizeof($_current)
+            ];
+            $userinfo["banlog"] = [
+                "legacy" => $_legacy,
+                "current" => $_current,
+                "count" => $sizes['legacy'] == $sizes['current'] ? $sizes['legacy'] : $sizes['legacy'] - $sizes['current']
+            ];
             $this->addToTimeline(strtotime($userinfo['signup_time']), "signup", "", 0);
             return $userinfo;
         }

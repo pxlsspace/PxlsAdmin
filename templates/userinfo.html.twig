@@ -128,7 +128,7 @@
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#timeline" data-toggle="tab">Timeline</a></li>
                     <li><a href="#pixels" data-toggle="tab">Last Pixels</a></li>
-                    <li><a href="#banlog" data-toggle="tab">Ban log {% if userinfo.banlog|length > 0 %}<span class="badge label-danger">{{ userinfo.banlog|length }}</span>{% endif %}</a></li>
+                    <li><a href="#banlog" data-toggle="tab">Ban log {% if userinfo.banlog.count > 0 %}<span class="badge label-danger">{{ userinfo.banlog.count }}</span>{% endif %}</a></li>
                     <li><a href="#notes" data-toggle="tab">Notes {% if userinfo.notes|length > 0 %}<span class="badge label-warning">{{ userinfo.notes|length }}</span>{% endif %}</a></li>
                 </ul>
                 <div class="tab-content">
@@ -218,29 +218,65 @@
                         </table>
                     </div>
                     <div class="tab-pane" id="banlog">
-                        {% if userinfo.banlog|length == 0 %}
+                        {% if userinfo.banlog.count == 0 %}
                             <strong>No bans on record</strong>
                         {% endif %}
-                        <ul class="timeline timeline-inverse">
-                            {% for key,item in userinfo.banlog|reverse %}
-                            <li>
-                                {% if item.is_unban == "0" %}
-                                    <i class="fa fa-user-times bg-red"></i>
-                                {% else %}
-                                    <i class="fa fa-user-plus bg-green"></i>
-                                {% endif %}
-                                <div class="timeline-item">
-                                    <span class="time"><i class="fa fa-clock-o"></i> {{ item.time|date() }}</span>
-                                    <div class="timeline-body">
-                                        {{item.who}}: {{item.message}}
-                                    </div>
-                                </div>
-                            </li>
-                            {% endfor %}
-                            <li>
-                                <i class="fa fa-clock-o bg-gray"></i>
-                            </li>
-                        </ul>
+                        {% if userinfo.banlog.current|length > 0 %}
+                            <div class="banlog current">
+                                <ul class="timeline timeline-inverse">
+                                    {% for key,item in userinfo.banlog.current|reverse %}
+                                        <li>
+                                            {% if item.action != "unban" %}
+                                                <i class="fa fa-user-times bg-red"></i>
+                                            {% else %}
+                                                <i class="fa fa-user-plus bg-green"></i>
+                                            {% endif %}
+                                            <div class="timeline-item">
+                                                <span class="time"><i class="fa fa-clock-o"></i> {{ item.time|date() }}</span>
+                                                <div class="timeline-body">
+                                                    <a href="{{ base_url() }}/userinfo/{{ item.banner }}" target="_blank">{{ item.banner }}</a> {{ item.action }}ned {{ item.banned }} {% if item.length > 0 %} for {{ item.length }} seconds{% endif %}
+                                                    <p><strong>Reason:</strong> {{ item.ban_reason }}</p>
+                                                    {% if item.length != -1 %}
+                                                        <p><strong>Length:</strong> {{ item.length }} seconds</p>
+                                                        <p><strong>Expires:</strong> {{ item.ban_expiry_date }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                    <li>
+                                        <i class="fa fa-clock-o bg-gray"></i>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                        {% if userinfo.banlog.legacy|length > 0 %}
+                            <div style="padding-top:2rem;" class="banlog legacy">
+                                <hr />
+                                <h3>Legacy</h3>
+                                <p class="text-muted">Note: These may have duplicate entries from the above list and accuracy is not guaranteed. These work off of username instead of ID and have limited data attached. These are only displayed since the above list has only been kept track of since April 7th, 2019.</p>
+                                <ul class="timeline timeline-inverse">
+                                    {% for key,item in userinfo.banlog.legacy|reverse %}
+                                        <li>
+                                            {% if item.is_unban == "0" %}
+                                                <i class="fa fa-user-times bg-red"></i>
+                                            {% else %}
+                                                <i class="fa fa-user-plus bg-green"></i>
+                                            {% endif %}
+                                            <div class="timeline-item">
+                                                <span class="time"><i class="fa fa-clock-o"></i> {{ item.time|date() }}</span>
+                                                <div class="timeline-body">
+                                                    {{item.who}}: {{item.message}}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                    <li>
+                                        <i class="fa fa-clock-o bg-gray"></i>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="tab-pane" id="notes">
                         {% for note in userinfo.notes %}
