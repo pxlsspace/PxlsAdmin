@@ -232,7 +232,7 @@
                                                 <i class="fa fa-user-plus bg-green"></i>
                                             {% endif %}
                                             <div class="timeline-item">
-                                                <span class="time"><i class="fa fa-clock-o"></i> {{ item.time|date() }}</span>
+                                                <span class="time"><i class="fa fa-clock-o"></i> {{ item.when|date() }}</span>
                                                 <div class="timeline-body">
                                                     <a href="{{ base_url() }}/userinfo/{{ item.banner }}" target="_blank">{{ item.banner }}</a> {{ item.action }}ned {{ item.banned }} {% if item.length > 0 %} for {{ item.length }} seconds{% endif %}
                                                     {% if item.ban_reason|length > 0 %}
