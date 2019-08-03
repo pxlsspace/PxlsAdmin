@@ -26,7 +26,7 @@ class ChatReportHandler {
     }
 
     public function getReports($open=true) {
-        $query = $this->db->query("SELECT r.id,r.chat_message,r.target,r.initiator,r.claimed_by,m.purged_by,u.username as 'target_name',u1.username as 'initiator_name',u2.username as 'claimed_name',u3.username as 'purged_name' FROM chat_reports r INNER JOIN chat_messages m ON m.nonce=r.chat_message LEFT OUTER JOIN users u ON u.id=r.target LEFT OUTER JOIN users u1 ON u1.id=r.initiator LEFT OUTER JOIN users u2 ON u2.id=r.claimed_by LEFT OUTER JOIN users u3 ON u3.id=m.purged_by WHERE ".($open !== false ? 'r.closed = 0;' : '1;'));
+        $query = $this->db->query("SELECT r.id,r.time,r.chat_message,r.target,r.initiator,r.claimed_by,m.purged_by,u.username as 'target_name',u1.username as 'initiator_name',u2.username as 'claimed_name',u3.username as 'purged_name' FROM chat_reports r INNER JOIN chat_messages m ON m.nonce=r.chat_message LEFT OUTER JOIN users u ON u.id=r.target LEFT OUTER JOIN users u1 ON u1.id=r.initiator LEFT OUTER JOIN users u2 ON u2.id=r.claimed_by LEFT OUTER JOIN users u3 ON u3.id=m.purged_by WHERE ".($open !== false ? 'r.closed = 0;' : '1;'));
 
         try {
             return $query->fetchAll(\PDO::FETCH_ASSOC);

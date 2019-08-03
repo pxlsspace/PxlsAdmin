@@ -102,7 +102,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         //details
         modal.find('#crm-details-reporter').text(data.reporter.username);
         modal.find('#crm-details-reported').text(data.reported.username);
-        modal.find('#crm-details-sent').text(moment.unix(data.report.sent).format('MM.DD.YYYY HH:mm:ss'));
+        modal.find('#crm-details-sent').text(moment.unix(data.report.time).format('MM.DD.YYYY HH:mm:ss'));
         modal.find('#crm-details-reason').text(data.report.report_message);
         modal.find('#crm-details-chat-line').text(data.report.content);
 

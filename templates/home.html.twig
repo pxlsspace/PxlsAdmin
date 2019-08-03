@@ -369,7 +369,7 @@
                             { "data": "initiator_name" },
                             { "data": "target_name" },
                             {
-                                "data": "sent",
+                                "data": "time",
                                 render: (data, type, row) => {
                                     return moment.unix(data >> 0).format('MM.DD.YYYY - HH:mm:ss');
                                 }
