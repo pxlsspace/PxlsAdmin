@@ -51,7 +51,7 @@ class ChatReportHandler {
             $selfDataQuery->closeCursor();
         }
 
-        $queryReport = $this->db->prepare("SELECT r.*,m.* FROM chat_reports r INNER JOIN chat_messages m ON m.nonce=r.chat_message WHERE r.id = :id;");
+        $queryReport = $this->db->prepare("SELECT r.*,m.*,u.username AS 'claimed_by_name' FROM chat_reports r INNER JOIN chat_messages m ON m.nonce=r.chat_message LEFT OUTER JOIN users u ON u.id=r.claimed_by WHERE r.id = :id;");
         $queryReport->bindParam(":id", $rid, \PDO::PARAM_INT);
         if ($queryReport->execute()) {
             $toReturn["report"] = $queryReport->fetch(\PDO::FETCH_ASSOC);
