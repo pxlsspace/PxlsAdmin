@@ -14,7 +14,7 @@ class ReportHandler {
         $this->settings = $app->getContainer()->get("settings");
     }
 
-    public function announce() {
+    public function announce($openChatReports = 0) {
         $reports = $this->getReports(1);
         $claimedCount = 0;
         foreach($reports as $report) {
@@ -22,14 +22,21 @@ class ReportHandler {
         }
         $reportCount = count($reports) - $claimedCount;
         if($reportCount > 0) {
-            $prepend = "owo h-hewwo moderwators... ";
-            $form = ($reportCount == 1)?"this":"these";
-            $form2 = ($reportCount == 1) ? "" : " ".$reportCount;
-            $form3 = ($reportCount == 1)?"":"s";
-            $append = " pwease >.< <".$this->settings['webroots']['panel']."/>";
-            $this->discord->setName("pxls Admin");
-            //$this->discord->setMessage($prepend."there " . $form . " currently " . $reportCount . " open and unclaimed report".$form2.". ".$append); //broke this when I added form3. reposition forms as necessary
-            $this->discord->setMessage($prepend."pwease answewr ".$form.$form2." weport".$form3.$append);
+            $normalParts = [
+                'oWo h-hewwo moderwators... pwease answewr',
+                ' '.($reportCount == 0 ? '' : ($reportCount == 1 ? 'this ' : 'these ').$reportCount. " canvas weport".($reportCount == 1 ? '' : 's')),
+                ($openChatReports == 0 ? '' : (($reportCount > 0 ? ' and ' : ($openChatReports == 1 ? 'this ' : 'these ')).$openChatReports.' chat weport'.($openChatReports == 1 ? '' : 's'))),
+                ' pwease >.< <'.$this->settings['webroots']['panel'].'/>'
+            ];
+            $panicParts = [
+                '┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿ wake up, there are',
+                ' '.($reportCount == 0 ? '' : $reportCount.' canvas report'.($reportCount == 1 ? '' : 's')),
+                ''.($openChatReports == 0 ? ' ' : ($reportCount == 0 ? '' : ' and ').$openChatReports.' chat reports '),
+                'to handle. <'.$this->settings['webroots']['panel'].'/>'
+            ];
+
+            $this->discord->setName("Pxls Admin");
+            $this->discord->setMessage(implode(($reportCount >= 10 || $openChatReports >= 10) ? $panicParts : $normalParts));
             $this->discord->execute();
             return true;
         } else {

@@ -14,6 +14,7 @@ final class Report
     private $logger;
     private $database;
     private $reportInterface;
+    private $chatReportInterface;
     private $bypassToken;
 
     public function __construct(Twig $view, LoggerInterface $logger, \PDO $database, DiscordHook $discord, $bypassToken)
@@ -23,6 +24,7 @@ final class Report
         $this->database = $database;
         $this->discord = $discord;
         $this->reportInterface = new \pxls\ReportHandler($this->database, $this->discord);
+        $this->chatReportInterface = new \pxls\ChatReportHandler($this->database, $this->discord);
 
         if (!isset($bypassToken) || empty($bypassToken)) {
             $bypassToken = false;
@@ -69,12 +71,46 @@ final class Report
                     return $response->withStatus(200)->withJson($this->reportInterface->getReportDetails($reportId));
                 }
                 break;
+            case 'chatClaim':
+                if(isset($params[1])) {
+                    $reportId = intval($params[1]);
+                    $this->chatReportInterface->setClaimed($reportId, true);
+                    $this->logger->info("claimed chat report $reportId",array('userid'=>$_SESSION['user_id']));
+                    return $response->withStatus(200)->withJson(["status"=>"success"]);
+                }
+                break;
+            case 'chatUnclaim':
+                if(isset($params[1])) {
+                    $reportId = intval($params[1]);
+                    $this->chatReportInterface->setClaimed($reportId, false);
+                    $this->logger->info("unclaimed chat report $reportId",array('userid'=>$_SESSION['user_id']));
+                    return $response->withStatus(200)->withJson(["status"=>"success"]);
+                }
+                break;
+            case 'chatResolve':
+                if(isset($params[1])) {
+                    $reportId = intval($params[1]);
+                    if ($this->chatReportInterface->setResolved($reportId, true)) {
+                        $this->logger->info("resolved chat report $reportId",array('userid'=>$_SESSION['user_id']));
+                        return $response->withStatus(200)->withJson(["status"=>"success"]);
+                    } else {
+                        $this->logger->info("failed to resolve a chat report because they did not own it ($reportId)",array('userid'=>$_SESSION['user_id']));
+                        return $response->withStatus(400)->withJson(["status"=>"failed","reason"=>"claimed by someone else"]);
+                    }
+                }
+                break;
+            case 'chatDetails':
+                if(isset($params[1])) {
+                    $reportId = intval($params[1]);
+                    return $response->withStatus(200)->withJson($this->chatReportInterface->getReportDetails($reportId));
+                }
+                break;
             case 'announce':
                 $headerCheck = $request->getHeader("HTTP_AUTHORIZATION");
                 $headerCheck = sizeof($headerCheck) > 0 ? $headerCheck[0] : false;
 
                 if ($this->bypassToken !== false && $headerCheck == "Bearer ".$this->bypassToken) {
-                    if ($this->reportInterface->announce()) {
+                    if ($this->reportInterface->announce($this->chatReportInterface->getOpenReportsCount())) {
                         return $response->withStatus(200)->withJson(["status" => "success"]);
                     } else {
                         return $response->withStatus(200)->withJson(["status" => "failed", "msg" => "no opened reports"]);
@@ -92,7 +128,11 @@ final class Report
                 break;
 
             case 'reload':
-                return $response->withStatus(200)->withJson(["data"=>$this->reportInterface->getReports(!isset($_REQUEST['all']))]);
+                $toReturn = [
+                    "canvasReports" => $this->reportInterface->getReports(!isset($_REQUEST['all'])),
+                    "chatReports" => $this->chatReportInterface->getReports(!isset($_REQUEST['all']))
+                ];
+                return $response->withStatus(200)->withJson(["data"=>$toReturn]);
                 break;
 
         }

@@ -99,7 +99,7 @@
         <div class="col-xs-12">
             <div class="box">
                 <div class="box-header">
-                    <h3 class="box-title">Latest Reports</h3>
+                    <h3 class="box-title">Canvas Reports</h3>
                 </div>
                 <div class="box-body">
                     <table id="reports" class="table table-responsive table-bordered table-striped nowrap" width="100%">
@@ -117,6 +117,38 @@
                             <th>id#</th>
                             <th>Reporter</th>
                             <th>Position</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Chat Reports</h3>
+                </div>
+                <div class="box-body">
+                    <table id="chatReports" class="table table-responsive table-bordered table-striped nowrap" width="100%">
+                        <thead>
+                        <tr>
+                            <th>id#</th>
+                            <th>Reporter</th>
+                            <th>Reported</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>id#</th>
+                            <th>Reporter</th>
+                            <th>Reported</th>
                             <th>Time</th>
                             <th>Actions</th>
                         </tr>
@@ -244,35 +276,6 @@
                 "scrollX": true
             });
 
-            var reportList = $("#reports").DataTable({
-                "ajax": {
-                    "dataType": 'json',
-                    "contentType": "application/json; charset=utf-8",
-                    "type": "GET",
-                    "url": '{{ webroots.panel }}/api/report/reload'
-                },
-                "columns": [
-                    {
-                        "data": "id",
-                        "render": function(data, type, row) {
-                            return `<a href="#" data-toggle="modal" data-reportid="${data}" data-target="#report_info">${data}</a>`;
-                        }
-                    },
-                    { "data": "who_url" },
-                    { "data": "position_url" },
-                    { "data": "human_time" },
-                    { "data": "action" }
-                ],
-                "paging": true,
-                "lengthChange": false,
-                "searching": true,
-                "ordering": true,
-                "order": [[ 0, "desc" ]],
-                "info": true,
-                "autoWidth": false,
-                "scrollX": true
-            });
-
             var lastSignups = $("#signups").DataTable({
                 "ajax": {
                     "dataType": 'json',
@@ -306,11 +309,103 @@
                 "scrollX": true
             });
 
+            reloadReports();
+
+            function reloadReports() {
+                $.get("{{ xhr_base }}/api/report/reload?_=" + (new Date() >> 0), function(data) {
+                    _reloadCanvasReports(data.data.canvasReports);
+                    _reloadChatReports(data.data.chatReports);
+                });
+            }
+
+            function _reloadCanvasReports(data) {
+                if ($.fn.DataTable.isDataTable('#chatReports')) {
+                    let dt = $('#reports').DataTable();
+                    dt.clear();
+                    dt.rows.add(data);
+                    dt.draw();
+                } else {
+                    $("#reports").DataTable({
+                        data: data,
+                        "columns": [
+                            {
+                                "data": "id",
+                                "render": function(data, type, row) {
+                                    return `<a href="#" data-toggle="modal" data-reportid="${data}" data-target="#report_info">${data}</a>`;
+                                }
+                            },
+                            { "data": "who_url" },
+                            { "data": "position_url" },
+                            { "data": "human_time" },
+                            { "data": "action" }
+                        ],
+                        "paging": true,
+                        "lengthChange": false,
+                        "searching": true,
+                        "ordering": true,
+                        "order": [[ 0, "desc" ]],
+                        "info": true,
+                        "autoWidth": false,
+                        "scrollX": true
+                    });
+                }
+            }
+            function _reloadChatReports(data) {
+                if ($.fn.DataTable.isDataTable('#chatReports')) {
+                    let dt = $('#chatReports').DataTable();
+                    dt.clear();
+                    dt.rows.add(data);
+                    dt.draw();
+                } else {
+                    $("#chatReports").DataTable({
+                        data: data,
+                        "columns": [
+                            {
+                                "data": "id",
+                                "render": function(data, type, row) {
+                                    return `<a href="#" data-toggle='modal' data-report-id='${row.id}' data-message-nonce='${row.nonce}' data-target='#chat_report_modal'>${data}</a>`;
+                                }
+                            },
+                            { "data": "initiator_name" },
+                            { "data": "target_name" },
+                            {
+                                "data": "sent",
+                                render: (data, type, row) => {
+                                    return moment.unix(data >> 0).format('MM.DD.YYYY - HH:mm:ss');
+                                }
+                            },
+                            {
+                                "data": "nonce",
+                                "render": (data, type, row) => {
+                                    if (row.claimed_by >> 0 > 0) {
+                                        if (row.claimed_by == "{{ userdata.id }}") {
+                                            return `<button type='button' class='btn btn-success btn-xs' data-toggle='modal' data-report-id='${row.id}' data-message-nonce='${row.nonce}' data-target='#chat_report_modal'>View</button>`;
+                                        } else {
+                                            return `<button type='button' class='btn btn-default btn-xs' data-toggle='modal' data-report-id='${row.id}' data-message-nonce='${row.nonce}' data-target='#chat_report_modal' disabled>Claimed by ${row.claimed_name}</button>`;
+                                        }
+                                    } else {
+                                        return `<button type='button' class='btn btn-warning btn-xs' data-toggle='modal' data-report-id='${row.id}' data-message-nonce='${row.nonce}' data-target='#chat_report_modal'>View</button>`;
+                                    }
+                                }
+                            }
+                        ],
+                        "paging": true,
+                        "lengthChange": false,
+                        "searching": true,
+                        "ordering": true,
+                        "order": [[ 0, 'desc' ]],
+                        "info": true,
+                        "autoWidth": false,
+                        "scrollX": true
+                    });
+                }
+            }
+
             var intervalListener = null;
 
             $('#autoreload').change(function(){
                 if($('#autoreload').prop('checked')) {
-                    intervalListener = self.setInterval(function () {reportList.ajax.reload(); actionLog.ajax.reload(); lastSignups.ajax.reload()}, 500);
+                    intervalListener = self.setInterval(function () {reloadReports(); lastSignups.ajax.reload()}, 5e3);
                     $("#autoreload_label").html("Okay! Now reloading the tables every 5 seconds! Uncheck to stop!");
                 } else {
                     window.clearInterval(intervalListener);

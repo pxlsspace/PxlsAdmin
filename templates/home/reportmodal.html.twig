@@ -47,7 +47,7 @@
                             <!-- /.box-header -->
                             <div class="box-body">
                                     <span id="rmd-g-message">
-                                        Message goes here!
+                                        Loading... (if this is here for more than 5 seconds something broke! make sure your internet is fine then report to a dev.)
                                     </span>
                             </div>
                             <div class="box-footer clearfix">
@@ -59,6 +59,106 @@
             <div id="modal-footer" class="modal-footer">
 
             </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-default" id="chat_report_modal" tabindex="-1" role="dialog" aria-labelledby="report_info_label">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="report_info_label">Report Information (ID: <span id="rmd-g-id"></span>)</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-responsive">
+                            <tr><td colspan="2" class="text-center"><b>Details</b></td></tr>
+                            <tr>
+                                <th>Reporter</th>
+                                <td id="crm-details-reporter"></td>
+                            </tr>
+                            <tr>
+                                <th>Reported</th>
+                                <td id="crm-details-reported"></td>
+                            </tr>
+                            <tr>
+                                <th>Report Sent</th>
+                                <td id="crm-details-sent"></td>
+                            </tr>
+                            <tr>
+                                <th>Report Reason</th>
+                                <td id="crm-details-reason"></td>
+                            </tr>
+                            <tr>
+                                <th>Reported Chat Line</th>
+                                <td id="crm-details-chat-line"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table responsive">
+                            <tr><td colspan="2" class="text-center"><b>Reporter</b></td></tr>
+                            <tr>
+                                <th>ID</th>
+                                <td id="crm-reporter-id"></td>
+                            </tr>
+                            <tr>
+                                <th>Role</th>
+                                <td id="crm-reporter-role"></td>
+                            </tr>
+                            <tr>
+                                <th>Banned</th>
+                                <td id="crm-reporter-banned"></td>
+                            </tr>
+                            <tr>
+                                <th>ChatBanned</th>
+                                <td id="crm-reporter-chat-banned"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table responsive">
+                            <tr><td colspan="2" class="text-center"><b>Reported</b></td></tr>
+                            <tr>
+                                <th>ID</th>
+                                <td id="crm-reported-id"></td>
+                            </tr>
+                            <tr>
+                                <th>Role</th>
+                                <td id="crm-reported-role"></td>
+                            </tr>
+                            <tr>
+                                <th>Banned</th>
+                                <td id="crm-reported-banned"></td>
+                            </tr>
+                            <tr>
+                                <th>ChatBanned</th>
+                                <td id="crm-reported-chat-banned"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="box box-danger">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">ChatLog/Context</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <span id="rmd-g-message">Loading... (if this is here for more than 5 seconds something broke! make sure your internet is fine then report to a dev.)</span>
+                                <ul id="chat-context"></ul>
+                            </div>
+                            <div class="box-footer clearfix">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="modal-footer" class="modal-footer"></div>
         </div>
     </div>
 </div>

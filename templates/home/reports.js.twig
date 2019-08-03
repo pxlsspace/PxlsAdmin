@@ -51,7 +51,7 @@ $('#report_info').on('show.bs.modal', function (event) {
                 url: "{{ webroots.panel }}/api/report/claim/" + $(this).data('reportid')
             }).done(function() {
                 alert("Report claimed!");
-                setTimeout(function(){modal.modal("hide");reportList.ajax.reload()}, 500);
+                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
             });
         });
         modal.find('#rmd-unclaim').click(function(){
@@ -60,7 +60,7 @@ $('#report_info').on('show.bs.modal', function (event) {
                 url: "{{ webroots.panel }}/api/report/unclaim/" + $(this).data('reportid')
             }).done(function() {
                 alert("Report unclaimed!");
-                setTimeout(function(){modal.modal("hide");reportList.ajax.reload()}, 500);
+                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
             });
         });
         modal.find('#rmd-resolve').click(function(){
@@ -69,17 +69,120 @@ $('#report_info').on('show.bs.modal', function (event) {
                 url: "{{ webroots.panel }}/api/report/resolve/" + $(this).data('reportid')
             }).done(function() {
                 alert("Report was closed and marked as resolved!");
-                setTimeout(function(){modal.modal("hide");reportList.ajax.reload()}, 500);
+                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
             });
         });
 
         if(data.general.claimed == "no one") {
             modal.find('#rmd-unclaim').hide();
             modal.find('#rmd-resolve').hide();
-        } else if(data.general.claimed = "{{ userdata.username }}") {
+        } else if(data.general.claimed == "{{ userdata.username }}") {
             modal.find('#rmd-claim').hide();
         } else {
             modal.find('#rmd-claim').hide();
+            modal.find('#rmd-unclaim').hide();
+            modal.find('#rmd-resolve').hide();
+        }
+    });
+});
+$('#chat_report_modal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var modal = $(this);
+
+    modal.find('#rmd-g-message').show();
+    modal.find('#modal-footer').html(modal_footer);
+
+    $.getJSON('{{ webroots.panel }}/api/report/chatDetails/'+button.data('reportId'),function(data){
+        if (window.__dynVars && window.__dynVars.viewOnly === true) {
+            modal.find('#rmd-claim,#rmd-unclaim,#rmd-resolve').hide();
+        }
+        {#var server = data.reporter.username === null;#}
+        modal.find('#rmd-g-id').text(data.report.id);
+
+        //details
+        modal.find('#crm-details-reporter').text(data.reporter.username);
+        modal.find('#crm-details-reported').text(data.reported.username);
+        modal.find('#crm-details-sent').text(moment.unix(data.report.sent).format('MM.DD.YYYY HH:mm:ss'));
+        modal.find('#crm-details-reason').text(data.report.report_message);
+        modal.find('#crm-details-chat-line').text(data.report.content);
+
+        //reporter
+        modal.find('#crm-reporter-id').text(data.reporter.id);
+        modal.find('#crm-reporter-role').text(data.reporter.role);
+        modal.find('#crm-reporter-banned').text(data.reporter.banned >> 0 ? "Yes" : "No");
+        modal.find('#crm-reporter-chat-banned').text(data.reporter.chatbanned >> 0 ? "Yes" : "No");
+
+        //reported
+        modal.find('#crm-reported-id').text(data.reported.id);
+        modal.find('#crm-reported-role').text(data.reported.role);
+        modal.find('#crm-reported-banned').text(data.reported.banned >> 0 ? "Yes" : "No");
+        modal.find('#crm-reported-chat-banned').text(data.reported.chatbanned >> 0 ? "Yes" : "No");
+
+        //context
+        modal.find('#chat-context').empty();
+        for (let i = 0; i < data.context.length; i++) {
+            let x = data.context[i];
+            let time = `[${moment.unix(x.sent >> 0).format('MM.DD.YYYY HH:mm:ss')}] `;
+            let content = document.createElement('span'); //jQuery parses strings into HTML so have to use basic dom generation
+            content.textContent = x.content;
+            modal.find('#chat-context').append(
+                $("<li>")
+                    .append(time)
+                    .append($("<strong>").text(x.author_name + ': '))
+                    .append(content)
+                    .css(x.nonce === data.report.chat_message ? {'backgroundColor': 'rgba(255,245,9,0.3)'} : {})
+            )
+        }
+        modal.find('#rmd-g-message').hide();
+
+        //modal actions
+        let cannotOverwrite = (data.self.role != "ADMIN" && data.self.role != "DEVELOPER") && !data.report.claimed_by_you;
+        let claimButton = modal.find('#rmd-claim').show()[0];
+        let unclaimButton = modal.find('#rmd-unclaim').show()[0];
+        let resolveButton = modal.find('#rmd-resolve').show()[0];
+
+        claimButton.dataset['reportId'] =  data.report.id;
+
+        unclaimButton.dataset['reportId'] = data.report.id;
+        unclaimButton.disabled = cannotOverwrite;
+
+        resolveButton.dataset['reportId'] = data.report.id;
+        resolveButton.disabled = cannotOverwrite;
+
+        $(claimButton).click(function(){
+            $.ajax({
+                url: "{{ webroots.panel }}/api/report/chatClaim/" + claimButton.dataset['reportId']
+            }).done(function() {
+                alert("Report claimed!");
+                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
+            });
+        });
+        $(unclaimButton).click(function(){
+            $.ajax({
+                url: "{{ webroots.panel }}/api/report/chatUnclaim/" + unclaimButton.dataset['reportId']
+            }).done(function() {
+                alert("Report unclaimed!");
+                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
+            });
+        });
+        $(resolveButton).click(function(){
+            $.ajax({
+                url: "{{ webroots.panel }}/api/report/chatResolve/" + resolveButton.dataset['reportId']
+            }).done(function() {
+                alert("Report was closed and marked as resolved!");
+                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
+            });
+        });
+
+        if(data.report.claimed_by == "{{ userdata.id }}") {
+            modal.find('#rmd-claim').hide();
+            modal.find('#rmd-unclaim').show();
+        } else if(data.report.claimed_by >> 0 > 0 && cannotOverwrite) {
+            modal.find('#rmd-claim').hide();
+            modal.find('#rmd-unclaim').hide();
+            modal.find('#rmd-resolve').hide();
+        } else {
+            modal.find('#rmd-claim').show();
             modal.find('#rmd-unclaim').hide();
             modal.find('#rmd-resolve').hide();
         }
