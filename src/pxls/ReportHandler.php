@@ -21,7 +21,7 @@ class ReportHandler {
             if(!$report['claimed_by'] == 0) $claimedCount++;
         }
         $reportCount = count($reports) - $claimedCount;
-        if($reportCount > 0) {
+        if($reportCount > 0 || $openChatReports > 0) {
             $normalParts = [
                 'oWo h-hewwo moderwators... pwease answewr',
                 ' '.($reportCount == 0 ? '' : ($reportCount == 1 ? 'this ' : 'these ').$reportCount. " canvas weport".($reportCount == 1 ? '' : 's')),
