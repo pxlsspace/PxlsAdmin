@@ -23,7 +23,7 @@ class ReportHandler {
         $reportCount = count($reports) - $claimedCount;
         if($reportCount > 0 || $openChatReports > 0) {
             $normalParts = [
-                'oWo h-hewwo moderwators... pwease answewr',
+                'owo h-hewwo moderwators... pwease answewr',
                 ' '.($reportCount == 0 ? '' : ($reportCount == 1 ? 'this ' : 'these ').$reportCount. " canvas weport".($reportCount == 1 ? '' : 's')),
                 ($openChatReports == 0 ? '' : (($reportCount > 0 ? ' and ' : ($openChatReports == 1 ? 'this ' : 'these ')).$openChatReports.' chat weport'.($openChatReports == 1 ? '' : 's'))),
                 ' pwease >.< <'.$this->settings['webroots']['panel'].'/>'
@@ -53,7 +53,7 @@ class ReportHandler {
         return true;
     }
 
-    public function getReports($onlyOpen=1) {
+    public function getReports($onlyOpen=1, $specificType=null) {
         global $app;
         $reports = [];
         if($onlyOpen==1) {

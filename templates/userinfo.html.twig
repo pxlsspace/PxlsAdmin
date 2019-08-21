@@ -37,6 +37,10 @@
                             {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
                                 <li><a data-username="{{ userinfo.username }}" class="shadowban" href="#">Shadowban</a></li>
                             {% endif %}
+                            {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
+                                <li><a data-username="{{ userinfo.username }}" class="force-rename" href="#">Set Username</a></li>
+                            {% endif %}
+                            <li><a data-username="{{ userinfo.username }}" class="request-rename" href="#">Request Rename</a></li>
                             {% if (userinfo.banned == "1") %}
                                 <li class="divider"></li>
                                 <li><a data-username="{{ userinfo.username }}" class="unban" href="#">Unban</a></li>
@@ -389,14 +393,44 @@
                 addComment($(this));
                 return false;
             }
-        })
+        });
 
         $("input.addnote").keypress(function(e) {
             if(e.which == 13) {
                 addNote($(this));
                 return false;
             }
-        })
+        });
+
+        $(".force-rename").click(function(e) {
+            const newName = prompt('New name:');
+            $.ajaxSetup({
+                crossDomain: true,
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+            $.post("{{ webroots.game }}/admin/forceNameChange", {user: this.dataset.username, newName}, function() {
+                alert('Success');
+                document.location.href = `{{ webroots.panel }}/userinfo/${newName}`;
+            }).fail(function() {
+                alert('An error occurred');
+            });
+        });
+
+        $(".request-rename").click(function(e) {
+            $.ajaxSetup({
+                crossDomain: true,
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+            $.post("{{ webroots.game }}/admin/flagNameChange", {user: this.dataset.username}, function() {
+                alert('Success');
+            }).fail(function() {
+                alert('An error occurred');
+            });
+        });
         {% include "home/reports.js.twig" %}
     </script>
 {% endblock %}
