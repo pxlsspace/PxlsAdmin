@@ -58,11 +58,27 @@ function unbanUser(self, path) {
     });
 }
 $("a.permaban").click(function(e) {
+    if (this.onclick && this.dataset.username) return;
     banUser($(this), "{{ webroots.game }}/admin/permaban", "Reason:", "permaban");
 });
 $("a.shadowban").click(function(e) {
+    if (this.onclick && this.dataset.username) return;
     banUser($(this), "{{ webroots.game }}/admin/shadowban", "Reason:", "shadowban");
 });
 $("a.unban").click(function(e) {
+    if (this.onclick && this.dataset.username) return;
     unbanUser($(this), "{{ webroots.game }}/admin/unban");
 });
+
+function handlePermabanClick(e) {
+    console.log('handling perma click', e);
+    banUser($(this), "{{ webroots.game }}/admin/permaban", "Reason:", "permaban");
+}
+
+function handleShadowbanClick(e) {
+    banUser($(this), "{{ webroots.game }}/admin/shadowban", "Reason:", "shadowban");
+}
+
+function handleUnbanClick(e) {
+    unbanUser($(this), "{{ webroots.game }}/admin/unban");
+}
