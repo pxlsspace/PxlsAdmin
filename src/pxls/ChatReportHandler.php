@@ -70,7 +70,7 @@ class ChatReportHandler {
             $toReturn["reported"] = $queryReported->fetch(\PDO::FETCH_ASSOC);
         }
 
-        $contextQuery = $this->db->prepare("(SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.sent > (SELECT sent FROM chat_messages WHERE nonce = :nonce) LIMIT 10) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.nonce = :nonce) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.sent < (SELECT sent FROM chat_messages WHERE nonce = :nonce) LIMIT 10) ORDER BY sent ASC;");
+        $contextQuery = $this->db->prepare("(SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.sent > (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY sent ASC LIMIT 10) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.nonce = :nonce) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.sent < (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY m.sent DESC LIMIT 10) ORDER BY sent ASC;");
         $contextQuery->bindParam(":nonce", $toReturn["report"]["chat_message"], \PDO::PARAM_STR);
         if ($contextQuery->execute()) {
             $toReturn["context"] = $contextQuery->fetchAll(\PDO::FETCH_ASSOC);
