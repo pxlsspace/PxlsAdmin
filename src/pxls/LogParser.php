@@ -73,7 +73,7 @@ class LogParser {
         return false;
     }
 
-    public function humanLogMessage($messageArray,$user_name) {
+    public function humanLogMessage($messageArray,$user_name,$raw_message) {
         $m = $messageArray; $messageTpl = [];
         // Scope: ModAction
         $messageTpl["modaction"]["selfshadow"]  = '<a href="/userinfo/%user_name%" target="_blank">%user_name%</a> was shadowbanned automatically. (%extra%)';
@@ -91,12 +91,13 @@ class LogParser {
         $messageTpl["api"]["publicapi"]     = '[ACCESS] <a target="_ipinfo" href="http://netip.de/search?query=%target%">%target%</a> accessed the public api (<a target="_ipinfo" href="https://apps.db.ripe.net/search/query.html?searchtext=%target%">RIPE</a>)';
         $messageTpl["api"]["ratelimit"]     = '[RATELIMIT] <a target="_ipinfo" href="http://netip.de/search?query=%target%">%target%</a> exceeded 15 requests per 15 minutes.  (<a target="_ipinfo" href="https://apps.db.ripe.net/search/query.html?searchtext=%target%">RIPE</a>)';
 
-        $messageTpl["unknown"]              = '[UNKNOWN] %target% %user_name% %extra%';
+        $messageTpl["unknown"]              = '[UNKNOWN] %raw%';
 
         $messageData = [
             "%target%" => $m["target"],
             "%user_name%" => $user_name,
             "%extra%" => $m["extra"],
+            "%raw%" => $raw_message
         ];
 
         $tplArray = (isset($messageTpl[$m['scope']][$m['action']]) && !empty($messageTpl[$m['scope']][$m['action']]))?$messageTpl[$m['scope']][$m['action']]:$messageTpl["unknown"];

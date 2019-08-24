@@ -141,7 +141,7 @@ final class PrivateAPI
                 $user = $this->user->getUserById($log["userid"]);
                 $log["username"] = $user["username"];
             }
-            $log["message"] = $logParser->humanLogMessage($logParser->parse($log["message"]),$log["username"]);
+            $log["message"] = $logParser->humanLogMessage($logParser->parse($log["message"]),$log["username"],$log["message"]);
             $log["time"] = date("d.m.Y H:i:s",$log["time"]);
             $log["username"] = '<a href="/userinfo/'.$log["username"].'" target="_blank">'.$log["username"].'</a>';
             $logs[] = $log;
