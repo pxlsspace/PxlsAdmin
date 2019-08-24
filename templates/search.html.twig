@@ -62,13 +62,13 @@
                                             <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">Action
                                                 <span class="fa fa-caret-down"></span></button>
                                             <ul class="dropdown-menu">
-                                                <li><a data-username="{{ user.username }}" class="permaban" href="#">Permaban</a></li>
+                                                <li><span class="action" data-username="{{ user.username }}" data-action="permaban" onclick="handleSearchAction('permaban', '{{ user.username }}', this)">Permaban</span></li>
                                                 {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
-                                                    <li><a data-username="{{ user.username }}" class="shadowban" href="#">Shadowban</a></li>
+                                                    <li><span class="action" data-username="{{ user.username }}" data-action="shadowban" onclick="handleSearchAction('shadowban', '{{ user.username }}', this)">Shadowban</span></li>
                                                 {% endif %}
                                                 {% if (user.ban_expiry|date() > date() or user.role == "BANNED" or user.role == "SHADOWBANNED") %}
                                                     <li class="divider"></li>
-                                                    <li><a data-username="{{ user.username }}" class="unban" href="#">Unban</a></li>
+                                                    <li><span class="action" data-username="{{ user.username }}" data-action="unban" onclick="handleSearchAction('unban', '{{ user.username }}', this)">Unban</span></li>
                                                 {% endif %}
                                             </ul>
                                         </div>
@@ -91,7 +91,7 @@
                                 <th>Signup IP</th>
                                 <th>Pixel Count</th>
                                 <th>Reason</th>
-                                {# <th>Action</th> #}
+                                <th>Action</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -115,5 +115,19 @@
             "autoWidth": false
         });
         {% include "ban.js.twig" %}
+        function handleSearchAction(action, who, elem) {
+            console.log('Performing action %s on %s', action, who);
+            switch(action) {
+                case 'permaban':
+                    banUser($(elem), "{{ webroots.game }}/admin/permaban", "Reason:", "permaban");
+                    break;
+                case 'shadowban':
+                    banUser($(elem), "{{ webroots.game }}/admin/shadowban", "Reason:", "shadowban");
+                    break;
+                case 'unban':
+                    unbanUser($(elem), "{{ webroots.game }}/admin/unban");
+                    break;
+            }
+        }
     </script>
 {% endblock %}
