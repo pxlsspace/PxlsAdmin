@@ -70,5 +70,8 @@ $container[\pxls\Action\Profile::class] = function ($c) {
 $container[\pxls\Action\ReportList::class] = function ($c) {
     return new \pxls\Action\ReportList($c->get('renderer'), $c->get('logger'), $c->get('database'),$c->get('discord'));
 };
+$container[\pxls\Action\ChatContext::class] = function ($c) {
+    return new \pxls\Action\ChatContext($c->get('renderer'), $c->get('logger'), $c->get('database'),$c->get('discord'));
+};
 
 //endregion

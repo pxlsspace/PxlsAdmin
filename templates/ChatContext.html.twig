@@ -1,0 +1,60 @@
+{% extends "master.html.twig" %}
+
+{% set title = 'Chat Context' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Chat Context</h3>
+                </div>
+                <div class="box-body">
+                    <label>Nonce: <input type="text" id="nonce"></label>
+                    <button id="btnSubmit">Submit</button>
+                    <ul id="chat-context"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js %}
+    {{ parent() }}
+    <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/extensions/Scroller/js/dataTables.scroller.js"></script>
+    <script type="text/javascript">
+        (function() {
+            document.getElementById('btnSubmit').onclick = function() {
+                let nonce = document.getElementById('nonce').value;
+                $.post('/chatContext', {nonce}, function(data) {
+                    if (!data || !data.success) {
+                        alert('failed to post');
+                        console.error(data, this);
+                    } else {
+                        if (!data.data.length) {
+                            alert('no context found');
+                        } else {
+                            let ctx = $("#chat-context");
+                            ctx.empty();
+                            for (let i = 0; i < data.data.length; i++) {
+                                let x = data.data[i];
+                                let time = `[${moment.unix(x.sent >> 0).tz("Europe/Berlin").format('MM.DD.YYYY HH:mm:ss')}] `;
+                                let content = document.createElement('span'); //jQuery parses strings into HTML so have to use basic dom generation
+                                content.textContent = x.content;
+                                ctx.append(
+                                    $("<li>")
+                                        .append(time)
+                                        .append($("<strong>").text(x.author_name + ': '))
+                                        .append(content)
+                                        .css(x.nonce === nonce ? {'backgroundColor': 'rgba(255,245,9,0.3)'} : {})
+                                )
+                            }
+                        }
+                    }
+                }).fail(console.error);
+            }
+        })();
+    </script>
+{% endblock %}
