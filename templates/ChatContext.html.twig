@@ -45,6 +45,7 @@
                                 content.textContent = x.content;
                                 ctx.append(
                                     $("<li>")
+                                        .attr("data-nonce", x.nonce)
                                         .append(time)
                                         .append($("<strong>").text(x.author_name + ': '))
                                         .append(content)
