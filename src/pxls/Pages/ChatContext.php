@@ -30,7 +30,7 @@ final class ChatContext
             $toRet = [];
             $nonce = filter_input(INPUT_POST, 'nonce', FILTER_SANITIZE_STRING);
             if ($nonce !== FALSE) {
-                $toRet = $this->chatReportHandler->getContextAroundNonce($nonce, 50);
+                $toRet = $this->chatReportHandler->getContextAroundNonce($nonce, 100);
             }
             return $response->withJson(["success" => $nonce !== FALSE, "data" => $toRet]);
         } else {

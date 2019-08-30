@@ -79,9 +79,10 @@ class ChatReportHandler {
         $amount = intval($amount);
         $toReturn = [];
 
-        $contextQuery = $this->db->prepare("(SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.sent > (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY sent ASC LIMIT $amount) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.nonce = :nonce) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m INNER JOIN users u ON u.id=m.author WHERE m.sent < (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY m.sent DESC LIMIT $amount) ORDER BY sent ASC;");
+        $contextQuery = $this->db->prepare("(SELECT m.*,u.username AS 'author_name' FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent > (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY sent ASC LIMIT $amount) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.nonce = :nonce) UNION ALL (SELECT m.*,u.username AS 'author_name' FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent < (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY m.sent DESC LIMIT $amount) ORDER BY sent ASC;");
         $contextQuery->bindParam(":nonce", $nonce, \PDO::PARAM_STR);
         if ($contextQuery->execute()) {
+
             $toReturn = $contextQuery->fetchAll(\PDO::FETCH_ASSOC);
         }
 

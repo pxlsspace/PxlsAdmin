@@ -13,6 +13,8 @@
                     <label>Nonce: <input type="text" id="nonce"></label>
                     <button id="btnSubmit">Submit</button>
                     <ul id="chat-context"></ul>
+                    <button id="btnBack" data-nonce="0">Back</button>
+                    <button id="btnForward" data-nonce="0">Forward</button>
                 </div>
             </div>
         </div>
@@ -27,7 +29,17 @@
     <script type="text/javascript">
         (function() {
             document.getElementById('btnSubmit').onclick = function() {
-                let nonce = document.getElementById('nonce').value;
+                doPost(document.getElementById('nonce').value);
+            };
+            document.getElementById('btnBack').onclick = function() {
+                doPost(this.dataset.nonce);
+            };
+            document.getElementById('btnForward').onclick = function() {
+                doPost(this.dataset.nonce);
+            };
+
+            function doPost(nonce) {
+                console.log('posting with %o', {nonce});
                 $.post('/chatContext', {nonce}, function(data) {
                     if (!data || !data.success) {
                         alert('failed to post');
@@ -52,6 +64,8 @@
                                         .css(x.nonce === nonce ? {'backgroundColor': 'rgba(255,245,9,0.3)'} : {})
                                 )
                             }
+                            document.getElementById('btnBack').dataset.nonce = data.data[0].nonce;
+                            document.getElementById('btnForward').dataset.nonce = data.data[data.data.length-1].nonce;
                         }
                     }
                 }).fail(console.error);
