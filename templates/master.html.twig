@@ -117,10 +117,10 @@
                 <li class="header">MAIN NAVIGATION</li>
                 <li><a href="{{ path_for('home') }}"><i class="fa fa-dashboard text-aqua"></i> <span>Dashboard</span></a></li>
                 <li><a href="{{ path_for('reportList') }}"><i class="fa fa-clipboard text-aqua"></i> <span>Reports</span></a></li>
+                <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-list text-aqua"></i> <span>Chat Context (dev tool)</span></a></li>
 
                 {% if (userdata.role == 'ADMIN' or userdata.role == 'DEVELOPER') %}
                     <li><a href="{{ path_for('logs') }}"><i class="fa fa-list text-aqua"></i> <span>Logs</span></a></li>
-                    <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-list text-aqua"></i> <span>Chat Context</span></a></li>
                 {% endif %}
             </ul>
         </section>
