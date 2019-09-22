@@ -80,6 +80,7 @@ final class Profile
                 "current" => $_current,
                 "count" => $sizes['legacy'] == $sizes['current'] ? $sizes['legacy'] : $sizes['legacy'] - $sizes['current']
             ];
+            $userinfo["ip_log"] = $user->getIPLogForUser($userinfo['id']);
             $this->addToTimeline(strtotime($userinfo['signup_time']), "signup", "", 0);
             return $userinfo;
         }
