@@ -66,3 +66,93 @@ $("a.shadowban").click(function(e) {
 $("a.unban").click(function(e) {
     unbanUser($(this), "{{ webroots.game }}/admin/unban");
 });
+
+function tempbanPreflight() {
+    let toRet = {banLength: false, removalAmount: false, banReason: false};
+
+    let banLength = prompt('Ban length (in hours):');
+    if (isNaN(banLength)) {
+        alert('Ban length is required. Tempban aborted.');
+        return toRet;
+    }
+
+    let removalAmount = prompt('Pixel reversal (in hours):');
+    if (isNaN(removalAmount)) {
+        alert('Pixel reversal is required. Tempban aborted.');
+        return toRet;
+    }
+
+    let banReason = prompt('Ban reason:');
+    if (!banReason) {
+        alert('Ban reason is required. Tempban aborted.');
+        return toRet;
+    }
+
+    toRet.banLength = banLength;
+    toRet.removalAmount = removalAmount;
+    toRet.banReason = banReason;
+
+    return toRet;
+}
+
+
+
+{#$(".temporary-ban").click(function(e) {#}
+{#    // $.ajaxSetup({#}
+{#    //     crossDomain: true,#}
+{#    //     xhrFields: {#}
+{#    //         withCredentials: true#}
+{#    //     }#}
+{#    // });#}
+
+{#    // let preflight = tempbanPreflight();#}
+
+{#    handleSearchAction("tempban", this.dataset.username, this);#}
+
+{#    // $.post("{{ webroots.game }}/admin/ban", {#}
+{#    //     username: this.dataset.username,#}
+{#    //     reason: preflight.banReason,#}
+{#    //     rollback_time: parseFloat(preflight.removalAmount) * 3600,#}
+{#    //     time: parseFloat(preflight.banLength) * 3600#}
+{#    // }, function() {#}
+{#    //     alert('User tempbanned');#}
+{#    // }).fail(function() {#}
+{#    //     alert('Failed to tempban, if the problem persists contact a dev.');#}
+{#    // });#}
+{#});#}
+
+function handleSearchAction(action, who, elem) {
+    switch(action) {
+        case 'permaban':
+            banUser($(elem), "{{ webroots.game }}/admin/permaban", "Reason:", "permaban");
+            break;
+        case 'shadowban':
+            banUser($(elem), "{{ webroots.game }}/admin/shadowban", "Reason:", "shadowban");
+            break;
+        case 'unban':
+            unbanUser($(elem), "{{ webroots.game }}/admin/unban");
+            break;
+        case 'tempban': {
+            $.ajaxSetup({
+                crossDomain: true,
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+
+            let preflight = tempbanPreflight();
+
+            $.post("{{ webroots.game }}/admin/ban", {
+                username: who,
+                reason: preflight.banReason,
+                rollback_time: parseFloat(preflight.removalAmount) * 3600,
+                time: parseFloat(preflight.banLength) * 3600
+            }, function() {
+                alert('User tempbanned');
+            }).fail(function() {
+                alert('Failed to tempban, if the problem persists contact a dev.');
+            });
+            break;
+        }
+    }
+}

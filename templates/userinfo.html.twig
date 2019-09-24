@@ -41,6 +41,7 @@
                                 <li><a data-username="{{ userinfo.username }}" class="force-rename" href="#">Set Username</a></li>
                             {% endif %}
                             <li><a data-username="{{ userinfo.username }}" class="request-rename" href="#">Request Rename</a></li>
+                            <li><a data-username="{{ userinfo.username }}" class="temporary-ban" href="#">Temporary ban</a></li>
                             {% if (userinfo.banned == "1") %}
                                 <li class="divider"></li>
                                 <li><a data-username="{{ userinfo.username }}" class="unban" href="#">Unban</a></li>
@@ -438,18 +439,20 @@
 
         $(".force-rename").click(function(e) {
             const newName = prompt('New name:');
-            $.ajaxSetup({
-                crossDomain: true,
-                xhrFields: {
-                    withCredentials: true
-                }
-            });
-            $.post("{{ webroots.game }}/admin/forceNameChange", {user: this.dataset.username, newName}, function() {
-                alert('Success');
-                document.location.href = `{{ webroots.panel }}/userinfo/${newName}`;
-            }).fail(function() {
-                alert('An error occurred');
-            });
+            if (newName) {
+                $.ajaxSetup({
+                    crossDomain: true,
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                });
+                $.post("{{ webroots.game }}/admin/forceNameChange", {user: this.dataset.username, newName}, function() {
+                    alert('Success');
+                    document.location.href = `{{ webroots.panel }}/userinfo/${newName}`;
+                }).fail(function() {
+                    alert('An error occurred');
+                });
+            }
         });
 
         $(".request-rename").click(function(e) {
@@ -464,6 +467,10 @@
             }).fail(function() {
                 alert('An error occurred');
             });
+        });
+
+        $(".temporary-ban").click(function(e) {
+            handleSearchAction("tempban", this.dataset.username, this);
         });
         {% include "home/reports.js.twig" %}
     </script>
