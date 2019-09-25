@@ -45,6 +45,11 @@ return [
         'webroots' => [
             'panel' => 'https://admin.pxls.space', //The admin panel's root
             'game' => 'https://pxls.space' //The game's root (where the canvas resides)
+        ],
+
+        //Roles are used for pings in webhooks
+        'roles' => [
+            'moderator' => ''
         ]
     ],
 ];

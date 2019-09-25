@@ -29,9 +29,9 @@ class ReportHandler {
                 ' pwease >.< <'.$this->settings['webroots']['panel'].'/>'
             ];
             $panicParts = [
-                '┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿ wake up, there',
+                '┻━┻彡 ヽ(ಠДಠ)ノ彡┻━┻﻿ wake up'.(strlen($this->settings['roles']['moderator']) > 0 ? " <@&".$this->settings['roles']['moderator'].">" : '').', there',
                 ' '.($reportCount == 0 ? '' : ($reportCount == 1 ? 'is ' : 'are ').$reportCount.' canvas report'.($reportCount == 1 ? '' : 's')),
-                ''.($openChatReports == 0 ? ' ' : ($reportCount == 0 ? ($openChatReports == 1 ? 'is ' : 'are ') : ' and ').$openChatReports.' chat reports '),
+                ''.($openChatReports == 0 ? ' ' : ($reportCount == 0 ? ($openChatReports == 1 ? 'is ' : 'are ') : ' and ').$openChatReports.' chat report'.($openChatReports == 1 ? '' : 's').' '),
                 'to handle. <'.$this->settings['webroots']['panel'].'/>'
             ];
 
