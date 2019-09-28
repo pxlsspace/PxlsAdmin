@@ -33,7 +33,7 @@ final class Search
         if(empty($request->getParam('q'))) {
             return $response->withStatus(302)->withHeader('Location','/');
         }
-        $data['result'] = $this->doSearch($request->getParam('q'));
+        $data['result'] = $this->doSearch(trim($request->getParam('q')), $request->getParam('type', 'user'));
         $this->view->render($response, 'search.html.twig', $data);
         return $response;
     }
@@ -54,34 +54,71 @@ final class Search
         }
     }
 
-    protected function doSearch($needle) {
-        $this->searchByUser($needle.'%');
+    protected function doSearch($needle, $type) {
+        switch($type) {
+            case 'user':
+                $this->searchByUser($needle.'%');
+                break;
+            case 'ip':
+                $this->searchByIP($needle);
+                break;
+            case 'login':
+                $this->searchByLogin($needle);
+                break;
+        }
         return $this->result;
     }
 
     protected function searchByUser($needle) {
-        $search = $this->database->prepare("SELECT ".$this->qs." FROM users WHERE username LIKE :search LIMIT 30");
-        $needle = str_replace("_","\_",$needle);
-        $search->bindParam(":search", $needle, \PDO::PARAM_STR);
-        $search->execute();
-        if($search->rowCount() > 0) {
-            while($row = $search->fetch(\PDO::FETCH_ASSOC)) {
-		$this->addResult($row, "username");
-    		$this->searchForIp($row['signup_ip'], "signup_ip");
-                $this->searchForIp($row['last_ip'], "last_ip");
-            }
+        $rows = $this->_performSearch(sprintf("SELECT %s FROM users WHERE username LIKE :search LIMIT 30", $this->qs), [
+            ":search" => [str_replace('_', '\_', $needle), \PDO::PARAM_STR]
+        ]);
+
+        //Search for accounts with same IPs
+        foreach($rows as $row) {
+            $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip = INET6_ATON(:ip)", $this->qs), [
+                ':ip' => [$row['last_ip'], \PDO::PARAM_STR]
+            ], 'same last_ip');
+            $this->_performSearch(sprintf("SELECT %s FROM users WHERE signup_ip = INET6_ATON(:ip)", $this->qs), [
+                ':ip' => [$row['signup_ip'], \PDO::PARAM_STR]
+            ], 'same signup_ip');
         }
     }
 
-    protected function searchForIp($needle,$why) {
-        $search = $this->database->prepare("SELECT ".$this->qs." FROM users WHERE $why = INET6_ATON(:search)");
-        $search->bindParam(":search", $needle, \PDO::PARAM_STR);
-        $search->execute();
-        if($search->rowCount() > 0) {
-            while($row = $search->fetch(\PDO::FETCH_ASSOC)) {
-                $this->addResult($row, $why);
+    protected function searchByIP($needle) {
+        $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip=INET6_ATON(:ip) OR signup_ip=INET6_ATON(:ip) LIMIT 30", $this->qs), [
+            ":ip" => [$needle, \PDO::PARAM_STR]
+        ]);
+        $this->_performSearch("SELECT u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.role, u.ban_expiry, u.ban_reason, INET6_NTOA(u.signup_ip) as signup_ip, INET6_NTOA(u.last_ip) as last_ip, u.pixel_count, INET6_NTOA(l.ip) AS log_ip FROM ip_log l LEFT OUTER JOIN users u ON u.id = l.user WHERE INET6_ATON(:ip) = l.ip", [
+            ':ip' => [$needle, \PDO::PARAM_STR]
+        ], 'ip_log match');
+    }
+
+    protected function searchByLogin($needle) {
+        $this->_performSearch(sprintf("SELECT %s FROM users WHERE login LIKE :login LIMIT 30", $this->qs), [
+            ':login' => [sprintf("%%%s%%", str_replace('_', '\_', $needle)), \PDO::PARAM_STR]
+        ]);
+    }
+
+    /**
+     * @param $queryString "select * from table where param=:param"
+     * @param $toBind [":param" => ["param_value", \PDO::PARAM_TYPE]]
+     * @param $reason "associated last_ip" (this is for UX only, shows in the 'reason' column on the front-end to explain why this row exists, e.g. 'last_ip' signals that this row was matched because the user shares the same last_ip)
+     * @return mixed Returns a copy of the rows that have been added to the local results
+     */
+    private function _performSearch($queryString, $toBind, $reason = "original query") {
+        $toRet = [];
+        $query = $this->database->prepare($queryString);
+        foreach($toBind as $key=>$value) {
+            $query->bindParam($key, $value[0], $value[1]);
+        }
+        if ($query->execute()) {
+            while ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
+                $this->addResult($row, $reason);
+                $toRet[] = $row;
             }
         }
+        return $toRet;
     }
 
 }

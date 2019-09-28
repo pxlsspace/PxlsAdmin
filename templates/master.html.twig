@@ -102,14 +102,20 @@
                 </div>
             </div>
             <!-- search form -->
-            <form action="{{ path_for('search') }}" method="get" class="sidebar-form">
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="Search...">
-                    <span class="input-group-btn">
-                <button type="submit" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-                </button>
-              </span>
-                </div>
+            <form action="{{ path_for('search') }}" method="get" class="sidebar-form -search-form">
+                <label class="text-muted">
+                    Search Term:
+                    <input type="text" name="q" class="form-control">
+                </label>
+                <label class="text-muted">
+                    Search Type:
+                    <select name="type" class="form-control dark">
+                        <option value="user">Username</option>
+                        <option value="ip">IP</option>
+                        <option value="login">Login</option>
+                    </select>
+                </label>
+                <button class="btn btn-block mtop2" type="submit">Search</button>
             </form>
             <!-- /.search form -->
             <!-- sidebar menu: : style can be found in sidebar.less -->
