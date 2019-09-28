@@ -33,7 +33,7 @@ $app->add(new TokenAuthentication([
     'path' => '/',
     'authenticator' => $authenticator,
     'cookie' => 'pxls-token',
-    'secure' => true,
+    'secure' =>  $app->getContainer()->get("settings")["authentication"]["secure"] === true,
     'passthrough' => ['/api/public','/api/report/announce'],
     'error' => $error,
 ]));

@@ -50,6 +50,11 @@ return [
         //Roles are used for pings in webhooks
         'roles' => [
             'moderator' => ''
-        ]
+        ],
+
+        'authentication' => [
+            //this designates the TokenAuth's `secure` setting. Should be `true` on production
+            'secure' => true
+        ],
     ],
 ];
