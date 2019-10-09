@@ -26,6 +26,8 @@ $('#report_info').on('show.bs.modal', function (event) {
         } else {
             modal.find('#rmd-a-username').closest('.col-md-4').show();
             modal.find('#rmd-a-username').html('<a href="/userinfo/' + data.reporter.username + '" target="_blank">' + data.reporter.username + '</a>');
+            modal.find('#rmd-a-last-ip').text(data.reporter.ip.last);
+            modal.find('#rmd-a-login-ip').text(data.reporter.ip.signup);
             modal.find('#rmd-a-login').text(data.reporter.login);
             modal.find('#rmd-a-signup').text(data.reporter.signup);
             modal.find('#rmd-a-role').text(data.reporter.role);
@@ -36,6 +38,8 @@ $('#report_info').on('show.bs.modal', function (event) {
         //reported
         modal.find('#rmd-b-username').html('<a href="/userinfo/' + data.reported.username + '" target="_blank">' + data.reported.username + '</a>');
         modal.find('#rmd-b-login').text(data.reported.login);
+        modal.find('#rmd-b-last-ip').text(data.reported.ip.last);
+        modal.find('#rmd-b-login-ip').text(data.reported.ip.signup);
         modal.find('#rmd-b-signup').text(data.reported.signup);
         modal.find('#rmd-b-role').text(data.reported.role);
         modal.find('#rmd-b-pixel').text(data.reported.pixelcount);
