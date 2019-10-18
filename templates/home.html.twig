@@ -321,9 +321,11 @@
             function _reloadCanvasReports(data) {
                 if ($.fn.DataTable.isDataTable('#chatReports')) {
                     let dt = $('#reports').DataTable();
+                    const curPage = dt.page();
                     dt.clear();
                     dt.rows.add(data);
                     dt.draw();
+                    dt.page(curPage).draw(false);
                 } else {
                     $("#reports").DataTable({
                         data: data,
@@ -353,9 +355,11 @@
             function _reloadChatReports(data) {
                 if ($.fn.DataTable.isDataTable('#chatReports')) {
                     let dt = $('#chatReports').DataTable();
+                    const curPage = dt.page();
                     dt.clear();
                     dt.rows.add(data);
                     dt.draw();
+                    dt.page(curPage).draw(false);
                 } else {
                     $("#chatReports").DataTable({
                         data: data,
@@ -405,7 +409,7 @@
 
             $('#autoreload').change(function(){
                 if($('#autoreload').prop('checked')) {
-                    intervalListener = self.setInterval(function () {reloadReports(); lastSignups.ajax.reload()}, 5e3);
+                    intervalListener = self.setInterval(function () {reloadReports(); lastSignups.ajax.reload(null, false)}, 5e3);
                     $("#autoreload_label").html("Okay! Now reloading the tables every 5 seconds! Uncheck to stop!");
                 } else {
                     window.clearInterval(intervalListener);

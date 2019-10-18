@@ -54,8 +54,10 @@ $('#report_info').on('show.bs.modal', function (event) {
             $.ajax({
                 url: "{{ webroots.panel }}/api/report/claim/" + $(this).data('reportid')
             }).done(function() {
-                alert("Report claimed!");
-                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
+                modal.find('#rmd-claim').hide();
+                modal.find('#rmd-unclaim').show();
+                modal.find('#rmd-resolve').show();
+                setTimeout(function(){reloadReports();}, 500);
             });
         });
         modal.find('#rmd-unclaim').click(function(){
@@ -63,8 +65,10 @@ $('#report_info').on('show.bs.modal', function (event) {
             $.ajax({
                 url: "{{ webroots.panel }}/api/report/unclaim/" + $(this).data('reportid')
             }).done(function() {
-                alert("Report unclaimed!");
-                setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
+                modal.find('#rmd-claim').show();
+                modal.find('#rmd-unclaim').hide();
+                modal.find('#rmd-resolve').hide();
+                setTimeout(function(){reloadReports();}, 500);
             });
         });
         modal.find('#rmd-resolve').click(function(){
