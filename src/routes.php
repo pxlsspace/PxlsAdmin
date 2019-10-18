@@ -1,6 +1,8 @@
 <?php
 // Routes
 
+use pxls\Action\NotifyController;
+
 $app->get('/', \pxls\Action\Home::class)->setName('home');
 $app->get('/logs', \pxls\Action\LogPage::class)->setName('logs');
 $app->get('/reports', \pxls\Action\ReportList::class)->setName('reportList');
@@ -15,3 +17,5 @@ $app->get('/api/public[/{params:.*}]', \pxls\Action\PublicAPI::class)->setName('
 
 $app->post('/api/log', \pxls\Action\Logger::class)->setName('logger');
 $app->get('/api/report[/{params:.*}]', \pxls\Action\Report::class)->setName('report');
+
+$app->map(['GET', 'POST'], '/notifications', NotifyController::class)->setName('notifications');

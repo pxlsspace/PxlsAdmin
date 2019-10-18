@@ -127,6 +127,7 @@
 
                 {% if (userdata.role == 'ADMIN' or userdata.role == 'DEVELOPER') %}
                     <li><a href="{{ path_for('logs') }}"><i class="fa fa-list text-aqua"></i> <span>Logs</span></a></li>
+                    <li><a href="{{ path_for('notifications') }}"><i class="fa fa-exclamation-circle text-aqua"></i> <span>Notifications</span></a></li>
                 {% endif %}
             </ul>
         </section>
