@@ -49,8 +49,8 @@
                                     <td>{{ user.role }}</td>
                                     <td>{{ user.ban_expiry }}</td>
                                     <td>{{ user.ban_reason }}</td>
-                                    <td>{{ user.signup_ip }}</td>
-                                    <td>{{ user.last_ip }}</td>
+                                    <td><a href="{{ base_url() }}{{ path_for('search') }}?q={{ user.signup_ip }}&type=ip">{{ user.signup_ip }}</a></td>
+                                    <td><a href="{{ base_url() }}{{ path_for('search') }}?q={{ user.last_ip }}&type=ip">{{ user.last_ip }}</a></td>
                                     <td>{{ user.pixel_count }}</td>
                                     <td>
                                         {% for reason in user.reason %}

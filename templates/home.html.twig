@@ -288,8 +288,14 @@
                     { "data": "username" },
                     { "data": "signup_time" },
                     { "data": "login" },
-                    { "data": "signup_ip" },
-                    { "data": "last_ip" },
+                    {
+                        "data": "signup_ip",
+                        render: data => `<a href="{{ path_for('search') }}?q=${data}&type=ip">${data}</a>`
+                    },
+                    {
+                        "data": "last_ip",
+                        render: data => `<a href="{{ path_for('search') }}?q=${data}&type=ip">${data}</a>`
+                    },
                     { "data" : "pixel_count" },
                     {
                         "data": "banned",

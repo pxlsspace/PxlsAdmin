@@ -66,11 +66,11 @@
                     <strong><i class="fa fa-sign-in margin-r-5"></i> Login Type: <a href="{{ userinfo.login_url|raw }}">{{ userinfo.login }}</a></strong>
 
                     <hr />
-                    <strong><i class="fa fa-globe margin-r-5"></i> Signup IP: {{ userinfo.signup_ip }}</strong>
+                    <strong><i class="fa fa-globe margin-r-5"></i> Signup IP: <a href="{{ path_for('search') }}?q={{ userinfo.signup_ip }}&type=ip">{{ userinfo.signup_ip }}</a></strong>
 
                     <hr />
 
-                    <strong><i class="fa fa-globe margin-r-5"></i> Last IP: {{ userinfo.last_ip }}</strong>
+                    <strong><i class="fa fa-globe margin-r-5"></i> Last IP: <a href="{{ path_for('search') }}?q={{ userinfo.last_ip }}&type=ip">{{ userinfo.last_ip }}</a></strong>
 
                     <hr>
 
@@ -346,7 +346,7 @@
                                     {% for key,item in userinfo.ip_log %}
                                         <tr>
                                             <td>{{ item.id }}</td>
-                                            <td>{{ item.ip }}</td>
+                                            <td><a href="{{ path_for('search') }}?q={{ item.ip }}&type=ip">{{ item.ip }}</a></td>
                                             <td>{{ item.last_used }}</td>
                                         </tr>
                                     {% endfor %}
