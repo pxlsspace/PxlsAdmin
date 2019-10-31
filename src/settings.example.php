@@ -1,13 +1,13 @@
 <?php
 return [
     'settings' => [
-        'displayErrorDetails' => true, // set to false in production
+        'displayErrorDetails'    => true, // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
 
         // Renderer settings
         'renderer' => [
             'template_path' => __DIR__ . '/../templates/',
-            'cache_path' => __DIR__ . '/../cache/'
+            'cache_path'    => __DIR__ . '/../cache/'
         ],
 
         // Monolog settings
@@ -20,18 +20,18 @@ return [
         'discord' => [
             'general' => [ //general webhook
                 'name'   => "discord webhook name",
-                'url'   => "discord webhook URL"
+                'url'    => "discord webhook URL"
             ],
             'whois' => [ //!whois webhook
                 'name'   => "discord webhook name",
-                'url'   => "discord webhook URL"
+                'url'    => "discord webhook URL"
             ]
         ],
 
         'db' => [
-            'host' => 'localhost',
-            'user' => 'pxls',
-            'pass' => 'password',
+            'host'   => 'localhost',
+            'user'   => 'pxls',
+            'pass'   => 'password',
             'dbname' => 'pxls'
         ],
 
@@ -44,7 +44,7 @@ return [
         //Root URLs for various XHR requests and links. No trailing slash
         'webroots' => [
             'panel' => 'https://admin.pxls.space', //The admin panel's root
-            'game' => 'https://pxls.space' //The game's root (where the canvas resides)
+            'game'  => 'https://pxls.space' //The game's root (where the canvas resides)
         ],
 
         //Roles are used for pings in webhooks
