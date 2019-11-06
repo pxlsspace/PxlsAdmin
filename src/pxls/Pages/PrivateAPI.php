@@ -113,23 +113,23 @@ final class PrivateAPI
         return $toRet;
     }
 
-    protected function lastActionLog($scope=null) {
+    protected function lastActionLog($scope=null,$max=5000) {
         $logs = [];
         switch($scope) {
             case 'adminlog':
-                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE channel = 'pxlsAdmin' AND message NOT LIKE '%api%' ORDER BY id DESC LIMIT 1000;");
+                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE channel = 'pxlsAdmin' AND message NOT LIKE '%api%' ORDER BY id DESC LIMIT ".intval($max).";");
                 break;
             case 'canvaslog':
-                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE channel = 'pxlsCanvas' ORDER BY id DESC LIMIT 1000;");
+                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE channel = 'pxlsCanvas' ORDER BY id DESC LIMIT ".intval($max).";");
                 break;
             case 'consolelog':
-                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE channel = 'pxlsConsole' ORDER BY id DESC LIMIT 1000;");
+                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE channel = 'pxlsConsole' ORDER BY id DESC LIMIT ".intval($max).";");
                 break;
             case 'apilog':
-                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE message LIKE '%public api%' ORDER BY id DESC LIMIT 1000;");
+                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE message LIKE '%public api%' ORDER BY id DESC LIMIT ".intval($max).";");
                 break;
             default:
-                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE message NOT LIKE '%public api%' ORDER BY id DESC LIMIT 1000;");
+                $qLogs = $this->database->query("SELECT * FROM admin_log WHERE message NOT LIKE '%public api%' ORDER BY id DESC LIMIT ".intval($max).";");
                 break;
         }
         $logParser = new \pxls\LogParser();
