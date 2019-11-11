@@ -238,7 +238,7 @@
     </div>
 {% endif %}
 
-    {% include "home/activity.html.twig" %}
+{#    {% include "home/activity.html.twig" %}#}
 
     {% include "home/reportmodal.html.twig" %}
 {% endblock content %}
@@ -425,7 +425,7 @@
 
             {% include "home/reports.js.twig" %}
 
-            {% include "home/activity.js.twig" %}
+{#            {% include "home/activity.js.twig" %}#}
         });
         //placed outside of onload so that we're scoped correctly for onclick handlers
         function discordLookup(id) {
