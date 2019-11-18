@@ -57,7 +57,7 @@ class ReportHandler {
         global $app;
         $reports = [];
         if($onlyOpen==1) {
-            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE closed = 0 AND reported IS NOT NULL");
+            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE closed = false AND reported IS NOT NULL");
         } else {
             $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported,r.closed FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE reported IS NOT NULL");
         }
@@ -107,7 +107,7 @@ class ReportHandler {
     }
     private function _resolve($rId) {
         $rid = intval($rId);
-        $updateReport = $this->db->prepare("UPDATE reports SET closed = 1 WHERE id = :rid");
+        $updateReport = $this->db->prepare("UPDATE reports SET closed = true WHERE id = :rid");
         $updateReport->bindParam(":rid",$rid,\PDO::PARAM_INT);
         $updateReport->execute();
         return true;
@@ -155,7 +155,7 @@ class ReportHandler {
             $report['reporter']['signup']           = $reporterData->signup_time;
             $report['reporter']['role']             = $reporterData->role;
             $report['reporter']['pixelcount']       = $reporterData->pixel_count;
-            $report['reporter']['ip']               = ["last"=>inet_ntop($reporterData->last_ip),"signup"=>inet_ntop($reporterData->signup_ip)];
+            $report['reporter']['ip']               = ["last"=>$reporterData->last_ip,"signup"=>$reporterData->signup_ip];
             $report['reporter']['ban']              = ["expiry"=>$reporterData->ban_expiry,"reason"=>$reporterData->ban_reason];
 
             $reportedData = $this->getUserdataById($gData->reported);
@@ -164,7 +164,7 @@ class ReportHandler {
             $report['reported']['signup']           = $reportedData->signup_time;
             $report['reported']['role']             = $reportedData->role;
             $report['reported']['pixelcount']       = $reportedData->pixel_count;
-            $report['reported']['ip']               = ["last"=>inet_ntop($reportedData->last_ip),"signup"=>inet_ntop($reportedData->signup_ip)];
+            $report['reported']['ip']               = ["last"=>$reportedData->last_ip,"signup"=>$reportedData->signup_ip];
             $report['reported']['ban']              = ["expiry"=>$reportedData->ban_expiry,"reason"=>$reportedData->ban_reason];
         }
         return $report;

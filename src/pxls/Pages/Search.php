@@ -15,7 +15,7 @@ final class Search
     private $logger;
     private $database;
     protected $result = [];
-    private $qs = "id, username, login, signup_time, cooldown_expiry, role, ban_expiry, ban_reason, INET6_NTOA(signup_ip) as signup_ip, INET6_NTOA(last_ip) as last_ip, pixel_count";
+    private $qs = "id, username, login, signup_time, cooldown_expiry, role, ban_expiry, ban_reason, signup_ip as signup_ip, last_ip as last_ip, pixel_count";
 
     public function __construct(Twig $view, LoggerInterface $logger, \PDO $database)
     {
@@ -76,20 +76,20 @@ final class Search
 
         //Search for accounts with same IPs
         foreach($rows as $row) {
-            $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip = INET6_ATON(:ip)", $this->qs), [
+            $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip = :ip", $this->qs), [
                 ':ip' => [$row['last_ip'], \PDO::PARAM_STR]
             ], 'same last_ip');
-            $this->_performSearch(sprintf("SELECT %s FROM users WHERE signup_ip = INET6_ATON(:ip)", $this->qs), [
+            $this->_performSearch(sprintf("SELECT %s FROM users WHERE signup_ip = :ip", $this->qs), [
                 ':ip' => [$row['signup_ip'], \PDO::PARAM_STR]
             ], 'same signup_ip');
         }
     }
 
     protected function searchByIP($needle) {
-        $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip=INET6_ATON(:ip) OR signup_ip=INET6_ATON(:ip) LIMIT 30", $this->qs), [
+        $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip=:ip OR signup_ip=:ip LIMIT 30", $this->qs), [
             ":ip" => [$needle, \PDO::PARAM_STR]
         ]);
-        $this->_performSearch("SELECT u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.role, u.ban_expiry, u.ban_reason, INET6_NTOA(u.signup_ip) as signup_ip, INET6_NTOA(u.last_ip) as last_ip, u.pixel_count, INET6_NTOA(l.ip) AS log_ip FROM ip_log l LEFT OUTER JOIN users u ON u.id = l.user WHERE INET6_ATON(:ip) = l.ip", [
+        $this->_performSearch("SELECT u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.role, u.ban_expiry, u.ban_reason, u.signup_ip as signup_ip, u.last_ip as last_ip, u.pixel_count, l.ip AS log_ip FROM ip_log l LEFT OUTER JOIN users u ON u.id = l.user WHERE :ip = l.ip", [
             ':ip' => [$needle, \PDO::PARAM_STR]
         ], 'ip_log match');
     }

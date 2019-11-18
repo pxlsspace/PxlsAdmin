@@ -52,7 +52,7 @@ final class Profile
     }
 
     protected function findUserPixels($needle) {
-        $pixels = $this->db->prepare("SELECT * FROM pixels WHERE who = :userid ORDER BY `time` DESC LIMIT 50");
+        $pixels = $this->db->prepare("SELECT * FROM pixels WHERE who = :userid ORDER BY \"time\" DESC LIMIT 50");
         $pixels->bindParam(":userid", $needle, \PDO::PARAM_INT);
         $pixels->execute();
         return $pixels->fetchAll(\PDO::FETCH_OBJ);
