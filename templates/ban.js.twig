@@ -50,7 +50,11 @@ function unbanUser(self, path) {
         }
     });
 
-    var data = { 'username': self.data("username") };
+    let reason = prompt('Unban Reason');
+    if (reason == null) return; //cancelled, don't bug with an alert
+    if (!reason.trim()) return alert('Unban reason is required'); //didn't cancel, input is blank/whitespace
+
+    var data = { 'username': self.data("username"), 'reason': reason };
     $.post(path, data, function() {
         $("#alertarea").append('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i>' + self.data("username") + ' has been unbanned. <a href="#" onclick="window.refresh()">Reload Page</a></h4></div>');
     }).fail(function() {
