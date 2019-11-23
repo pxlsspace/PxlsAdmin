@@ -32,18 +32,31 @@ $('#report_info').on('show.bs.modal', function (event) {
             modal.find('#rmd-a-signup').text(data.reporter.signup);
             modal.find('#rmd-a-role').text(data.reporter.role);
             modal.find('#rmd-a-pixel').text(data.reporter.pixelcount);
-            modal.find('#rmd-a-ban').html(data.reporter.ban.expiry + " (" + data.reporter.ban.reason + ")");
+            if (data.reporter.ban.expiry == null) {
+                modal.find('#rmd-a-ban').html('None')
+            } else {
+                modal.find('#rmd-a-ban').html(data.reporter.ban.expiry + " (" + data.reporter.ban.reason + ")");
+            }
         }
 
         //reported
-        modal.find('#rmd-b-username').html('<a href="/userinfo/' + data.reported.username + '" target="_blank">' + data.reported.username + '</a>');
-        modal.find('#rmd-b-login').text(data.reported.login);
-        modal.find('#rmd-b-last-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.last}&type=ip">${data.reported.ip.last}</a>`);
-        modal.find('#rmd-b-login-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.signup}&type=ip">${data.reported.ip.signup}</a>`);
-        modal.find('#rmd-b-signup').text(data.reported.signup);
-        modal.find('#rmd-b-role').text(data.reported.role);
-        modal.find('#rmd-b-pixel').text(data.reported.pixelcount);
-        modal.find('#rmd-b-ban').html(data.reported.ban.expiry + " (" + data.reported.ban.reason + ")");
+        if (data.reported.username == null) {
+            // This relies on the username existing
+            modal.find('#rmd-b-username').closest('.col-md-4').html('<b>Reported data unavailable</b>');
+        } else {
+            modal.find('#rmd-b-username').html('<a href="/userinfo/' + data.reported.username + '" target="_blank">' + data.reported.username + '</a>');
+            modal.find('#rmd-b-login').text(data.reported.login);
+            modal.find('#rmd-b-last-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.last}&type=ip">${data.reported.ip.last}</a>`);
+            modal.find('#rmd-b-login-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.signup}&type=ip">${data.reported.ip.signup}</a>`);
+            modal.find('#rmd-b-signup').text(data.reported.signup);
+            modal.find('#rmd-b-role').text(data.reported.role);
+            modal.find('#rmd-b-pixel').text(data.reported.pixelcount);
+            if (data.reported.ban.expiry == null) {
+                modal.find('#rmd-b-ban').html('None')
+            } else {
+                modal.find('#rmd-b-ban').html(data.reported.ban.expiry + " (" + data.reported.ban.reason + ")");
+            }
+        }
 
         let cannotOverwrite = (data.self.role != "ADMIN" && data.self.role != "DEVELOPER") && !data.general.claimed_by_you;
         modal.find('#rmd-claim').data('reportid',data.general.id);
