@@ -33,9 +33,9 @@ class PgSQLHandler extends AbstractProcessingHandler
 
     private function initialize() {
         $this->pdo->exec('CREATE TABLE IF NOT EXISTS "'.$this->table.'" (id BIGSERIAL PRIMARY KEY, channel VARCHAR(255), level INTEGER, message TEXT, time BIGINT)');
-        $this->pdo->exec('CREATE INDEX ON "'.$this->table.'" USING HASH (channel)');
-        $this->pdo->exec('CREATE INDEX ON "'.$this->table.'" USING HASH (level)');
-        $this->pdo->exec('CREATE INDEX ON "'.$this->table.'" USING BTREE (time)');
+        $this->pdo->exec('CREATE INDEX IF NOT EXISTS "'.$this->table.'_channel_idx" ON "'.$this->table.'" USING HASH (channel)');
+        $this->pdo->exec('CREATE INDEX IF NOT EXISTS "'.$this->table.'_level_idx" ON "'.$this->table.'" USING HASH (level)');
+        $this->pdo->exec('CREATE INDEX IF NOT EXISTS "'.$this->table.'_time_idx" ON "'.$this->table.'" USING BTREE (time)');
         $actualFields = array();
         $rs = $this->pdo->query('SELECT * FROM"'.$this->table.'" LIMIT 0');
         for ($i = 0; $i < $rs->columnCount(); $i++) {
