@@ -49,7 +49,7 @@ final class NotifyController
     private function getNotifications() {
         $toReturn = [];
 
-        $query = $this->database->query("SELECT n.id,FROM_UNIXTIME(n.time) AS 'time',FROM_UNIXTIME(n.expiry) AS 'expiry',n.title,n.content,u.username as 'who_name',n.who as 'who_id',UNIX_TIMESTAMP()>n.expiry AND n.expiry<>0 AS '_expired',n.expiry<>0 AS '_expires' FROM notifications n LEFT OUTER JOIN users u ON u.id = n.who WHERE 1 ORDER BY time DESC");
+        $query = $this->database->query("SELECT n.id,to_timestamp(n.time) AS \"time\",to_timestamp(n.expiry) AS \"expiry\",n.title,n.content,u.username as \"who_name\",n.who as \"who_id\",CAST(EXTRACT(epoch FROM NOW()) AS INTEGER)>n.expiry AND n.expiry<>0 AS \"_expired\",n.expiry<>0 AS \"_expires\" FROM notifications n LEFT OUTER JOIN users u ON u.id = n.who ORDER BY time DESC");
         if ($query->execute()) {
             $toReturn = $query->fetchAll(\PDO::FETCH_ASSOC);
         }

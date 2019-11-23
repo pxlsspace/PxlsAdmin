@@ -19,7 +19,7 @@
                             <b>Signup Time</b> <a class="pull-right">{{ userinfo.signup_time|date() }}</a>
                         </li>
                         <li class="list-group-item">
-                            <b>Cooldown Expiry</b> <a class="pull-right">{{ userinfo.cooldown_expiry|date() }}</a>
+                            <b>Cooldown Expiry</b> <a class="pull-right">{{ userinfo.cooldown_expiry|date(0) }}</a>
                         </li>
                         <li class="list-group-item">
                             <b>Pixels placed</b> <a class="pull-right">{{ userinfo.pixel_count|number_format() }}</a>

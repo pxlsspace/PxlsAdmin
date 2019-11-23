@@ -50,13 +50,13 @@ class User {
         if (isset($userBufferId[$uid])) {
             return $userBufferId[$uid];
         }
-        $getUser = $this->db->prepare("SELECT *,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS 'banned' FROM users WHERE id = :uid LIMIT 1");
+        $getUser = $this->db->prepare("SELECT *,(SELECT role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE id = :uid LIMIT 1");
         $getUser->bindParam(":uid",$uid,\PDO::PARAM_INT);
         $getUser->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
-            $usr["signup_ip"] = inet_ntop($usr["signup_ip"]);
-            $usr["last_ip"] = inet_ntop($usr["last_ip"]);
+            $usr["signup_ip"] = $usr["signup_ip"];
+            $usr["last_ip"] = $usr["last_ip"];
             $userBufferId[$uid] = $usr;
             return $usr;
         } else {
@@ -70,13 +70,13 @@ class User {
         if (isset($userBufferName[$uname])) {
             return $userBufferName[$uname];
         }
-        $getUser = $this->db->prepare("SELECT *,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS 'banned' FROM users WHERE username = :uname");
+        $getUser = $this->db->prepare("SELECT *,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE username = :uname");
         $getUser->bindParam(":uname",$uname,\PDO::PARAM_STR);
         $getUser->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
-            $usr["signup_ip"] = inet_ntop($usr["signup_ip"]);
-            $usr["last_ip"] = inet_ntop($usr["last_ip"]);
+            $usr["signup_ip"] = $usr["signup_ip"];
+            $usr["last_ip"] = $usr["last_ip"];
             $userBufferName[$uname] = $usr;
             return $usr;
         } else {
@@ -107,7 +107,7 @@ class User {
         $toRet = [];
         $user = $this->getUserById($uid);
         if ($user) {
-            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as \'when_timestamp\', from_unixtime(b.when) as \'when\', b.banner as \'banner_id\', COALESCE(u.username, \'console\') as \'banner\', b.banned as \'banned_id\', u1.username as \'banned\', b.ban_expiry as \'ban_expiry_timestamp\', IF(b.ban_expiry, from_unixtime(b.ban_expiry), 0) as \'ban_expiry_date\', IF(b.ban_expiry-b.when > 0, b.ban_expiry-b.when, -1) as \'length\', b.action, b.ban_reason FROM banlogs b LEFT OUTER JOIN users u ON u.id = b.banner INNER JOIN users u1 ON u1.id = b.banned WHERE b.banned = :id');
+            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as "when_timestamp", to_timestamp(b.when) as "when", b.banner as "banner_id", COALESCE(u.username, \'console\') as "banner", b.banned as "banned_id", u1.username as "banned", b.ban_expiry as "ban_expiry_timestamp", (CASE WHEN b.ban_expiry != NULL THEN b.ban_expiry ELSE 0 END) as "ban_expiry_date", (CASE WHEN b.ban_expiry - b.when > 0 THEN b.ban_expiry - b.when ELSE -1 END) as "length", b.action, b.ban_reason FROM banlogs b LEFT OUTER JOIN users u ON u.id = b.banner INNER JOIN users u1 ON u1.id = b.banned WHERE b.banned = :id');
             $getBansQuery->bindParam(':id', $uid);
             $getBansQuery->execute();
             if ($getBansQuery->rowCount() > 0) {
@@ -126,7 +126,7 @@ class User {
             $uname = str_replace("_", "\\_", $uname);
             $uname = str_replace("%", "\\%", $uname);
 
-            $getBansQuery = $this->db->prepare('SELECT a.*,COALESCE(u.username, "console") AS \'who\',LEFT(message, 2) = \'un\' AS \'is_unban\' FROM admin_log a LEFT OUTER JOIN users u ON u.id = a.userid WHERE a.message LIKE "%ban '.$uname.'" OR a.message LIKE "%ban '.$uname.' %";');
+            $getBansQuery = $this->db->prepare('SELECT a.*,COALESCE(u.username, \'console\') AS "who",LEFT(message, 2) = \'un\' AS "is_unban" FROM admin_log a LEFT OUTER JOIN users u ON u.id = a.userid WHERE a.message LIKE \'%ban '.$uname.'\' OR a.message LIKE \'%ban '.$uname.' %\';');
             $getBansQuery->execute();
             if($getBansQuery->rowCount() > 0) {
                 $toRet = $getBansQuery->fetchAll(\PDO::FETCH_ASSOC);

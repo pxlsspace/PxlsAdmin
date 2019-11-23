@@ -104,18 +104,20 @@
                 };
                 if (toPost.expiry === "NaN") delete toPost.expiry;
 
-                $.post("{{ webroots.game }}/createNotification", toPost, function() {
-                    if (confirm("Notification created. Reload page?")) {
-                        document.location.href = document.location.href;
-                    }
-                    btnSubmit.disabled = false;
-                    btnSubmit.textContent = restoreText;
-                }).fail(function() {
-                    console.error(this);
-                    alert('Failed to send notification, if the problem persists contact a dev.');
-                    btnSubmit.disabled = false;
-                    btnSubmit.textContent = restoreText;
-                });
+                $.post("{{ webroots.game }}/createNotification")
+                    .done(function() {
+                        if (confirm("Notification created. Reload page?")) {
+                            document.location.href = document.location.href;
+                        }
+                        btnSubmit.disabled = false;
+                        btnSubmit.textContent = restoreText;
+                    }).fail(function(x, s, e) {
+                        console.error(this);
+                        console.log(x, s, e);
+                        alert('Failed to send notification, if the problem persists contact a dev.');
+                        btnSubmit.disabled = false;
+                        btnSubmit.textContent = restoreText;
+                    });
             })
         })();
         function handleNotificationAction(elem, arg) {
