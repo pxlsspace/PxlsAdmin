@@ -186,12 +186,11 @@ class User {
         $toRet = [];
 
         if ($_user) { // $usr["last_ip"] = inet_ntop($usr["last_ip"]);
-            $query = $this->db->prepare('SELECT * FROM ip_log WHERE user=:user ORDER BY last_used DESC;');
+            $query = $this->db->prepare('SELECT * FROM ip_log WHERE "user"=:user ORDER BY last_used DESC;');
             $query->bindParam(':user', $uid);
             $query->execute();
             if ($query->rowCount() > 0) {
                 while ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
-                    $row['ip'] = inet_ntop($row['ip']);
                     $toRet[] = $row;
                 }
             }
