@@ -17,7 +17,7 @@ class ChatReportHandler {
     }
 
     public function getOpenReportsCount() {
-        $qReports = $this->db->query("SELECT count(id) AS \"total\" FROM chat_reports WHERE NOT closed AND NOT claimed_by AND target IS NOT NULL");
+        $qReports = $this->db->query("SELECT count(id) AS \"total\" FROM chat_reports WHERE NOT closed AND claimed_by = 0 AND target IS NOT NULL");
 
         if ($qReports->execute()) {
             return intval($qReports->fetch()->total);
