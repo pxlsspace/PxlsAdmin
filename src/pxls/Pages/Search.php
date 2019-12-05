@@ -70,7 +70,7 @@ final class Search
     }
 
     protected function searchByUser($needle) {
-        $rows = $this->_performSearch(sprintf("SELECT %s FROM users WHERE username LIKE :search LIMIT 30", $this->qs), [
+        $rows = $this->_performSearch(sprintf("SELECT %s FROM users WHERE UPPER(username) LIKE UPPER(:search) LIMIT 30", $this->qs), [
             ":search" => [str_replace('_', '\_', $needle), \PDO::PARAM_STR]
         ]);
 
@@ -95,7 +95,7 @@ final class Search
     }
 
     protected function searchByLogin($needle) {
-        $this->_performSearch(sprintf("SELECT %s FROM users WHERE login LIKE :login LIMIT 30", $this->qs), [
+        $this->_performSearch(sprintf("SELECT %s FROM users WHERE UPPER(login) LIKE UPPER(:login) LIMIT 30", $this->qs), [
             ':login' => [sprintf("%%%s%%", str_replace('_', '\_', $needle)), \PDO::PARAM_STR]
         ]);
     }
