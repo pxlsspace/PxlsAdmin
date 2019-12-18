@@ -104,7 +104,7 @@
                 };
                 if (toPost.expiry === "NaN") delete toPost.expiry;
 
-                $.post("{{ webroots.game }}/createNotification")
+                $.post("{{ webroots.game }}/createNotification", toPost)
                     .done(function() {
                         if (confirm("Notification created. Reload page?")) {
                             document.location.href = document.location.href;
