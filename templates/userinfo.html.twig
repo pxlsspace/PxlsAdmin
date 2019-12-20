@@ -16,16 +16,16 @@
 
                     <ul class="list-group list-group-unbordered">
                         <li class="list-group-item">
-                            <b>Signup Time</b> <a class="pull-right">{{ userinfo.signup_time|date() }}</a>
+                            <b>Signup Time</b><br/><a>{{ userinfo.signup_time|date("M, d Y H:i:s") }}</a>
                         </li>
                         <li class="list-group-item">
-                            <b>Cooldown Expiry</b> <a class="pull-right">{{ userinfo.cooldown_expiry|date(0) }}</a>
+                            <b>Cooldown Expiry</b><br/><a>{{ userinfo.cooldown_expiry|date("M, d Y H:i:s") }}</a>
                         </li>
                         <li class="list-group-item">
-                            <b>Pixels placed</b> <a class="pull-right">{{ userinfo.pixel_count|number_format() }}</a>
+                            <b>Pixels placed</b><br/><a>{{ userinfo.pixel_count|number_format() }}</a>
                         </li>
                         <li class="list-group-item">
-                            <b>Pixels placed (all time)</b> <a class="pull-right">{{ userinfo.pixel_count_alltime|number_format() }}</a>
+                            <b>Pixels placed (all time)</b><br/><a>{{ userinfo.pixel_count_alltime|number_format() }}</a>
                         </li>
                     </ul>
 
@@ -56,45 +56,31 @@
             <!-- About Me Box -->
             <div class="box box-primary">
                 <div class="box-header with-border">
-                    <h3 class="box-title">About {{ userinfo.username }}</h3>
+                    <h3 class="box-title">About <span>{{ userinfo.username }}</span></h3>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                    <strong><i class="fa fa-user margin-r-5"></i> User ID: {{ userinfo.id }}</strong>
-
-                    <hr />
-                    <strong><i class="fa fa-sign-in margin-r-5"></i> Login Type: <a href="{{ userinfo.login_url|raw }}">{{ userinfo.login }}</a></strong>
-
-                    <hr />
-                    <strong><i class="fa fa-globe margin-r-5"></i> Signup IP: <a href="{{ path_for('search') }}?q={{ userinfo.signup_ip }}&type=ip">{{ userinfo.signup_ip }}</a></strong>
-
-                    <hr />
-
-                    <strong><i class="fa fa-globe margin-r-5"></i> Last IP: <a href="{{ path_for('search') }}?q={{ userinfo.last_ip }}&type=ip">{{ userinfo.last_ip }}</a></strong>
-
-                    <hr>
-
-                    <strong><i class="fa fa-globe margin-r-5"></i> IPs On Record: {{ userinfo.ip_log|length }} </strong>
-
-                    <hr>
-
-                    <strong><i class="fa fa-map-marker margin-r-5"></i> Location (based on last IP)</strong>
-
+                    <b><i class="fa fa-user margin-r-5"></i> User ID: <span>{{ userinfo.id }}</span></b>
+                    <br />
+                    <b><i class="fa fa-sign-in margin-r-5"></i> Login Type: <a href="{{ userinfo.login_url|raw }}">{{ userinfo.login }}</a></b>
+                    <br />
+                    <b><i class="fa fa-globe margin-r-5"></i> Signup IP: <a href="{{ path_for('search') }}?q={{ userinfo.signup_ip }}&type=ip">{{ userinfo.signup_ip }}</a></b>
+                    <br />
+                    <b><i class="fa fa-globe margin-r-5"></i> Last IP: <a href="{{ path_for('search') }}?q={{ userinfo.last_ip }}&type=ip">{{ userinfo.last_ip }}</a></b>
+                    <br />
+                    <b><i class="fa fa-globe margin-r-5"></i> IPs On Record: {{ userinfo.ip_log|length }}</b>
+                    <br />
+                    <b><i class="fa fa-user margin-r-5"></i> Discord: <span>{{ userinfo.discord_name ?: '(not set)' }}</span></b>
+                    <br />
+                    <b><i class="fa fa-map-marker margin-r-5"></i> Location (based on last IP)</b>
                     <p class="text-muted">{{ userinfo.last_ip_detail.city }}, {{ userinfo.last_ip_detail.region }}, {{ userinfo.last_ip_detail.country }}</p>
-
-                    <hr>
-
-                    <strong><i class="fa fa-pencil margin-r-5"></i> Reports</strong>
-
+                    <b><i class="fa fa-pencil margin-r-5"></i> Reports</b>
                     <p>
                         <span class="label label-danger">Received: {{ userinfo.reports_recv }}</span>
                         <span class="label label-warning">Sent: {{ userinfo.reports_sent }}</span>
                     </p>
-
-                    <hr>
-
-                    <strong><i class="fa fa-globe margin-r-5"></i> User-Agent</strong>
-                    <p class="text-muted"> {{ userinfo.user_agent }}</p>
+                    <b><i class="fa fa-globe margin-r-5"></i> User-Agent</b>
+                    <p class="text-muted">{{ userinfo.user_agent }}</p>
                 </div>
                 <!-- /.box-body -->
             </div>
