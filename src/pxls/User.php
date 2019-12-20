@@ -135,6 +135,21 @@ class User {
         return $toRet;
     }
 
+    public function getChatbanlogFromDB($uid) {
+        $uid = intval($uid);
+        $toRet = [];
+        $user = $this->getUserById($uid);
+        if ($user) {
+            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as "when_timestamp", to_timestamp(b.when) as "when", b.initiator as "banner_id", COALESCE(u.username, \'console\') as "banner", b.target as "banned_id", u1.username as "banned", b.expiry as "ban_expiry_timestamp", (CASE WHEN b.expiry != NULL THEN b.expiry ELSE 0 END) as "ban_expiry_date", (CASE WHEN b.expiry - b.when > 0 THEN b.expiry - b.when ELSE -1 END) as "length", b.type, b.purged, b.reason as ban_reason FROM chatbans b LEFT OUTER JOIN users u ON u.id = b.initiator INNER JOIN users u1 ON u1.id = b.target WHERE b.target = :id');
+            $getBansQuery->bindParam(':id', $uid);
+            $getBansQuery->execute();
+            if ($getBansQuery->rowCount() > 0) {
+                $toRet = $getBansQuery->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        }
+        return $toRet;
+    }
+
     public function getNoteReplysById($nid) {
         $nid = intval($nid); $replys = [];
         $getReplys = $this->db->prepare("SELECT id,user_id,target_id,reply_to,message,timestamp FROM admin_notes WHERE reply_to = :nid");
