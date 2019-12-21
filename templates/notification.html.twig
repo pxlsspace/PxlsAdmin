@@ -20,12 +20,16 @@
                             <textarea name="txtBody" id="txtBody" cols="30" rows="10" class="form-control" placeholder="Notification Body" maxlength="1894" required></textarea>
                         </div>
                         <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="cbPermanent" id="cbPermanent"> Permanent
+                            </label>
+                            or
                             <label for="txtExpiry">Expiry (local time):</label>
                             <input type="datetime-local" name="txtExpiry" id="txtExpiry" placeholder="mm/dd/yy hh:mm">
                         </div>
                         <div class="checkbox">
                             <label>
-                                <input type="checkbox" name="cbDiscord" id="cbDiscord"> Also send to discord
+                                <input type="checkbox" name="cbDiscord" id="cbDiscord"> Also send to Discord
                             </label>
                         </div>
                         <button type="submit" id="btnSubmit">Send</button>
@@ -83,10 +87,32 @@
     {{ parent() }}
     <script type="text/javascript">
         (() => {
-            let btnSubmit = document.getElementById('btnSubmit');
+            const btnSubmit = document.getElementById('btnSubmit');
+            const cbPermanent = document.getElementById('cbPermanent');
+            const expiryInput = document.getElementById('txtExpiry');
+
+            const dateTimeFormat = Intl.DateTimeFormat();
+            const isDate = (d) => !(d === 'Invalid Date' || isNaN(d));
+
+            if (navigator.userAgent.match(/Firefox/)) {
+                expiryInput.value = new Date().toLocaleString('en-US', { hour12: false });
+            } else {
+                const now = new Date().toJSON();
+                expiryInput.value = now.substring(0, now.length - 2);
+            }
+
+            cbPermanent.addEventListener('change', e => {
+                expiryInput.disabled = cbPermanent.checked;
+            });
+
             document.getElementById('frmNotify').addEventListener('submit', e => {
                 e.preventDefault();
-                let restoreText = btnSubmit.textContent;
+                const restoreText = btnSubmit.textContent;
+                const restore = () => {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = restoreText;
+                }
+
                 btnSubmit.disabled = true;
                 btnSubmit.textContent = 'Working...';
                 $.ajaxSetup({
@@ -96,35 +122,50 @@
                     }
                 });
 
-                let toPost = {
+                const toPost = {
                     txtTitle: document.getElementById('txtTitle').value,
                     txtBody: document.getElementById('txtBody').value,
-                    discord: document.getElementById('cbDiscord').checked === true,
-                    expiry:  String(document.getElementById('txtExpiry').valueAsNumber)
+                    discord: document.getElementById('cbDiscord').checked === true
                 };
-                if (toPost.expiry === "NaN") delete toPost.expiry;
+                if (!toPost.txtTitle) {
+                    alert('Missing notification title.');
+                    return restore();
+                }
+                if (!toPost.txtBody) {
+                    alert('Missing notification body.');
+                    return restore();
+                }
+                if (!cbPermanent.checked) {
+                    const d = new Date(expiryInput.value);
+                    if (!isDate(d)) {
+                        alert('Invalid date given.');
+                        return restore();
+                    }
+                    toPost.expiry = d.getTime();
 
-                $.post("{{ webroots.game }}/createNotification", toPost)
-                    .done(function() {
-                        if (confirm("Notification created. Reload page?")) {
+                    const expiryInThePastWarning = 'Expiry date preceeds the current local date, are you sure you want to send an already expired notification?';
+                    if (toPost.expiry < Date.now() && !confirm(expiryInThePastWarning)) {
+                        return restore();
+                    }
+                }
+                
+                $.post('{{ webroots.game }}/createNotification', toPost)
+                    .done(() => {
+                        if (confirm('Notification created. Reload page?')) {
                             document.location.href = document.location.href;
                         }
-                        btnSubmit.disabled = false;
-                        btnSubmit.textContent = restoreText;
-                    }).fail(function(x, s, e) {
-                        console.error(this);
-                        console.log(x, s, e);
+                    }).fail((x, s, e) => {
+                        console.error('Failed to send notification:', x, s, e);
                         alert('Failed to send notification, if the problem persists contact a dev.');
-                        btnSubmit.disabled = false;
-                        btnSubmit.textContent = restoreText;
-                    });
+                    }).always(restore);
             })
         })();
         function handleNotificationAction(elem, arg) {
-            console.log(elem);
-            let todo = {
+            const todo = {
                 url: '',
-                payload: {id: elem.closest('.panel').dataset.notificationId}
+                payload: {
+                    id: elem.closest('.panel').dataset.notificationId
+                }
             };
             switch(elem.dataset.action) {
                 case 'discord':
@@ -144,13 +185,14 @@
                     withCredentials: true
                 }
             });
-            $.post(todo.url, todo.payload, function() {
-                if (confirm("Action completed successfully. Reload page?")) {
-                    document.location.href = document.location.href;
-                }
-            }).fail(function() {
-                alert('Failed to perform the action, if the problem persists contact a dev.');
-            });
+            $.post(todo.url, todo.payload)
+                .done(() => {
+                    if (confirm("Action completed successfully. Reload page?")) {
+                        document.location.href = document.location.href;
+                    }
+                }).fail(() => {
+                    alert('Failed to perform the action, if the problem persists contact a dev.');
+                });
         }
     </script>
 {% endblock %}
