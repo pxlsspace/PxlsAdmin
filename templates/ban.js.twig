@@ -75,21 +75,21 @@ function tempbanPreflight() {
     let toRet = {banLength: false, removalAmount: false, banReason: false};
 
     let banLength = prompt('Ban length (in hours):');
-    if (isNaN(banLength)) {
+    if (banLength == null || isNaN(banLength)) {
         alert('Ban length is required. Tempban aborted.');
-        return toRet;
+        return false;
     }
 
     let removalAmount = prompt('Pixel reversal (in hours):');
-    if (isNaN(removalAmount)) {
+    if (removalAmount == null || isNaN(removalAmount)) {
         alert('Pixel reversal is required. Tempban aborted.');
-        return toRet;
+        return false;
     }
 
     let banReason = prompt('Ban reason:');
     if (!banReason) {
         alert('Ban reason is required. Tempban aborted.');
-        return toRet;
+        return false;
     }
 
     toRet.banLength = banLength;
@@ -145,6 +145,7 @@ function handleSearchAction(action, who, elem) {
             });
 
             let preflight = tempbanPreflight();
+            if (preflight === false) return;
 
             $.post("{{ webroots.game }}/admin/ban", {
                 username: who,
