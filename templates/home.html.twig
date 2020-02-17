@@ -376,8 +376,14 @@
                                     return `<a href="#" data-toggle='modal' data-report-id='${row.id}' data-message-nonce='${row.nonce}' data-target='#chat_report_modal'>${data}</a>`;
                                 }
                             },
-                            { "data": "initiator_name" },
-                            { "data": "target_name" },
+                            {
+                                "data": "initiator_name",
+                                "render": data => `<a href="/userinfo/${data}">${data}</a>`
+                            },
+                            {
+                                "data": "target_name",
+                                "render": data => `<a href="/userinfo/${data}">${data}</a>`
+                            },
                             {
                                 "data": "time",
                                 render: (data, type, row) => {
