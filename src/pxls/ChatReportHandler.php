@@ -26,7 +26,7 @@ class ChatReportHandler {
     }
 
     public function getReports($open=true) {
-        $query = $this->db->query("SELECT r.id,r.time,r.chat_message,r.target,r.initiator,r.claimed_by,m.purged_by,u.username as \"target_name\",u1.username as \"initiator_name\",u2.username as \"claimed_name\",u3.username as \"purged_name\" FROM chat_reports r INNER JOIN chat_messages m ON m.nonce=r.chat_message LEFT OUTER JOIN users u ON u.id=r.target LEFT OUTER JOIN users u1 ON u1.id=r.initiator LEFT OUTER JOIN users u2 ON u2.id=r.claimed_by LEFT OUTER JOIN users u3 ON u3.id=m.purged_by WHERE ".($open !== false ? 'r.closed = false;' : 'true;'));
+        $query = $this->db->query("SELECT r.id,r.time,r.cmid,r.target,r.initiator,r.claimed_by,m.purged_by,u.username as \"target_name\",u1.username as \"initiator_name\",u2.username as \"claimed_name\",u3.username as \"purged_name\" FROM chat_reports r INNER JOIN chat_messages m ON m.id=r.cmid LEFT OUTER JOIN users u ON u.id=r.target LEFT OUTER JOIN users u1 ON u1.id=r.initiator LEFT OUTER JOIN users u2 ON u2.id=r.claimed_by LEFT OUTER JOIN users u3 ON u3.id=m.purged_by WHERE ".($open !== false ? 'r.closed = false;' : 'true;'));
 
         try {
             return $query->fetchAll(\PDO::FETCH_ASSOC);
@@ -51,7 +51,7 @@ class ChatReportHandler {
             $selfDataQuery->closeCursor();
         }
 
-        $queryReport = $this->db->prepare("SELECT r.*,m.*,u.username AS \"claimed_by_name\" FROM chat_reports r INNER JOIN chat_messages m ON m.nonce=r.chat_message LEFT OUTER JOIN users u ON u.id=r.claimed_by WHERE r.id = :id;");
+        $queryReport = $this->db->prepare("SELECT r.*,m.*,u.username AS \"claimed_by_name\" FROM chat_reports r INNER JOIN chat_messages m ON m.id=r.cmid LEFT OUTER JOIN users u ON u.id=r.claimed_by WHERE r.id = :id;");
         $queryReport->bindParam(":id", $rid, \PDO::PARAM_INT);
         if ($queryReport->execute()) {
             $toReturn["report"] = $queryReport->fetch(\PDO::FETCH_ASSOC);
@@ -70,19 +70,18 @@ class ChatReportHandler {
             $toReturn["reported"] = $queryReported->fetch(\PDO::FETCH_ASSOC);
         }
 
-       $toReturn["context"] = $this->getContextAroundNonce($toReturn["report"]["chat_message"]);
+       $toReturn["context"] = $this->getContextAroundID($toReturn["report"]["chat_message"]);
 
         return $toReturn;
     }
 
-    public function getContextAroundNonce($nonce, $amount = 10) {
+    public function getContextAroundID($id, $amount = 10) {
         $amount = intval($amount);
         $toReturn = [];
 
-        $contextQuery = $this->db->prepare("(SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent > (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY sent ASC LIMIT $amount) UNION ALL (SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.nonce = :nonce) UNION ALL (SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent < (SELECT sent FROM chat_messages WHERE nonce = :nonce) ORDER BY m.sent DESC LIMIT $amount) ORDER BY sent ASC;");
-        $contextQuery->bindParam(":nonce", $nonce, \PDO::PARAM_STR);
+        $contextQuery = $this->db->prepare("(SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent > (SELECT sent FROM chat_messages WHERE id = :id) ORDER BY sent ASC LIMIT $amount) UNION ALL (SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.id = :id) UNION ALL (SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent < (SELECT sent FROM chat_messages WHERE id = :id) ORDER BY m.sent DESC LIMIT $amount) ORDER BY sent ASC;");
+        $contextQuery->bindParam(":id", $id, \PDO::PARAM_INT);
         if ($contextQuery->execute()) {
-
             $toReturn = $contextQuery->fetchAll(\PDO::FETCH_ASSOC);
         }
 
