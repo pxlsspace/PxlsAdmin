@@ -28,11 +28,11 @@ final class ChatContext
     {
         if ($request->getMethod() === "POST") {
             $toRet = [];
-            $nonce = filter_input(INPUT_POST, 'nonce', FILTER_SANITIZE_STRING);
-            if ($nonce !== FALSE) {
-                $toRet = $this->chatReportHandler->getContextAroundNonce($nonce, 100);
+            $cmid = filter_input(INPUT_POST, 'cmid', FILTER_SANITIZE_STRING);
+            if ($cmid !== FALSE) {
+                $toRet = $this->chatReportHandler->getContextAroundID($cmid, 100);
             }
-            return $response->withJson(["success" => $nonce !== FALSE, "data" => $toRet]);
+            return $response->withJson(["success" => $cmid !== FALSE, "data" => $toRet]);
         } else {
             $this->view->render($response, 'ChatContext.html.twig', ['args' => $args, 'userdata' => (new \pxls\User($this->database))->getUserById($_SESSION['user_id'])]);
         }
