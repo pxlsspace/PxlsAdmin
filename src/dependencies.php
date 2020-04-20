@@ -78,5 +78,8 @@ $container[\pxls\Action\ChatContext::class] = function ($c) {
 $container[\pxls\Action\NotifyController::class] = function ($c) {
     return new \pxls\Action\NotifyController($c->get('renderer'), $c->get('logger'), $c->get('database'),$c->get('discord'));
 };
+$container[\pxls\Action\Factions::class] = function ($c) {
+    return new \pxls\Action\Factions($c->get('renderer'), $c->get('logger'), $c->get('database'));
+};
 
 //endregion

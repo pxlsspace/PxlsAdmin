@@ -19,3 +19,5 @@ $app->post('/api/log', \pxls\Action\Logger::class)->setName('logger');
 $app->get('/api/report[/{params:.*}]', \pxls\Action\Report::class)->setName('report');
 
 $app->map(['GET', 'POST'], '/notifications', NotifyController::class)->setName('notifications');
+
+$app->get('/factions', \pxls\Action\Factions::class)->setName('factions');

@@ -18,7 +18,8 @@
         "monolog/monolog": "^1.17",
         "slim/twig-view": "^2.2",
         "dyorg/slim-token-authentication": "^0.3.3",
-        "wazaari/monolog-mysql": "^1.0"
+        "wazaari/monolog-mysql": "^1.0",
+        "gofabian/negotiation-middleware": "^0.1.3"
     },
     "require-dev": {
         "phpunit/phpunit": ">=4.8 < 6.0"

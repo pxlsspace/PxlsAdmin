@@ -1,0 +1,230 @@
+{% extends "master.html.twig" %}
+
+{% set title = 'Factions' %}
+
+{% block css %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ base_url() }}/assets/spectrum/spectrum.css"></link>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Factions</h3>
+                </div>
+                <div class="box-body">
+                    <table id="tblReports" class="table table-responsive table-bordered table-striped nowrap">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Created</th>
+                                <th>Tag</th>
+                                <th>Name</th>
+                                <th>Owner</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modal-default" id="faction_edit_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" class="close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Edit Faction</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/factions" method="POST" id="frmEditFaction">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="txtFactionName">Name: </label>
+                                    <input type="text" id="txtFactionName" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="txtFactionTag">Tag: </label>
+                                    <input type="text" id="txtFactionTag" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="txtFactionColor">Color: </label>
+                                    <input type="text" id="txtFactionColor" class="form-control spectrum-placeholder" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12" style="text-align: right">
+                                <button type="button" class="btn btn-sm btn-secondary" id="btnFactionEditCancel" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-sm btn-primary" id="btnFactionEditSubmit">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js %}
+    {{ parent() }}
+    <script src="{{ base_url() }}/assets/spectrum/spectrum-min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/extensions/Scroller/js/dataTables.scroller.js"></script>
+    <script type="text/javascript">
+        window.DEFAULT_SPECTRUM_OPTIONS = window.DEFAULT_SPECTRUM_OPTIONS || {
+            showInput: true,
+            clickoutFiresChange: true,
+            flat: false,
+            allowEmpty: false,
+            showAlpha: false,
+            disabled: false,
+            showPalette: false,
+            showPaletteOnly: false,
+            preferredFormat: 'hex',
+            theme: 'sp-purple',
+        };
+
+        if ($ && $.spectrum) {
+            $('input.spectrum-placeholder').spectrum(DEFAULT_SPECTRUM_OPTIONS);
+        }
+
+        window.__dynVars = Object.assign(window.__dynVars || {}, {viewOnly: true});
+        let dtReports = $('#tblReports').dataTable({
+            ajax: '{{ xhr_base }}/factions',
+            order: [[0, 'asc']],
+            'columns': [
+                {data: "id"},
+                {data: "created"},
+                {data: "tag"},
+                {data: "name"},
+                {data: "owner"},
+                {
+                    data: "id",
+                    render: (data, type, row, meta) => {
+                        return `<button class="btn btn-sm btn-danger" style="margin-right: .5em" data-action="delete">Delete</button><button class="btn btn-sm btn-warning" data-action="edit">Edit</button>`;
+                    }
+                },
+            ]
+        }).on('click', 'button[data-action]', function() {
+            const data = dtReports.row(this.closest('tr')).data();
+            switch ((this.dataset.action || '').toLowerCase().trim()) {
+                case 'delete': {
+                    let confirmed = confirm('Are you sure you want to delete this faction?') === true;
+                    if (confirmed) {
+                        let _ourTr = this.closest('tr');
+                        $.ajaxSetup({
+                            crossDomain: true,
+                            xhrFields: {
+                                withCredentials: true,
+                            },
+                        });
+                        $.post(`{{ webroots.game }}/admin/faction/delete?fid=${data.id}`, {}).done(function(data) {
+                            dtReports.row(_ourTr).remove().draw();
+                            alert('Faction deleted');
+                        }).fail(function(a) {
+                            let resp;
+                            try {
+                                resp = JSON.parse(a.responseText);
+                            } catch (ignored) {}
+                            console.log('delete failed: %o (%o)', resp, a.responseText);
+                            alert(`Failed to delete faction: ${(resp && resp.details) || 'An unknown error occurred.'}`)
+                        });
+                    }
+                    break;
+                }
+                case 'edit': {
+                    handleFactionEdit(data).then(res => {
+                        if (res !== false) {
+                            dtReports.row(this.closest('tr')).data(Object.assign(data, res)).invalidate();
+                            alert('Faction updated');
+                        } // else: user cancelled
+                    }).catch(err => alert('Failed to update faction\n' + err.toString()));
+                    break;
+                }
+            }
+        }).DataTable();
+
+        async function handleFactionEdit(data) {
+            return new Promise(function(resolve, reject) {
+                try {
+                    let elModal = $('#faction_edit_modal');
+                    elModal.find('form').off('submit').on('submit', function(e) {
+                        e.originalEvent.preventDefault();
+                        let postWith = {};
+
+                        let _name = document.getElementById('txtFactionName').value;
+                        let _tag = document.getElementById('txtFactionTag').value;
+                        let _color = parseInt(document.getElementById('txtFactionColor').value.substr(1), 16);
+
+                        if (_name !== data.name) {
+                            postWith.name = _name;
+                        }
+                        if (_tag !== data.tag) {
+                            postWith.tag = _tag;
+                        }
+                        if (_color !== data.color) {
+                            postWith.color = _color;
+                        }
+                        if (Object.keys(postWith).length === 0) return alert(new Error('No updated values provided'));
+
+                        $.ajaxSetup({
+                            crossDomain: true,
+                            xhrFields: {
+                                withCredentials: true,
+                            },
+                        });
+                        $.post(`{{ webroots.game }}/admin/faction/edit?fid=${data.id}`, {
+                            payload: JSON.stringify(postWith)
+                        }).done(function(data) {
+                            handleResp(data);
+                        }).fail(function(a) {
+                            handleResp(a.responseText);
+                        });
+
+                        function handleResp(resp) {
+                            if (typeof resp === 'string') {
+                                try {
+                                    resp = JSON.parse(resp);
+                                } catch (ignored) {
+                                }
+                            }
+                            if (resp && resp.details) {
+                                let failed = Object.entries(resp.details.failed);
+                                let _resolveWith = {};
+                                if (failed.length > 0) {
+                                    alert(`Failed to update the following:\n    ${failed.map(x => `${x[0]}: ${x[1]}`).join('\n    ')}${resp.details.changed.length > 0 ? `\n\nHowever, the following were successfully updated:\n    ${resp.details.changed.join('\n    ')}` : ''}`);
+                                }
+                                if (resp.details.changed.length > 0) {
+                                    resp.details.changed.map(x => x.toLowerCase().trim()).forEach(x => {
+                                        _resolveWith[x] = postWith[x];
+                                    });
+                                    if (failed.length === 0) {
+                                        resolve(_resolveWith);
+                                        elModal.modal('hide');
+                                    }
+                                }
+                            } else { // an actual error occurred
+                                alert('An unknown error occurred, please try again later. If the problem persists, contact a developer');
+                            }
+                        }
+                    });
+                    elModal.find('#txtFactionName').val(data.name);
+                    elModal.find('#txtFactionTag').val(data.tag);
+                    elModal.find('#txtFactionColor').spectrum('set', `#${('000000' + ((data.color) >>> 0).toString(16)).slice(-6)}`);
+                    elModal.off('hidden.bs.modal').on('hidden.bs.modal', function() {
+                        resolve(false); // if we haven't resolved at this point we want to make sure we send false to denote a `cancel`.
+                    });
+                    elModal.modal();
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }
+    </script>
+{% endblock %}
