@@ -51,35 +51,41 @@ class ChatReportHandler {
             $selfDataQuery->closeCursor();
         }
 
-        $queryReport = $this->db->prepare("SELECT r.*,m.*,u.username AS \"claimed_by_name\" FROM chat_reports r INNER JOIN chat_messages m ON m.id=r.cmid LEFT OUTER JOIN users u ON u.id=r.claimed_by WHERE r.id = :id;");
-        $queryReport->bindParam(":id", $rid, \PDO::PARAM_INT);
-        if ($queryReport->execute()) {
-            $toReturn["report"] = $queryReport->fetch(\PDO::FETCH_ASSOC);
-            $toReturn["report"]["claimed_by_you"] = intval($toReturn["report"]["claimed_by"]) === intval($toReturn["self"]["id"]);
+        $queryReportDetails = $this->db->prepare("SELECT r.*,u.username AS \"claimed_by_name\" FROM chat_reports r LEFT OUTER JOIN users u ON u.id=r.claimed_by WHERE r.id=:id");
+        $queryReportDetails->bindParam(":id", $rid, \PDO::PARAM_INT);
+        if ($queryReportDetails->execute()) {
+            $toReturn['report']['details'] = $queryReportDetails->fetch(\PDO::FETCH_ASSOC);
+            $queryReportMessage = $this->db->prepare("SELECT * FROM chat_messages WHERE id = :id");
+            $queryReportMessage->bindParam(':id', $toReturn['report']['details']['cmid']);
+            if ($queryReportMessage->execute()) {
+                $toReturn['report']['message'] = $queryReportMessage->fetch(\PDO::FETCH_ASSOC);
+            }
+            $toReturn['report']['claimed_by_you'] = intval($toReturn['report']['details']['claimed_by']) === intval($toReturn['self']['id']);
         }
 
         $queryReporter = $this->db->prepare("SELECT id,username,role,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\",(perma_chat_banned OR (now() < chat_ban_expiry)) AS \"chatbanned\" FROM users WHERE id=:id;");
-        $queryReporter->bindParam(":id", $toReturn["report"]["initiator"], \PDO::PARAM_INT);
+        $queryReporter->bindParam(":id", $toReturn["report"]["details"]["initiator"], \PDO::PARAM_INT);
         if ($queryReporter->execute()) {
             $toReturn["reporter"] = $queryReporter->fetch(\PDO::FETCH_ASSOC);
         }
 
         $queryReported = $this->db->prepare("SELECT id,username,role,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\",(perma_chat_banned OR (now() < chat_ban_expiry)) AS \"chatbanned\" FROM users WHERE id=:id;");
-        $queryReported->bindParam(":id", $toReturn["report"]["target"], \PDO::PARAM_INT);
+        $queryReported->bindParam(":id", $toReturn["report"]["details"]["target"], \PDO::PARAM_INT);
         if ($queryReported->execute()) {
             $toReturn["reported"] = $queryReported->fetch(\PDO::FETCH_ASSOC);
         }
 
-       $toReturn["context"] = $this->getContextAroundID($toReturn["report"]["chat_message"]);
+       $toReturn["context"] = $this->getContextAroundID($toReturn["report"]["details"]["cmid"]);
 
         return $toReturn;
     }
 
-    public function getContextAroundID($id, $amount = 10) {
+    public function getContextAroundID($id, $amount = 12) {
+        $id = intval($id);
         $amount = intval($amount);
         $toReturn = [];
 
-        $contextQuery = $this->db->prepare("(SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent > (SELECT sent FROM chat_messages WHERE id = :id) ORDER BY sent ASC LIMIT $amount) UNION ALL (SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.id = :id) UNION ALL (SELECT m.*,u.username AS \"author_name\" FROM chat_messages m LEFT OUTER JOIN users u ON u.id=m.author WHERE m.sent < (SELECT sent FROM chat_messages WHERE id = :id) ORDER BY m.sent DESC LIMIT $amount) ORDER BY sent ASC;");
+        $contextQuery = $this->db->prepare("(select m.*,u.username as \"author_name\" from chat_messages m inner join users u on u.id=m.author where m.id > :id order by id asc limit $amount) union all (select m.*,u.username as \"author_name\" from chat_messages m inner join users u on u.id=m.author where m.id = :id) union all (select m.*,u.username as \"author_name\" from chat_messages m inner join users u on u.id=m.author where m.id < :id order by m.id desc limit $amount) order by id desc;");
         $contextQuery->bindParam(":id", $id, \PDO::PARAM_INT);
         if ($contextQuery->execute()) {
             $toReturn = $contextQuery->fetchAll(\PDO::FETCH_ASSOC);

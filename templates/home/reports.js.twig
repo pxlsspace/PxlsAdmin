@@ -117,18 +117,18 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
             modal.find('#rmd-claim,#rmd-unclaim,#rmd-resolve').hide();
         }
         {#var server = data.reporter.username === null;#}
-        modal.find('#rmd-g-id').text(data.report.id);
+        modal.find('#rmd-g-id').text(data.report.details.id);
 
         //details
         modal.find('#crm-details-reporter').html($('<a>').attr('href', `/userinfo/${data.reporter.username}`).text(data.reporter.username));
         modal.find('#crm-details-reported').html($('<a>').attr('href', `/userinfo/${data.reported.username}`).text(data.reported.username));
-        modal.find('#crm-details-sent').text(moment.unix(data.report.time).format('MM.DD.YYYY HH:mm:ss'));
-        modal.find('#crm-details-reason').text(data.report.report_message);
-        modal.find('#crm-details-chat-line').text(data.report.content);
-        modal.find('#crm-details-nonce').text(data.report.chat_message);
-        if (data.report.claimed_by_name) {
+        modal.find('#crm-details-sent').text(moment.unix(data.report.details.time).format('MM.DD.YYYY HH:mm:ss'));
+        modal.find('#crm-details-reason').text(data.report.details.report_message);
+        modal.find('#crm-details-chat-line').text(data.report.message.content);
+        modal.find('#crm-details-cmid').text(data.report.details.cmid);
+        if (data.report.details.claimed_by_name) {
             modal.find('#crm-details-claimed-by-wrapper').show();
-            modal.find('#crm-details-claimed-by').text(data.report.claimed_by_name);
+            modal.find('#crm-details-claimed-by').text(data.report.details.claimed_by_name);
         } else {
             modal.find('#crm-details-claimed-by-wrapper').hide();
         }
@@ -157,7 +157,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
                     .append(time)
                     .append($("<strong>").text(x.author_name + ': '))
                     .append(content)
-                    .css(x.nonce === data.report.chat_message ? {'backgroundColor': 'rgba(255,245,9,0.3)'} : {})
+                    .css(x.id === data.report.details.cmid ? {'backgroundColor': 'rgba(255,245,9,0.3)'} : {})
             )
         }
         modal.find('#rmd-g-message').hide();
@@ -168,12 +168,12 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         let unclaimButton = modal.find('#rmd-unclaim').show()[0];
         let resolveButton = modal.find('#rmd-resolve').show()[0];
 
-        claimButton.dataset['reportId'] =  data.report.id;
+        claimButton.dataset['reportId'] =  data.report.details.id;
 
-        unclaimButton.dataset['reportId'] = data.report.id;
+        unclaimButton.dataset['reportId'] = data.report.details.id;
         unclaimButton.disabled = cannotOverwrite;
 
-        resolveButton.dataset['reportId'] = data.report.id;
+        resolveButton.dataset['reportId'] = data.report.details.id;
         resolveButton.disabled = cannotOverwrite;
 
         $(claimButton).click(function(){
@@ -204,10 +204,10 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
             });
         });
 
-        if(data.report.claimed_by == "{{ userdata.id }}") {
+        if(data.report.details.claimed_by == "{{ userdata.id }}") {
             modal.find('#rmd-claim').hide();
             modal.find('#rmd-unclaim').show();
-        } else if(data.report.claimed_by >> 0 > 0 && cannotOverwrite) {
+        } else if(data.report.details.claimed_by >> 0 > 0 && cannotOverwrite) {
             modal.find('#rmd-claim').hide();
             modal.find('#rmd-unclaim').hide();
             modal.find('#rmd-resolve').hide();
