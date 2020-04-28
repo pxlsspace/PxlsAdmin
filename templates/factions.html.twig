@@ -15,7 +15,7 @@
                     <h3 class="box-title">Factions</h3>
                 </div>
                 <div class="box-body">
-                    <table id="tblReports" class="table table-responsive table-bordered table-striped nowrap">
+                    <table id="tblFactions" class="table table-responsive table-bordered table-striped nowrap">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -95,7 +95,7 @@
         }
 
         window.__dynVars = Object.assign(window.__dynVars || {}, {viewOnly: true});
-        let dtReports = $('#tblReports').dataTable({
+        let dtReports = $('#tblFactions').dataTable({
             ajax: '{{ xhr_base }}/factions',
             order: [[0, 'asc']],
             'columns': [
@@ -103,7 +103,12 @@
                 {data: "created"},
                 {data: "tag"},
                 {data: "name"},
-                {data: "owner"},
+                {
+                    data: "owner",
+                    render: (data, type, row, meta) => {
+                        return `<a href="/userinfo/${data}">${data}</a>`
+                    }
+                },
                 {
                     data: "id",
                     render: (data, type, row, meta) => {
@@ -150,7 +155,7 @@
             }
         }).DataTable();
 
-        async function handleFactionEdit(data) {
+        function handleFactionEdit(data) {
             return new Promise(function(resolve, reject) {
                 try {
                     let elModal = $('#faction_edit_modal');
