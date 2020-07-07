@@ -36,8 +36,8 @@ class User {
         $getRole = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
         $getRole->bindParam(":uid",$uid,\PDO::PARAM_INT);
         $getRole->execute();
-        while($row = $getRole->fetch(\PDO::FETCH_OBJ)) {
-            if(in_array($row->role,$allowRoles)) {
+        while($row = $getRole->fetchAll(\PDO::FETCH_COLUMN, 0)) {
+            if(!empty(array_intersect($row, $allowRoles))) {
                 return $this->getUserById($uid);
             }
         }
