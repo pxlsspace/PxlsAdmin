@@ -86,7 +86,16 @@ class ReportHandler {
         $getUser = $this->db->prepare("SELECT * FROM users WHERE id = :uid LIMIT 1");
         $getUser->bindParam(":uid",$s,\PDO::PARAM_INT);
         $getUser->execute();
-        return $getUser->fetch(\PDO::FETCH_OBJ);
+        $fetched = $getUser->fetch(\PDO::FETCH_OBJ);
+        $fetched->roles = $this->getRolesById($s);
+        return $fetched;
+    }
+
+    public function getRolesById($s) {
+        $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
+        $getRoles->bindParam(":uid",$s,\PDO::PARAM_INT);
+        $getRoles->execute();
+        return $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
     public function getUserdataByPixel($s) {
@@ -114,7 +123,7 @@ class ReportHandler {
     }
     public function resolve($rId) {
         $execUser = $this->getUserdataById($_SESSION['user_id']);
-        if ($execUser->role == "ADMIN") return $this->_resolve($rId);
+        if (in_array('administrator', $execUser->roles)) return $this->_resolve($rId);
         if ($this->whoClaimedReport($rId) != $_SESSION['user_id']) return false;
         return $this->_resolve($rId);
     }
@@ -139,7 +148,7 @@ class ReportHandler {
             $report['self'] = [
                 'id' => $self->id,
                 'username' => $self->username,
-                'role' => $self->role
+                'roles' => $self->roles
             ];
             $report['general']['id'] = $gData->id;
             $report['general']['pixel'] = $gData->pixel_id;
@@ -153,7 +162,7 @@ class ReportHandler {
             $report['reporter']['username']         = $reporterData->username;
             $report['reporter']['login']            = $reporterData->login;
             $report['reporter']['signup']           = $reporterData->signup_time;
-            $report['reporter']['role']             = $reporterData->role;
+            $report['reporter']['roles']            = $reporterData->roles;
             $report['reporter']['pixelcount']       = $reporterData->pixel_count;
             $report['reporter']['ip']               = ["last"=>$reporterData->last_ip,"signup"=>$reporterData->signup_ip];
             $report['reporter']['ban']              = ["expiry"=>$reporterData->ban_expiry,"reason"=>$reporterData->ban_reason];
@@ -162,7 +171,7 @@ class ReportHandler {
             $report['reported']['username']         = $reportedData->username;
             $report['reported']['login']            = $reportedData->login;
             $report['reported']['signup']           = $reportedData->signup_time;
-            $report['reported']['role']             = $reportedData->role;
+            $report['reported']['roles']            = $reportedData->roles;
             $report['reported']['pixelcount']       = $reportedData->pixel_count;
             $report['reported']['ip']               = ["last"=>$reportedData->last_ip,"signup"=>$reportedData->signup_ip];
             $report['reported']['ban']              = ["expiry"=>$reportedData->ban_expiry,"reason"=>$reportedData->ban_reason];

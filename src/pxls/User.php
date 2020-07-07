@@ -30,16 +30,15 @@ class User {
     }
 
     protected function checkRole($uid) {
-        $allowRoles = ["DEVELOPER", "ADMIN","MODERATOR","TRIALMOD"];
+        // TODO (Flying)
+        $allowRoles = ["staff", "trialmod", "moderator", "administrator"];
 
-        $getRole = $this->db->prepare("SELECT * FROM users WHERE id = :uid");
+        $getRole = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
         $getRole->bindParam(":uid",$uid,\PDO::PARAM_INT);
         $getRole->execute();
         while($row = $getRole->fetch(\PDO::FETCH_OBJ)) {
             if(in_array($row->role,$allowRoles)) {
-                return $row;
-            } else {
-                return false;
+                return $this->getUserById($uid);
             }
         }
         return false;
@@ -50,13 +49,17 @@ class User {
         if (isset($userBufferId[$uid])) {
             return $userBufferId[$uid];
         }
-        $getUser = $this->db->prepare("SELECT *,(SELECT role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE id = :uid LIMIT 1");
+        $getUser = $this->db->prepare("SELECT *,(SELECT is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE id = :uid LIMIT 1");
         $getUser->bindParam(":uid",$uid,\PDO::PARAM_INT);
         $getUser->execute();
+        $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
+        $getRoles->bindParam(":uid",$uid,\PDO::PARAM_INT);
+        $getRoles->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
             $usr["signup_ip"] = $usr["signup_ip"];
             $usr["last_ip"] = $usr["last_ip"];
+            $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
             $userBufferId[$uid] = $usr;
             return $usr;
         } else {
@@ -70,13 +73,17 @@ class User {
         if (isset($userBufferName[$uname])) {
             return $userBufferName[$uname];
         }
-        $getUser = $this->db->prepare("SELECT *,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE username = :uname");
+        $getUser = $this->db->prepare("SELECT *,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE username = :uname");
         $getUser->bindParam(":uname",$uname,\PDO::PARAM_STR);
         $getUser->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
             $usr["signup_ip"] = $usr["signup_ip"];
             $usr["last_ip"] = $usr["last_ip"];
+            $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
+            $getRoles->bindParam(":uid",$usr["id"],\PDO::PARAM_INT);
+            $getRoles->execute();
+            $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
             $userBufferName[$uname] = $usr;
             return $usr;
         } else {

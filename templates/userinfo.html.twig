@@ -12,7 +12,7 @@
                     <h3 class="profile-username text-center">
                         <a href="{{ path_for('search') }}?q={{ userinfo.username }}">{{ userinfo.username }}</a></h3>
 
-                    <p class="text-muted text-center">{{ userinfo.role }}</p>
+                    <p class="text-muted text-center">{{ userinfo.roles|join(', ') }}</p>
 
                     <ul class="list-group list-group-unbordered">
                         <li class="list-group-item">
@@ -34,10 +34,10 @@
                             <span class="fa fa-caret-down"></span></button>
                         <ul class="dropdown-menu btn-block">
                             <li><a data-username="{{ userinfo.username }}" class="permaban" href="#">Permaban</a></li>
-                            {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
+                            {% if ('administrator' in userinfo.roles) %}
                                 <li><a data-username="{{ userinfo.username }}" class="shadowban" href="#">Shadowban</a></li>
                             {% endif %}
-                            {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
+                            {% if ('administrator' in userinfo.roles) %}
                                 <li><a data-username="{{ userinfo.username }}" class="force-rename" href="#">Set Username</a></li>
                             {% endif %}
                             <li><a data-username="{{ userinfo.username }}" class="request-rename" href="#">Request Rename</a></li>
@@ -87,7 +87,7 @@
             </div>
             <!-- /.box -->
 
-            {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
+            {% if ('administrator' in userinfo.roles) %}
                 <!-- About Me Box -->
                 <div class="box box-primary">
                     <div class="box-header with-border">
@@ -146,12 +146,12 @@
                                 </li>
                             {% endif %}
 
-                            {% if (userinfo.role == "BANNED" or userinfo.role == "SHADOWBANNED") %}
+                            {% if (userinfo.is_shadow_banned or userinfo.ban_expiry == 0) %}
                                 <li>
                                     <i class="fa fa-user-times bg-red"></i>
                                     <div class="timeline-item">
                                         <span class="time"></span>
-                                        <h3 class="timeline-header"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> was {{ userinfo.role|lower }} {% if userinfo.role == "BANNED" %}permanently{% endif %}</h3>
+                                        <h3 class="timeline-header"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> was banned {% if userinfo.ban_expiry == 0 %} permanently{% endif %}</h3>
                                         <div class="timeline-body">
                                             {{ userinfo.ban_reason }}
                                         </div>

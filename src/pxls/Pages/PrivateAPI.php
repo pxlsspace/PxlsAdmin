@@ -88,7 +88,7 @@ final class PrivateAPI
 
     protected function lastSignups() {
         $toRet = [];
-        $qSignups = $this->database->query("SELECT id,username,signup_time,login,ban_reason,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\",signup_ip,last_ip,pixel_count FROM users ORDER BY signup_time DESC LIMIT 100");
+        $qSignups = $this->database->query("SELECT id,username,signup_time,login,ban_reason,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",signup_ip,last_ip,pixel_count FROM users ORDER BY signup_time DESC LIMIT 100");
         $qSignups->execute();
 
         while ($signup = $qSignups->fetch(\PDO::FETCH_ASSOC)) {

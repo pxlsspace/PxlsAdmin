@@ -89,7 +89,7 @@ final class Search
         $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip=:ip OR signup_ip=:ip LIMIT 30", $this->qs), [
             ":ip" => [$needle, \PDO::PARAM_STR]
         ]);
-        $this->_performSearch("SELECT u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.role, u.ban_expiry, u.ban_reason, u.signup_ip as signup_ip, u.last_ip as last_ip, u.pixel_count, l.ip AS log_ip FROM ip_log l LEFT OUTER JOIN users u ON u.id = l.user WHERE :ip = l.ip", [
+        $this->_performSearch("SELECT u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.ban_expiry, u.ban_reason, u.signup_ip as signup_ip, u.last_ip as last_ip, u.pixel_count, l.ip AS log_ip FROM ip_log l LEFT OUTER JOIN users u ON u.id = l.user WHERE :ip = l.ip", [
             ':ip' => [$needle, \PDO::PARAM_STR]
         ], 'ip_log match');
     }

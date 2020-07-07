@@ -63,13 +63,13 @@ class ChatReportHandler {
             $toReturn['report']['claimed_by_you'] = intval($toReturn['report']['details']['claimed_by']) === intval($toReturn['self']['id']);
         }
 
-        $queryReporter = $this->db->prepare("SELECT id,username,role,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\",(perma_chat_banned OR (now() < chat_ban_expiry)) AS \"chatbanned\" FROM users WHERE id=:id;");
+        $queryReporter = $this->db->prepare("SELECT id,username,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",(perma_chat_banned OR (now() < chat_ban_expiry)) AS \"chatbanned\" FROM users WHERE id=:id;");
         $queryReporter->bindParam(":id", $toReturn["report"]["details"]["initiator"], \PDO::PARAM_INT);
         if ($queryReporter->execute()) {
             $toReturn["reporter"] = $queryReporter->fetch(\PDO::FETCH_ASSOC);
         }
 
-        $queryReported = $this->db->prepare("SELECT id,username,role,(role='BANNED' OR role='SHADOWBANNED' OR (now() < ban_expiry)) AS \"banned\",(perma_chat_banned OR (now() < chat_ban_expiry)) AS \"chatbanned\" FROM users WHERE id=:id;");
+        $queryReported = $this->db->prepare("SELECT id,username,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",(perma_chat_banned OR (now() < chat_ban_expiry)) AS \"chatbanned\" FROM users WHERE id=:id;");
         $queryReported->bindParam(":id", $toReturn["report"]["details"]["target"], \PDO::PARAM_INT);
         if ($queryReported->execute()) {
             $toReturn["reported"] = $queryReported->fetch(\PDO::FETCH_ASSOC);

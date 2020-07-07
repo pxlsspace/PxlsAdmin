@@ -35,7 +35,7 @@ final class LogPage
         $data['userdata'] = $user->getUserById($_SESSION['user_id']);
         //endregion
 
-        if($data['userdata']['role'] != "ADMIN" || $data['userdata']['role'] != "DEVELOPER") return $response->withStatus(403)->getBody()->write("lol, nope. you don't belong here.");
+        if(in_array('administrator', $data['userdata']['roles'])) return $response->withStatus(403)->getBody()->write("lol, nope. you don't belong here.");
 
         $data['logs'] = [];
         $data['logs']['total']      = $this->getTotal();
@@ -61,7 +61,8 @@ final class LogPage
         $logs->bindParam(":channel",$channel,\PDO::PARAM_STR);
         $logs->execute();
         while($row = $logs->fetch(\PDO::FETCH_ASSOC)) {
-            $qUser = $this->database->query("SELECT username FROM users WHERE id = '".$row['userid']."'");
+            $qUser = $this->database->prepare("SELECT username FROM users WHERE id = :uid");
+            $qUser->bindParam(":uid", $row['userid']);
             $qUser->execute();
             $username = $qUser->fetch(\PDO::FETCH_ASSOC)['username'];
 
