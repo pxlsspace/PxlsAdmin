@@ -14,7 +14,7 @@ $authenticator = function($request, TokenAuthentication $tokenAuth){
     $token = $tokenAuth->findToken($request);
     $user = new pxls\User($app->getContainer()->get('database'));
     $user = $user->checkToken($token, $bypassToken);
-    $_SESSION['user_id'] = $user->id;
+    $_SESSION['user_id'] = $user['id'];
 };
 
 $error = function(\Slim\Http\Request $request, \Slim\Http\Response $response, TokenAuthentication $tokenAuth) {
