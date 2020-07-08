@@ -36,7 +36,7 @@ class ReportHandler {
             ];
 
             $this->discord->setName("Pxls Admin");
-            $this->discord->setMessage(implode(($reportCount >= 10 || $openChatReports >= 10) ? $panicParts : $normalParts));
+            $this->discord->setMessage(implode(($reportCount >= 30 || $openChatReports >= 30) ? $panicParts : $normalParts));
             $this->discord->execute();
             return true;
         } else {
