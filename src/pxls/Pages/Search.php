@@ -15,7 +15,8 @@ final class Search
     private $logger;
     private $database;
     protected $result = [];
-    private $qs = "id, username, login, signup_time, cooldown_expiry, role, ban_expiry, ban_reason, signup_ip as signup_ip, last_ip as last_ip, pixel_count";
+    // TODO (Flying): missing role
+    private $qs = "id, username, login, signup_time, cooldown_expiry, ban_expiry, ban_reason, signup_ip as signup_ip, last_ip as last_ip, pixel_count";
 
     public function __construct(Twig $view, LoggerInterface $logger, \PDO $database)
     {
