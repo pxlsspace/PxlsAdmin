@@ -51,7 +51,7 @@ class ChatReportHandler {
             "context" => []
         ];
 
-        $selfDataQuery = $this->db->prepare("select id,username,role from users where id = :id");
+        $selfDataQuery = $this->db->prepare("select id,username from users where id = :id");
         $selfDataQuery->bindParam(":id", $_SESSION['user_id'], \PDO::PARAM_INT);
         if ($selfDataQuery->execute()) {
             $toReturn['self'] = $selfDataQuery->fetch(\PDO::FETCH_ASSOC);
