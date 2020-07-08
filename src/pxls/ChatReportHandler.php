@@ -35,6 +35,13 @@ class ChatReportHandler {
         }
     }
 
+    public function getRolesById($uid) {
+        $query = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
+        $query->bindParam(":uid", $uid);
+        $query->execute();
+        return $query->fetchAll(\PDO::FETCH_COLUMN, 0);
+    }
+
     public function getReportDetails($rid) {
         $toReturn = [
             "self" => [],
@@ -48,6 +55,7 @@ class ChatReportHandler {
         $selfDataQuery->bindParam(":id", $_SESSION['user_id'], \PDO::PARAM_INT);
         if ($selfDataQuery->execute()) {
             $toReturn['self'] = $selfDataQuery->fetch(\PDO::FETCH_ASSOC);
+            $toReturn['self']['roles'] = $this->getRolesById($_SESSION['user_id']);
             $selfDataQuery->closeCursor();
         }
 
@@ -67,12 +75,14 @@ class ChatReportHandler {
         $queryReporter->bindParam(":id", $toReturn["report"]["details"]["initiator"], \PDO::PARAM_INT);
         if ($queryReporter->execute()) {
             $toReturn["reporter"] = $queryReporter->fetch(\PDO::FETCH_ASSOC);
+            $toReturn['reporter']['roles'] = $this->getRolesById($toReturn["report"]["details"]["initiator"]);
         }
 
         $queryReported = $this->db->prepare("SELECT id,username,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",(perma_chat_banned OR (now() < chat_ban_expiry)) AS \"chatbanned\" FROM users WHERE id=:id;");
         $queryReported->bindParam(":id", $toReturn["report"]["details"]["target"], \PDO::PARAM_INT);
         if ($queryReported->execute()) {
             $toReturn["reported"] = $queryReported->fetch(\PDO::FETCH_ASSOC);
+            $toReturn['reported']['roles'] = $this->getRolesById($toReturn["report"]["details"]["target"]);
         }
 
        $toReturn["context"] = $this->getContextAroundID($toReturn["report"]["details"]["cmid"]);

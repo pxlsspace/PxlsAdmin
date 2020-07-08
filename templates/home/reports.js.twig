@@ -49,7 +49,7 @@ $('#report_info').on('show.bs.modal', function (event) {
             modal.find('#rmd-b-last-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.last}&type=ip">${data.reported.ip.last}</a>`);
             modal.find('#rmd-b-login-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.signup}&type=ip">${data.reported.ip.signup}</a>`);
             modal.find('#rmd-b-signup').text(data.reported.signup);
-            modal.find('#rmd-b-role').text(data.reported.role);
+            modal.find('#rmd-b-roles').text(data.reported.roles);
             modal.find('#rmd-b-pixel').text(data.reported.pixelcount);
             if (data.reported.ban.expiry == null) {
                 modal.find('#rmd-b-ban').html('None')
@@ -135,13 +135,13 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
 
         //reporter
         modal.find('#crm-reporter-id').text(data.reporter.id);
-        modal.find('#crm-reporter-role').text(data.reporter.role);
+        modal.find('#crm-reporter-roles').text(data.reporter.roles);
         modal.find('#crm-reporter-banned').text(data.reporter.banned >> 0 ? "Yes" : "No");
         modal.find('#crm-reporter-chat-banned').text(data.reporter.chatbanned >> 0 ? "Yes" : "No");
 
         //reported
         modal.find('#crm-reported-id').text(data.reported.id);
-        modal.find('#crm-reported-role').text(data.reported.role);
+        modal.find('#crm-reported-roles').text(data.reported.roles);
         modal.find('#crm-reported-banned').text(data.reported.banned >> 0 ? "Yes" : "No");
         modal.find('#crm-reported-chat-banned').text(data.reported.chatbanned >> 0 ? "Yes" : "No");
 
