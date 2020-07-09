@@ -90,9 +90,11 @@ class User {
             $getRoles->execute();
             $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
             // NOTE (Flying): DateTimeZone uses explicit timezone due to local dev issues
-            $banExpiryDateTime = \DateTime::createFromFormat("Y-m-d H:i:s", $usr["ban_expiry"], new \DateTimeZone("Europe/Berlin"));
-            if ($banExpiryDateTime->getTimestamp() === 0) {
-                $usr["ban_expiry"] = 0;
+            if ($usr["ban_expiry"] != null) {
+                $banExpiryDateTime = \DateTime::createFromFormat("Y-m-d H:i:s", $usr["ban_expiry"], new \DateTimeZone("Europe/Berlin"));
+                if ($banExpiryDateTime->getTimestamp() === 0) {
+                    $usr["ban_expiry"] = 0;
+                }
             }
             $userBufferName[$uname] = $usr;
             return $usr;
