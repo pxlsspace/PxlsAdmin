@@ -60,10 +60,12 @@ class User {
             $getRoles->bindParam(":uid",$uid,\PDO::PARAM_INT);
             $getRoles->execute();
             $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
-            // NOTE (Flying): DateTimeZone uses explicit timezone due to local dev issues
-            $banExpiryDateTime = \DateTime::createFromFormat("Y-m-d H:i:s", $usr["ban_expiry"], new \DateTimeZone("Europe/Berlin"));
-            if ($banExpiryDateTime->getTimestamp() === 0) {
-                $usr["ban_expiry"] = 0;
+            if ($usr["ban_expiry"] != null) {
+                // NOTE (Flying): DateTimeZone uses explicit timezone due to local dev issues
+                $banExpiryDateTime = \DateTime::createFromFormat("Y-m-d H:i:s", $usr["ban_expiry"], new \DateTimeZone("Europe/Berlin"));
+                if ($banExpiryDateTime->getTimestamp() === 0) {
+                    $usr["ban_expiry"] = 0;
+                }
             }
             $userBufferId[$uid] = $usr;
             return $usr;
@@ -89,8 +91,8 @@ class User {
             $getRoles->bindParam(":uid",$usr["id"],\PDO::PARAM_INT);
             $getRoles->execute();
             $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
-            // NOTE (Flying): DateTimeZone uses explicit timezone due to local dev issues
             if ($usr["ban_expiry"] != null) {
+                // NOTE (Flying): DateTimeZone uses explicit timezone due to local dev issues
                 $banExpiryDateTime = \DateTime::createFromFormat("Y-m-d H:i:s", $usr["ban_expiry"], new \DateTimeZone("Europe/Berlin"));
                 if ($banExpiryDateTime->getTimestamp() === 0) {
                     $usr["ban_expiry"] = 0;
