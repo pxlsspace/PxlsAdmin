@@ -27,6 +27,16 @@
                         <li class="list-group-item">
                             <b>Pixels placed (all time)</b><br/><a>{{ userinfo.pixel_count_alltime|number_format() }}</a>
                         </li>
+                        {% if userban.ban_expiry is defined or userban.ban_expiry == 0 %}
+                            <li class="list-group-item">
+                                <b>Ban Expiry</b><br/>
+                                {% if userban.ban_expiry == 0 %}
+                                    <a>Never</a>
+                                {% else %}
+                                    <a>{{ userinfo.ban_expiry|date("M, d Y H:i:s") }}</a>
+                                {% endif %}
+                            </li>
+                        {% endif %}
                     </ul>
 
                     <div class="input-group-btn">
