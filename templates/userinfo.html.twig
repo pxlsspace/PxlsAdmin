@@ -12,7 +12,7 @@
                     <h3 class="profile-username text-center">
                         <a href="{{ path_for('search') }}?q={{ userinfo.username }}">{{ userinfo.username }}</a></h3>
 
-                    <p class="text-muted text-center">{{ userinfo.roles|join(', ') }}</p>
+                    <p class="text-muted text-center">{{ userinfo.roles|join(', ') | default('(no roles)') }}</p>
 
                     <ul class="list-group list-group-unbordered">
                         <li class="list-group-item">
