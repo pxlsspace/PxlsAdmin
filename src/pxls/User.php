@@ -6,6 +6,8 @@ class User {
 
     protected $db;
 
+    private static $sql_select_userinfo = "SELECT *, ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT is_shadow_banned OR ban_expiry = to_timestamp(0) OR (now() < ban_expiry)) AS \"banned\" FROM users";
+
     public function __construct($db) {
         $this->db = $db;
     }
@@ -44,29 +46,26 @@ class User {
         return false;
     }
 
+    private function populateUserData($usr) {
+        $usr["signup_ip"] = $usr["signup_ip"];
+        $usr["last_ip"] = $usr["last_ip"];
+        $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
+        $getRoles->bindParam(":uid",$usr["id"],\PDO::PARAM_INT);
+        $getRoles->execute();
+        $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
+    }
+
     private $userBufferId = [];
     public function getUserById($uid) {
         if (isset($userBufferId[$uid])) {
             return $userBufferId[$uid];
         }
-        $getUser = $this->db->prepare("SELECT *,(SELECT is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE id = :uid LIMIT 1");
+        $getUser = $this->db->prepare("{$this::$sql_select_userinfo} WHERE id = :uid LIMIT 1");
         $getUser->bindParam(":uid",$uid,\PDO::PARAM_INT);
         $getUser->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
-            $usr["signup_ip"] = $usr["signup_ip"];
-            $usr["last_ip"] = $usr["last_ip"];
-            $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
-            $getRoles->bindParam(":uid",$uid,\PDO::PARAM_INT);
-            $getRoles->execute();
-            $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
-            if ($usr["ban_expiry"] != null) {
-                // NOTE (Flying): DateTimeZone uses explicit timezone due to local dev issues
-                $banExpiryDateTime = \DateTime::createFromFormat("Y-m-d H:i:s", $usr["ban_expiry"], new \DateTimeZone("Europe/Berlin"));
-                if ($banExpiryDateTime->getTimestamp() === 0) {
-                    $usr["ban_expiry"] = 0;
-                }
-            }
+            $this->populateUserData($usr);
             $userBufferId[$uid] = $usr;
             return $usr;
         } else {
@@ -80,24 +79,12 @@ class User {
         if (isset($userBufferName[$uname])) {
             return $userBufferName[$uname];
         }
-        $getUser = $this->db->prepare("SELECT *,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\" FROM users WHERE username = :uname");
+        $getUser = $this->db->prepare("{$this::$sql_select_userinfo} WHERE username = :uname");
         $getUser->bindParam(":uname",$uname,\PDO::PARAM_STR);
         $getUser->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
-            $usr["signup_ip"] = $usr["signup_ip"];
-            $usr["last_ip"] = $usr["last_ip"];
-            $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
-            $getRoles->bindParam(":uid",$usr["id"],\PDO::PARAM_INT);
-            $getRoles->execute();
-            $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
-            if ($usr["ban_expiry"] != null) {
-                // NOTE (Flying): DateTimeZone uses explicit timezone due to local dev issues
-                $banExpiryDateTime = \DateTime::createFromFormat("Y-m-d H:i:s", $usr["ban_expiry"], new \DateTimeZone("Europe/Berlin"));
-                if ($banExpiryDateTime->getTimestamp() === 0) {
-                    $usr["ban_expiry"] = 0;
-                }
-            }
+            $this->populateUserData($usr);
             $userBufferName[$uname] = $usr;
             return $usr;
         } else {
