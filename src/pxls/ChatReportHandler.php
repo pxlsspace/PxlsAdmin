@@ -120,17 +120,20 @@ class ChatReportHandler {
         $rid = intval($rid);
         $isResolved = ($isResolved == true ? 1 : 0);
 
-        $queryWhoami = $this->db->prepare('SELECT id,role FROM users WHERE id = :id');
-        $queryWhoami->bindParam(':id', $_SESSION['user_id'], \PDO::PARAM_INT);
-        if (!$queryWhoami->execute()) return false;
-        $whoami = $queryWhoami->fetch(\PDO::FETCH_ASSOC);
+        // TODO (Flying), added by netux: -- change roles to use use Pxls' roles.conf
+        $allowRoles = ["staff", "trialmod", "moderator", "administrator"];
+
+        $sessionRoles = $this->getRolesById($_SESSION['user_id']);
+        if(empty(array_intersect($sessionRoles, $allowRoles))) {
+            return false;
+        }
 
         $reportQuery = $this->db->prepare('SELECT claimed_by FROM chat_reports WHERE id = :rid');
         $reportQuery->bindParam(':rid', $rid, \PDO::PARAM_INT);
         if (!$reportQuery->execute()) return false;
         $reportClaimedBy = intval($reportQuery->fetch(\PDO::FETCH_ASSOC)['claimed_by']);
 
-        if (($whoami->role != "ADMIN" && $whoami->role != "DEVELOPER") && $reportClaimedBy != intval($_SESSION['user_id'])) {
+        if ($reportClaimedBy != intval($_SESSION['user_id'])) {
             return false;
         }
 
