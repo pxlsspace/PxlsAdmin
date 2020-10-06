@@ -53,6 +53,7 @@ class User {
         $getRoles->bindParam(":uid",$usr["id"],\PDO::PARAM_INT);
         $getRoles->execute();
         $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
+        return $usr;
     }
 
     private $userBufferId = [];
@@ -65,7 +66,7 @@ class User {
         $getUser->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
-            $this->populateUserData($usr);
+            $usr = $this->populateUserData($usr);
             $userBufferId[$uid] = $usr;
             return $usr;
         } else {
@@ -84,7 +85,7 @@ class User {
         $getUser->execute();
         if($getUser->rowCount() == 1) {
             $usr = $getUser->fetch(\PDO::FETCH_ASSOC);
-            $this->populateUserData($usr);
+            $usr = $this->populateUserData($usr);
             $userBufferName[$uname] = $usr;
             return $usr;
         } else {

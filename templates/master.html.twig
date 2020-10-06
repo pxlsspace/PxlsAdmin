@@ -126,7 +126,7 @@
                 <li><a href="{{ path_for('factions') }}"><i class="fa fa-list text-aqua"></i> <span>Factions</span></a></li>
                 <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-list text-aqua"></i> <span>Chat Context (dev tool)</span></a></li>
 
-                {% if (userdata.role == 'ADMIN' or userdata.role == 'DEVELOPER') %}
+                {% if ('administrator' in userdata.roles or 'developer' in userdata.roles) %}
                     <li><a href="{{ path_for('logs') }}"><i class="fa fa-list text-aqua"></i> <span>Logs</span></a></li>
                     <li><a href="{{ path_for('notifications') }}"><i class="fa fa-exclamation-circle text-aqua"></i> <span>Notifications</span></a></li>
                 {% endif %}
