@@ -78,7 +78,7 @@ final class Profile
             $userinfo["banlog"] = [
                 "legacy" => $_legacy,
                 "current" => $_current,
-                "count" => $sizes['legacy'] == $sizes['current'] ? $sizes['legacy'] : $sizes['legacy'] - $sizes['current']
+                "count" => $sizes['legacy'] == $sizes['current'] ? $sizes['legacy'] : abs($sizes['legacy'] - $sizes['current'])
             ];
             $userinfo["chatbanlog"] = $user->getChatbanlogFromDB($userinfo['id']);
             $userinfo["ip_log"] = $user->getIPLogForUser($userinfo['id']);
