@@ -6,7 +6,7 @@ class User {
 
     protected $db;
 
-    private static $sql_select_userinfo = "SELECT *, ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT is_shadow_banned OR ban_expiry = to_timestamp(0) OR (now() < ban_expiry)) AS \"banned\" FROM users";
+    private static $sql_select_userinfo = "SELECT *, ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT is_shadow_banned OR ban_expiry = to_timestamp(0) OR (now() < ban_expiry)) AS \"banned\", (perma_chat_banned OR now() < chat_ban_expiry) AS \"chat_banned\" FROM users";
 
     public function __construct($db) {
         $this->db = $db;

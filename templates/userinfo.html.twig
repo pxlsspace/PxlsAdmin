@@ -29,16 +29,34 @@
                         <li class="list-group-item">
                             <b>Pixels placed (all time)</b><br/><a>{{ userinfo.pixel_count_alltime|number_format() }}</a>
                         </li>
-                        {% if not userinfo.ban_expiry is null %}
-                            <li class="list-group-item">
-                                <b>Ban Expiry</b><br/>
-                                {% if userinfo.is_ban_permanent %}
-                                    <a>Never</a>
+                        <li class="list-group-item">
+                            <b>Canvas Ban</b><br/>
+                            {% if userinfo.is_shadow_banned %}
+                                <a>Shadow banned</a>
+                            {% else %}
+                                {% if userinfo.banned %}
+                                    {% if userinfo.is_ban_permanent %}
+                                        <a>Permanent</a>
+                                    {% else %}
+                                        <a>Expires <span>{{ userinfo.ban_expiry|date("M, d Y H:i:s") }}</span></a>
+                                    {% endif %}
                                 {% else %}
-                                    <a>{{ userinfo.ban_expiry|date("M, d Y H:i:s") }}</a>
+                                    <a>Not Banned</a>
                                 {% endif %}
-                            </li>
-                        {% endif %}
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item">
+                            <b>Chat Ban</b><br/>
+                            {% if userinfo.chat_banned %}
+                                {% if userinfo.perma_chat_banned %}
+                                    <a>Permanent</a>
+                                {% else %}
+                                    <a>Expires <span>{{ userinfo.chat_ban_expiry|date("M, d Y H:i:s") }}</span></a>
+                                {% endif %}
+                            {% else %}
+                                <a>Not Banned</a>
+                            {% endif %}
+                        </li>
                     </ul>
 
                     <div class="input-group-btn">

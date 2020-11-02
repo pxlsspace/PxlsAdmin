@@ -15,8 +15,7 @@ final class Search
     private $logger;
     private $database;
     protected $result = [];
-    // TODO (Flying): missing role
-    private $qs = "id, username, login, signup_time, cooldown_expiry, ban_expiry, ban_reason, signup_ip as signup_ip, last_ip as last_ip, pixel_count";
+    private static $qs = "u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.signup_ip, u.last_ip, u.pixel_count, u.pixel_count_alltime, u.is_shadow_banned, u.ban_expiry, u.ban_reason, u.perma_chat_banned, u.chat_ban_expiry, u.chat_ban_reason, u.ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT u.is_shadow_banned OR u.ban_expiry = to_timestamp(0) OR (now() < u.ban_expiry)) AS \"banned\", (u.perma_chat_banned OR now() < u.chat_ban_expiry) AS \"chat_banned\"";
 
     public function __construct(Twig $view, LoggerInterface $logger, \PDO $database)
     {
@@ -71,34 +70,42 @@ final class Search
     }
 
     protected function searchByUser($needle) {
-        $rows = $this->_performSearch(sprintf("SELECT %s FROM users WHERE UPPER(username) LIKE UPPER(:search) LIMIT 30", $this->qs), [
+        $rows = $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE UPPER(username) LIKE UPPER(:search) LIMIT 30", [
             ":search" => [str_replace('_', '\_', $needle), \PDO::PARAM_STR]
         ]);
 
         //Search for accounts with same IPs
         foreach($rows as $row) {
-            $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip = :ip", $this->qs), [
+            $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE u.last_ip = :ip", [
                 ':ip' => [$row['last_ip'], \PDO::PARAM_STR]
             ], 'same last_ip');
-            $this->_performSearch(sprintf("SELECT %s FROM users WHERE signup_ip = :ip", $this->qs), [
+            $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE u.signup_ip = :ip", [
                 ':ip' => [$row['signup_ip'], \PDO::PARAM_STR]
             ], 'same signup_ip');
         }
     }
 
     protected function searchByIP($needle) {
-        $this->_performSearch(sprintf("SELECT %s FROM users WHERE last_ip=:ip OR signup_ip=:ip LIMIT 30", $this->qs), [
+        $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE last_ip=:ip OR signup_ip=:ip LIMIT 30", [
             ":ip" => [$needle, \PDO::PARAM_STR]
         ]);
-        $this->_performSearch("SELECT u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.ban_expiry, u.ban_reason, u.signup_ip as signup_ip, u.last_ip as last_ip, u.pixel_count, l.ip AS log_ip FROM ip_log l LEFT OUTER JOIN users u ON u.id = l.user WHERE :ip = l.ip", [
+        $this->_performSearch("SELECT {$this::$qs}, l.ip AS log_ip FROM ip_log l LEFT OUTER JOIN users u ON u.id = l.user WHERE :ip = l.ip", [
             ':ip' => [$needle, \PDO::PARAM_STR]
         ], 'ip_log match');
     }
 
     protected function searchByLogin($needle) {
-        $this->_performSearch(sprintf("SELECT %s FROM users WHERE UPPER(login) LIKE UPPER(:login) LIMIT 30", $this->qs), [
+        $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE UPPER(login) LIKE UPPER(:login) LIMIT 30", [
             ':login' => [sprintf("%%%s%%", str_replace('_', '\_', $needle)), \PDO::PARAM_STR]
         ]);
+    }
+
+    private function populateRoles($usr) {
+        $getRole = $this->database->prepare("SELECT role FROM roles WHERE id = :uid");
+        $getRole->bindParam(":uid",$usr['id'],\PDO::PARAM_INT);
+        $getRole->execute();
+        $usr['roles'] = $getRole->fetchAll(\PDO::FETCH_COLUMN, 0);
+        return $usr;
     }
 
     /**
@@ -115,6 +122,7 @@ final class Search
         }
         if ($query->execute()) {
             while ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
+                $row = $this->populateRoles($row);
                 $this->addResult($row, $reason);
                 $toRet[] = $row;
             }
