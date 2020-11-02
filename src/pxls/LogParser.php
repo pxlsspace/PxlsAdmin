@@ -72,7 +72,7 @@ class LogParser {
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[3][0], 'extra' => [ 'old_username' => $matches[1][0], 'uid' => $matches[2][0] ]];
                     break;
                 case 'forcedrename':
-                    return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[2][0], 'extra' => [ 'old_username' => $matches[1][0], 'uid' => $matches[1][0] ]];
+                    return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[2][0], 'extra' => [ 'old_username' => $matches[1][0], 'uid' => $matches[3][0] ]];
                     break;
                 case 'claim':
                     return ['scope' => 'report', 'action' => $action, 'target' => $matches[2][0], 'extra' => ''];
