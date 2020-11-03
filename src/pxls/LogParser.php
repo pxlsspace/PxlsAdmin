@@ -2,6 +2,7 @@
 
 namespace pxls;
 
+// TODO(netux): replace /userinfo/{username} with /userinfo/id/{id} when possible once pxlsspace/PxlsAdmin#17 is merged
 class LogParser {
 
     public function __construct() {

@@ -242,7 +242,7 @@
                                             <div class="timeline-item">
                                                 <span class="time"><i class="fa fa-clock-o"></i> {{ item.when|date() }}</span>
                                                 <div class="timeline-body">
-                                                    <a href="{{ base_url() }}/userinfo/{{ item.banner }}" target="_blank">{{ item.banner }}</a> <span>{{ item.action }}ned</span> <span>{{ item.banned }}</span> {% if item.length > 0 %}for <span>{{ item.length }}</span> seconds{% endif %}
+                                                    <a href="{{ path_for('profileId', {'id': item.banner_id}) }}" target="_blank">{{ item.banner }}</a> <span>{{ item.action }}ned</span> <a href="{{ path_for('profileId', {'id': item.banned_id}) }}" target="_blank">{{ item.banned }}</a> {% if item.length > 0 %}for <span>{{ item.length }}</span> seconds{% endif %}
                                                     {% if item.ban_reason|length > 0 %}
                                                         <p><strong>Reason:</strong> <span>{{ item.ban_reason }}</span></p>
                                                     {% endif %}
@@ -305,7 +305,7 @@
                                             <div class="timeline-item">
                                                 <span class="time"><i class="fa fa-clock-o"></i> {{ item.when|date() }}</span>
                                                 <div class="timeline-body">
-                                                    <a href="{{ base_url() }}/userinfo/{{ item.banner }}" target="_blank">{{ item.banner }}</a> <span>{{ item.type == 'UNBAN' ? 'un' : '' }}banned</span> <span>{{ item.banned }}</span> {% if item.length > 0 %} for <span>{{ item.length }}</span> seconds{% endif %}
+                                                    <a href="{{ path_for('profileId', {'id': item.banner_id}) }}" target="_blank">{{ item.banner }}</a> <span>{{ item.type == 'UNBAN' ? 'un' : '' }}banned</span> <a href="{{ path_for('profileId', {'id': item.banned_id}) }}" target="_blank">{{ item.banned }}</a> {% if item.length > 0 %} for <span>{{ item.length }}</span> seconds{% endif %}
                                                     {% if item.ban_reason|length > 0 %}
                                                         <p><strong>Reason:</strong> <span>{{ item.ban_reason }}</span></p>
                                                     {% endif %}
@@ -483,7 +483,7 @@
                 });
                 $.post("{{ webroots.game }}/admin/forceNameChange", {user: this.dataset.username, newName}, function() {
                     alert('Success');
-                    document.location.href = `{{ webroots.panel }}/userinfo/${newName}`;
+                    document.location.href = `{{ webroots.panel }}${'{{ path_for('profileUsername', {'username': '{username}'}) }}'.replace('{username}', newName)}`;
                 }).fail(function() {
                     alert('An error occurred');
                 });
