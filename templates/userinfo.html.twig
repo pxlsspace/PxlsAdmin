@@ -18,9 +18,11 @@
                         <li class="list-group-item">
                             <b>Signup Time</b><br/><a>{{ userinfo.signup_time|date("M, d Y H:i:s") }}</a>
                         </li>
-                        <li class="list-group-item">
-                            <b>Cooldown Expiry</b><br/><a>{{ userinfo.cooldown_expiry|date("M, d Y H:i:s") }}</a>
-                        </li>
+                        {% if not userinfo.cooldown_expiry is null %}
+                            <li class="list-group-item">
+                                <b>Cooldown Expiry</b><br/><a>{{ userinfo.cooldown_expiry|date("M, d Y H:i:s") }}</a>
+                            </li>
+                        {% endif %}
                         <li class="list-group-item">
                             <b>Pixels placed</b><br/><a>{{ userinfo.pixel_count|number_format() }}</a>
                         </li>
