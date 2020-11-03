@@ -29,8 +29,14 @@
     <script src="{{ base_url() }}/assets/plugins/datatables/extensions/Scroller/js/dataTables.scroller.js"></script>
     <script type="text/javascript">
         (function() {
+            const searchParams = new URLSearchParams(location.search.slice(1));
+
+            const cmidInp = document.getElementById('cmid');
             document.getElementById('btnSubmit').onclick = function() {
-                doPost(document.getElementById('cmid').value);
+                const cmid = cmidInp.value;
+                searchParams.set('cmid', cmid);
+                history.replaceState(null, '', `?${searchParams.toString()}`)
+                doPost(cmid);
             };
             document.getElementById('btnBack').onclick = function() {
                 doPost(this.dataset.cmid);
@@ -69,6 +75,14 @@
                         }
                     }
                 }).fail(console.error);
+            }
+
+            if (searchParams.has('cmid')) {
+                try {
+                    const cmid = parseInt(searchParams.get('cmid'));
+                    cmidInp.value = cmid;
+                    doPost(cmid);
+                } catch (ex) {}
             }
         })();
     </script>
