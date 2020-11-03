@@ -10,7 +10,8 @@ $app->get('/reports', \pxls\Action\ReportList::class)->setName('reportList');
 $app->map(['GET', 'POST'], '/chatContext', \pxls\Action\ChatContext::class)->setName('ChatContext');
 
 $app->map(['GET', 'POST'], '/search', \pxls\Action\Search::class)->setName('search');
-$app->map(['GET', 'POST'], '/userinfo/{identifier}', \pxls\Action\Profile::class)->setName('profile');
+$app->map(['GET', 'POST'], '/userinfo/{username}', \pxls\Action\Profile::class)->setName('profileUsername');
+$app->map(['GET', 'POST'], '/userinfo/id/{id}', \pxls\Action\Profile::class)->setName('profileId');
 
 $app->map(['GET','POST'], '/api/private[/{params:.*}]', \pxls\Action\PrivateAPI::class)->setName('prapi');
 $app->get('/api/public[/{params:.*}]', \pxls\Action\PublicAPI::class)->setName('papi');

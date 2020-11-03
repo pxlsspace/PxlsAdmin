@@ -38,7 +38,16 @@ final class Profile
         $this->data['userdata'] = $user->getUserById($_SESSION['user_id']);
         //endregion
 
-        $userinfo = $this->findUserDetails($this->data["args"]["identifier"]);
+        $method = null; $identifier = null;
+        if (isset($this->data["args"]["username"])) {
+            $method = "name";
+            $identifier = $this->data["args"]["username"];
+        } else if (isset($this->data["args"]["id"])) {
+            $method = "id";
+            $identifier = $this->data["args"]["id"];
+        }
+
+        $userinfo = $this->findUserDetails($method, $identifier);
         if($userinfo) {
             $this->data["userinfo"] = $userinfo;
             krsort($this->data["timeline"]);
@@ -58,9 +67,16 @@ final class Profile
         return $pixels->fetchAll(\PDO::FETCH_OBJ);
     }
 
-    protected function findUserDetails($needle) {
+    protected function findUserDetails($method, $needle) {
         $user = new \pxls\User($this->db); $userinfo = null;
-        $userinfo = $user->getUserByName($needle);
+        switch ($method) {
+            case 'id':
+                $userinfo = $user->getUserById($needle);
+                break;
+            case 'name':
+                $userinfo = $user->getUserByName($needle);
+                break;
+        }
 
         if(!is_null($userinfo) && $userinfo) {
             $userinfo["login_url"] = Utils::MakeUserLoginURL($userinfo["login"]);
