@@ -21,9 +21,10 @@ class LogParser {
         $regex['chatban'] = '/\(chatban\) TEMP: {Target: (\S*)} {Initiator: (\S*)} {Length: (\S*)} {Purge: (true|false)} {PurgeAmount: (\d+)} {Reason: (.+)}/i';
         $regex['chatpurge'] = '/<(\S*), (\d*)> purged (\d*) messages from <(\S*), (\d*)>/i';
         $regex['chatdelete'] = '/<(\S*), (\d*)> purged message with id (\d*) from <(\S*), (\d*)>/i';
-        $regex['setrole'] = '/Set (\S*)\'s role to (\S*)/i'; // Kept for legacy reasons
+        $regex['setroles'] = '/Set (\S*)\'s roles? to (\S*)/i';
         $regex['addroles'] = '/Added roles "(.+)" to (\S*)/i';
         $regex['removeroles'] = '/Removed roles "(.+)" from (\S*)/i';
+        $regex['removeallroles'] = '/Removed (\S*)\'s roles/i';
         $regex['flagrename'] = '/((?:un)?flagged) (\S*) \((\d+)\) for name change/i';
         $regex['rename'] = '/User (\S*) \((\d+)\) has just changed their name to (\S*)/i';
         $regex['forcedrename'] = '/Changed (\S*)\'s name to (\S*) \(uid: (\d*)\)/i';
@@ -90,8 +91,7 @@ class LogParser {
                 case 'chatdelete':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[4][0], 'extra' => ['cmid' => $matches[3][0], 'uid' => $matches[5][0]]];
                     break;
-                case 'setrole':
-                    // Kept for legacy reasons
+                case 'setroles':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[1][0], 'extra' => $matches[2][0]];
                     break;
                 case 'addroles':
@@ -99,6 +99,9 @@ class LogParser {
                     break;
                 case 'removeroles':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[2][0], 'extra' => $matches[1][0]];
+                    break;
+                case 'removeallroles':
+                    return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[1][0]];
                     break;
                 case 'flagrename':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[2][0], 'extra' => ['action' => strtolower($matches[1][0]), 'uid' => $matches[3][0]]];
@@ -135,23 +138,24 @@ class LogParser {
     public function humanLogMessage($messageArray,$user_name,$raw_message) {
         $m = $messageArray; $messageTpl = [];
         // Scope: ModAction
-        $messageTpl["modaction"]["selfshadow"]   = '<a href="/userinfo/%user_name%" target="_blank">%user_name%</a> was shadowbanned automatically. (%extra%)';
-        $messageTpl["modaction"]["selfban"]      = '<a href="/userinfo/%user_name%" target="_blank">%user_name%</a> was banned automatically. (Scripting)';
-        $messageTpl["modaction"]["permaban"]     = '<a href="/userinfo/%target%" target="_blank">%target%</a> was canvas banned permanently.';
-        $messageTpl["modaction"]["shadowban"]    = '<a href="/userinfo/%target%" target="_blank">%target%</a> was shadowbanned.';
-        $messageTpl["modaction"]["ban"]          = '<a href="/userinfo/%target%" target="_blank">%target%</a> was canvas time-banned.';
-        $messageTpl["modaction"]["unban"]        = '<a href="/userinfo/%target%" target="_blank">%target%</a> was canvas unbanned.';
-        $messageTpl["modaction"]["chatpermaban"] = '<a href="/userinfo/%target%" target="_blank">%target%</a> was chat banned permanently%extra%.';
-        $messageTpl["modaction"]["chatban"]      = '<a href="/userinfo/%target%" target="_blank">%target%</a> was chat time-banned%extra%.';
-        $messageTpl["modaction"]["chatunban"]    = '<a href="/userinfo/%target%" target="_blank">%target%</a> was chat unbanned.';
-        $messageTpl["modaction"]["chatpurge"]    = '%extra.amount% messages from <a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) were purged from chat.';
-        $messageTpl["modaction"]["chatdelete"]   = 'Message <a href="/chatContext?cmid=%extra.cmid%" target="_blank">ID %extra.cmid%</a> from <a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) was deleted from chat.';
-        $messageTpl["modaction"]["setrole"]      = '<a href="/userinfo/%target%" target="_blank">%target%</a> was pro/demoted to %extra%.';
-        $messageTpl["modaction"]["addroles"]     = '<a href="/userinfo/%target%" target="_blank">%target%</a> was given the role(s) %extra%.';
-        $messageTpl["modaction"]["removeroles"]  = '<a href="/userinfo/%target%" target="_blank">%target%</a> was revoked of the role(s) %extra%.';
-        $messageTpl["modaction"]["flagrename"]   = '<a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) was %extra.action% for rename.';
-        $messageTpl["modaction"]["rename"]       = '<a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) changed their name from %extra.old_username% to %target%.';
-        $messageTpl["modaction"]["forcedrename"] = '<a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%)\'s name was forcefully changed from %extra.old_username% to %target%.';
+        $messageTpl["modaction"]["selfshadow"]     = '<a href="/userinfo/%user_name%" target="_blank">%user_name%</a> was shadowbanned automatically. (%extra%)';
+        $messageTpl["modaction"]["selfban"]        = '<a href="/userinfo/%user_name%" target="_blank">%user_name%</a> was banned automatically. (Scripting)';
+        $messageTpl["modaction"]["permaban"]       = '<a href="/userinfo/%target%" target="_blank">%target%</a> was canvas banned permanently.';
+        $messageTpl["modaction"]["shadowban"]      = '<a href="/userinfo/%target%" target="_blank">%target%</a> was shadowbanned.';
+        $messageTpl["modaction"]["ban"]            = '<a href="/userinfo/%target%" target="_blank">%target%</a> was canvas time-banned.';
+        $messageTpl["modaction"]["unban"]          = '<a href="/userinfo/%target%" target="_blank">%target%</a> was canvas unbanned.';
+        $messageTpl["modaction"]["chatpermaban"]   = '<a href="/userinfo/%target%" target="_blank">%target%</a> was chat banned permanently%extra%.';
+        $messageTpl["modaction"]["chatban"]        = '<a href="/userinfo/%target%" target="_blank">%target%</a> was chat time-banned%extra%.';
+        $messageTpl["modaction"]["chatunban"]      = '<a href="/userinfo/%target%" target="_blank">%target%</a> was chat unbanned.';
+        $messageTpl["modaction"]["chatpurge"]      = '%extra.amount% messages from <a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) were purged from chat.';
+        $messageTpl["modaction"]["chatdelete"]     = 'Message <a href="/chatContext?cmid=%extra.cmid%" target="_blank">ID %extra.cmid%</a> from <a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) was deleted from chat.';
+        $messageTpl["modaction"]["setroles"]       = '<a href="/userinfo/%target%" target="_blank">%target%</a>\'s role(s) were set to %extra%.';
+        $messageTpl["modaction"]["addroles"]       = '<a href="/userinfo/%target%" target="_blank">%target%</a> was given the role(s) %extra%.';
+        $messageTpl["modaction"]["removeroles"]    = '<a href="/userinfo/%target%" target="_blank">%target%</a> was revoked of the role(s) %extra%.';
+        $messageTpl["modaction"]["removeallroles"] = '<a href="/userinfo/%target%" target="_blank">%target%</a> had all of their roles removed.';
+        $messageTpl["modaction"]["flagrename"]     = '<a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) was %extra.action% for rename.';
+        $messageTpl["modaction"]["rename"]         = '<a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%) changed their name from %extra.old_username% to %target%.';
+        $messageTpl["modaction"]["forcedrename"]   = '<a href="/userinfo/%target%" target="_blank">%target%</a> (UID %extra.uid%)\'s name was forcefully changed from %extra.old_username% to %target%.';
         // Scope: Report
         $messageTpl["report"]["canvasclaim"]   = 'Canvas Report <a href="#" data-toggle="modal" data-reportid="%target%" data-target="#report_info">ID %target%</a> has been claimed';
         $messageTpl["report"]["canvasunclaim"] = 'Canvas Report <a href="#" data-toggle="modal" data-reportid="%target%" data-target="#report_info">ID %target%</a> has been unclaimed';
