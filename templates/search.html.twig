@@ -23,12 +23,12 @@
                                 <th>Login</th>
                                 <th>Signup Time</th>
                                 <th>Cooldown Expiry</th>
-                                <th>Role</th>
-                                <th>Ban Expiry</th>
-                                <th>Ban Reason</th>
+                                <th>Roles</th>
+                                <th>Canvas Ban</th>
+                                <th>Chat Ban</th>
                                 <th>Signup IP</th>
                                 <th>Last IP</th>
-                                <th>Pixel Count</th>
+                                <th>Pixel Counts</th>
                                 <th>Reason</th>
                                 <th>Action</th>
                             </tr>
@@ -46,12 +46,40 @@
                                     <td><a href="{{ user.login_url|raw }}">{{ user.login }}</a></td>
                                     <td>{{ user.signup_time }}</td>
                                     <td>{{ user.cooldown_expiry }}</td>
-                                    <td>{{ user.role }}</td>
-                                    <td>{{ user.ban_expiry }}</td>
-                                    <td>{{ user.ban_reason }}</td>
+                                    <td>{{ user.roles|join(' ') }}</td>
+                                    <td>
+                                        {% if user.banned %}
+                                            {% if user.is_shadow_banned %}
+                                                Shadow banned
+                                            {% else %}
+                                                {% if user.is_ban_permanent %}
+                                                    Permanent
+                                                {% else %}
+                                                    Expires <span>{{ user.ban_expiry|date("M, d Y H:i:s") }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                            <br/>
+                                            Reason: <span>{{ user.ban_reason }}</span>
+                                        {% else %}
+                                            Not Banned
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.chat_banned %}
+                                            {% if user.perma_chat_banned %}
+                                                Permanent
+                                            {% else %}
+                                                Expires <span>{{ user.chat_ban_expiry|date("M, d Y H:i:s") }}</span>
+                                            {% endif %}
+                                            <br/>
+                                            Reason: <span>{{ user.chat_ban_reason }}</span>
+                                        {% else %}
+                                            Not Banned
+                                        {% endif %}
+                                    </td>
                                     <td><a href="{{ base_url() }}{{ path_for('search') }}?q={{ user.signup_ip }}&type=ip">{{ user.signup_ip }}</a></td>
                                     <td><a href="{{ base_url() }}{{ path_for('search') }}?q={{ user.last_ip }}&type=ip">{{ user.last_ip }}</a></td>
-                                    <td>{{ user.pixel_count }}</td>
+                                    <td>{{ user.pixel_count }}/{{ user.pixel_count_alltime }}</td>
                                     <td>
                                         {% for reason in user.reason %}
                                             {{ reason }}

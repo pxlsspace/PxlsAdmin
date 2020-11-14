@@ -6,7 +6,7 @@ class User {
 
     protected $db;
 
-    private static $sql_select_userinfo = "SELECT *, ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT is_shadow_banned OR ban_expiry = to_timestamp(0) OR (now() < ban_expiry)) AS \"banned\" FROM users";
+    private static $sql_select_userinfo = "SELECT *, ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT is_shadow_banned OR ban_expiry = to_timestamp(0) OR (now() < ban_expiry)) AS \"banned\", (perma_chat_banned OR now() < chat_ban_expiry) AS \"chat_banned\" FROM users";
 
     public function __construct($db) {
         $this->db = $db;
@@ -116,7 +116,7 @@ class User {
         $toRet = [];
         $user = $this->getUserById($uid);
         if ($user) {
-            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as "when_timestamp", to_timestamp(b.when) as "when", b.banner as "banner_id", COALESCE(u.username, \'console\') as "banner", b.banned as "banned_id", u1.username as "banned", b.ban_expiry as "ban_expiry_timestamp", (CASE WHEN b.ban_expiry != NULL THEN b.ban_expiry ELSE 0 END) as "ban_expiry_date", (CASE WHEN b.ban_expiry - b.when > 0 THEN b.ban_expiry - b.when ELSE -1 END) as "length", b.action, b.ban_reason FROM banlogs b LEFT OUTER JOIN users u ON u.id = b.banner INNER JOIN users u1 ON u1.id = b.banned WHERE b.banned = :id');
+            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as "when_timestamp", to_timestamp(b.when) as "when", b.banner as "banner_id", COALESCE(u.username, \'console\') as "banner", b.banned as "banned_id", u1.username as "banned", b.ban_expiry as "ban_expiry_timestamp", (CASE WHEN b.ban_expiry != NULL THEN b.ban_expiry ELSE 0 END) as "ban_expiry_date", (CASE WHEN b.ban_expiry - b.when > 0 THEN b.ban_expiry - b.when ELSE -1 END) as "length", b.action, b.ban_reason FROM banlogs b LEFT OUTER JOIN users u ON u.id = b.banner INNER JOIN users u1 ON u1.id = b.banned WHERE b.banned = :id ORDER BY b.when ASC');
             $getBansQuery->bindParam(':id', $uid);
             $getBansQuery->execute();
             if ($getBansQuery->rowCount() > 0) {
@@ -149,7 +149,7 @@ class User {
         $toRet = [];
         $user = $this->getUserById($uid);
         if ($user) {
-            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as "when_timestamp", to_timestamp(b.when) as "when", b.initiator as "banner_id", COALESCE(u.username, \'console\') as "banner", b.target as "banned_id", u1.username as "banned", b.expiry as "ban_expiry_timestamp", (CASE WHEN b.expiry != NULL THEN b.expiry ELSE 0 END) as "ban_expiry_date", (CASE WHEN b.expiry - b.when > 0 THEN b.expiry - b.when ELSE -1 END) as "length", b.type, b.purged, b.reason as ban_reason FROM chatbans b LEFT OUTER JOIN users u ON u.id = b.initiator INNER JOIN users u1 ON u1.id = b.target WHERE b.target = :id');
+            $getBansQuery = $this->db->prepare('SELECT b.id, b.when as "when_timestamp", to_timestamp(b.when) as "when", b.initiator as "banner_id", COALESCE(u.username, \'console\') as "banner", b.target as "banned_id", u1.username as "banned", b.expiry as "ban_expiry_timestamp", (CASE WHEN b.expiry != NULL THEN b.expiry ELSE 0 END) as "ban_expiry_date", (CASE WHEN b.expiry - b.when > 0 THEN b.expiry - b.when ELSE -1 END) as "length", b.type, b.purged, b.reason as ban_reason FROM chatbans b LEFT OUTER JOIN users u ON u.id = b.initiator INNER JOIN users u1 ON u1.id = b.target WHERE b.target = :id ORDER BY b.when ASC');
             $getBansQuery->bindParam(':id', $uid);
             $getBansQuery->execute();
             if ($getBansQuery->rowCount() > 0) {
