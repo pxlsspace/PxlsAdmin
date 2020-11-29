@@ -66,8 +66,8 @@ class ReportHandler {
             $report['who_name'] = $report['who'] ? $this->getUserdataById($report['who'])->username : 'Server';
             $report['claimed_name'] = ($report['claimed_by']==0)?'':$this->getUserdataById($report['claimed_by'])->username;
             $report['position_url'] = $report['who'] ? '<a href="'.$this->formatCoordsLink($report['x'], $report['y']).'" target="_blank">X:'.$report['x'].'; Y:'.$report['y'].'</a>' : 'N/A';
-            $report['who_url'] = $report['who'] ? '<a href="/userinfo/'.$report['who_name'].'" target="_blank">'.$report['who_name'].'</a>' : 'Server';
-            $report['reported_url'] = $report['reported'] ? '<a href="/userinfo/'.$report['reported_name'].'" target="_blank">'.$report['reported_name'].'</a>' : 'Server';
+            $report['who_url'] = $report['who'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['who']]).'" target="_blank">'.$report['who_name'].'</a>' : 'Server';
+            $report['reported_url'] = $report['reported'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['reported']]).'" target="_blank">'.$report['reported_name'].'</a>' : 'Server';
             $report['human_time'] = date("d.m.Y - H:i:s",$report['time']);
             if($report['claimed_by'] == 0) {
                 $report['action'] = '<button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-reportid="'.$report['id'].'" data-target="#report_info">Details</button>';
@@ -159,6 +159,7 @@ class ReportHandler {
             $report['general']['time'] = date("d.m.Y - H:i:s", $gData->time);
 
             $reporterData = $this->getUserdataById($gData->who);
+            $report['reporter']['id']               = $reporterData->id;
             $report['reporter']['username']         = $reporterData->username;
             $report['reporter']['login']            = $reporterData->login;
             $report['reporter']['signup']           = $reporterData->signup_time;
@@ -168,6 +169,7 @@ class ReportHandler {
             $report['reporter']['ban']              = ["expiry"=>$reporterData->ban_expiry,"reason"=>$reporterData->ban_reason];
 
             $reportedData = $this->getUserdataById($gData->reported);
+            $report['reported']['id']               = $reportedData->id;
             $report['reported']['username']         = $reportedData->username;
             $report['reported']['login']            = $reportedData->login;
             $report['reported']['signup']           = $reportedData->signup_time;

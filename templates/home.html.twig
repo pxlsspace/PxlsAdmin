@@ -376,11 +376,15 @@
                             },
                             {
                                 "data": "initiator_name",
-                                "render": data => `<a href="/userinfo/${data}">${data}</a>`
+                                "render": (data, type, row) => {
+                                    return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.initiator)}">${data}</a>`;
+                                }
                             },
                             {
                                 "data": "target_name",
-                                "render": data => `<a href="/userinfo/${data}">${data}</a>`
+                                "render": (data, type, row) => {
+                                    return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.target)}">${data}</a>`;
+                                }
                             },
                             {
                                 "data": "time",

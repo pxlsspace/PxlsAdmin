@@ -87,6 +87,8 @@ final class PrivateAPI
     }
 
     protected function lastSignups() {
+        global $app;
+
         $toRet = [];
         $qSignups = $this->database->query("SELECT id,username,signup_time,login,ban_reason,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",signup_ip,last_ip,pixel_count FROM users ORDER BY signup_time DESC LIMIT 100");
         $qSignups->execute();
@@ -105,7 +107,7 @@ final class PrivateAPI
             $signup["last_ip"] = $signup["last_ip"];
 
             $username = $signup["username"];
-            $signup["username"] = '<a href="userinfo/'.$username.'" target="_blank">'.$username.'</a>';
+            $signup["username"] = '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $signup['id']]).'" target="_blank">'.$username.'</a>';
 
             $toRet[] = $signup;
         }
@@ -114,6 +116,8 @@ final class PrivateAPI
     }
 
     protected function lastActionLog($scope=null,$max=5000) {
+        global $app;
+
         $logs = [];
         switch($scope) {
             case 'adminlog':
@@ -143,7 +147,9 @@ final class PrivateAPI
             }
             $log["message"] = $logParser->humanLogMessage($logParser->parse($log["message"]),$log["username"],$log["message"]);
             $log["time"] = date("d.m.Y H:i:s",$log["time"]);
-            $log["username"] = '<a href="/userinfo/'.$log["username"].'" target="_blank">'.$log["username"].'</a>';
+            if ($log["username"] !== "Server Console") {
+                $log["username"] = '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $log['userid']]).'" target="_blank">'.$log["username"].'</a>';
+            }
             $logs[] = $log;
         }
         return $logs;
