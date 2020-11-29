@@ -112,7 +112,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
     modal.find('#rmd-g-message').show();
     modal.find('#modal-footer').html(modal_footer);
 
-    $.getJSON('{{ webroots.panel }}/api/report/chatDetails/'+button.data('reportId'),function(data){
+    $.getJSON('{{ webroots.panel }}/api/report/chatDetails/'+button.data('reportid'),function(data){
         if (window.__dynVars && window.__dynVars.viewOnly === true) {
             modal.find('#rmd-claim,#rmd-unclaim,#rmd-resolve').hide();
         }
@@ -168,17 +168,17 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         let unclaimButton = modal.find('#rmd-unclaim').show()[0];
         let resolveButton = modal.find('#rmd-resolve').show()[0];
 
-        claimButton.dataset['reportId'] =  data.report.details.id;
+        claimButton.dataset['reportid'] =  data.report.details.id;
 
-        unclaimButton.dataset['reportId'] = data.report.details.id;
+        unclaimButton.dataset['reportid'] = data.report.details.id;
         unclaimButton.disabled = cannotOverwrite;
 
-        resolveButton.dataset['reportId'] = data.report.details.id;
+        resolveButton.dataset['reportid'] = data.report.details.id;
         resolveButton.disabled = cannotOverwrite;
 
         $(claimButton).click(function(){
             $.ajax({
-                url: "{{ webroots.panel }}/api/report/chatClaim/" + claimButton.dataset['reportId']
+                url: "{{ webroots.panel }}/api/report/chatClaim/" + claimButton.dataset['reportid']
             }).done(function() {
                 modal.find('#rmd-claim').hide();
                 modal.find('#rmd-unclaim').show();
@@ -188,7 +188,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         });
         $(unclaimButton).click(function(){
             $.ajax({
-                url: "{{ webroots.panel }}/api/report/chatUnclaim/" + unclaimButton.dataset['reportId']
+                url: "{{ webroots.panel }}/api/report/chatUnclaim/" + unclaimButton.dataset['reportid']
             }).done(function() {
                 modal.find('#rmd-claim').show();
                 modal.find('#rmd-unclaim').hide();
@@ -198,7 +198,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         });
         $(resolveButton).click(function(){
             $.ajax({
-                url: "{{ webroots.panel }}/api/report/chatResolve/" + resolveButton.dataset['reportId']
+                url: "{{ webroots.panel }}/api/report/chatResolve/" + resolveButton.dataset['reportid']
             }).done(function() {
                 setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
             });
