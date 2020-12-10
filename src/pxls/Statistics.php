@@ -5,7 +5,6 @@ namespace pxls;
 class Statistics {
 
     protected $db;
-    private $palette = ["#FFFFFF", "#CDCDCD", "#888888", "#222222", "#000000", "#FFA7D1", "#E50000", "#800000", "#FFDDCA", "#E59500", "#A06A42", "#E5D900", "#94E044", "#02BE01", "#00D3DD", "#0083C7", "#0000EA", "#CF6EE4", "#FF00FF", "#820080"];
 
     public function __construct($database) {
         $this->db = $database;
@@ -32,10 +31,6 @@ class Statistics {
         }
     }
 
-    public function mostPixels() {
-        return $this->db->query("SELECT username, pixel_count FROM users ORDER BY pixel_count DESC LIMIT 1")->fetch(\PDO::FETCH_OBJ);
-    }
-
     public function topUser() {
         $topuser = $this->db->query("SELECT username, pixel_count FROM users ORDER BY pixel_count DESC LIMIT 10");
         $top10 = [];
@@ -44,14 +39,4 @@ class Statistics {
         }
         return $top10;
     }
-
-    public function topColor() {
-        $topColor = $this->db->query("SELECT COUNT(*) as uses, color FROM pixels GROUP BY color ORDER BY uses DESC");
-        $topColors = $topColor->fetchAll(\PDO::FETCH_OBJ);
-        foreach($topColors as $top) {
-            $top->hex = $this->palette[$top->color];
-        }
-        return $topColors;
-    }
-
 }
