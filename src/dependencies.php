@@ -31,7 +31,10 @@ $container['logger'] = function ($c) {
     $settings = $c->get('settings')['logger'];
     $logger = new Monolog\Logger($settings['name']);
     $logger->pushProcessor(new Monolog\Processor\UidProcessor());
-    $logger->pushHandler(new PgSQLHandler($c->get('database'), "admin_log", array('userid'), \Monolog\Logger::DEBUG));
+    $logger->pushHandler(new PgSQLHandler($c->get('database'), "admin_log", array('userid'), $settings['level']));
+    if (isset($settings['path'])) {
+        $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
+    }
     return $logger;
 };
 
