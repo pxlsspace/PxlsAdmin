@@ -1,0 +1,417 @@
+{% extends "master.html.twig" %}
+
+{% set title = 'Pixel Lookup' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Search</h3>
+                </div>
+                <div class="box-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#search-custom">Custom</a></li>
+                        <li><a data-toggle="tab" href="#search-by-id">By ID</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <span>Leave any fields empty to ignore them.</span>
+                        <div id="search-by-id" class="tab-pane">
+                            <div>
+                                <label for="pixel-id">Pixel ID</label>
+                                <input name="pixel-id" type="number" min="0" />
+                            </div>
+                        </div>
+                        <div id="search-custom" class="tab-pane active">
+                            <fieldset>
+                                <legend>Coordinate</legend>
+                                <label><input type="radio" name="coordinate-search-type" value="range" checked/> Range</label>
+                                <label><input type="radio" name="coordinate-search-type" value="exact" /> Exact</label>
+                                <div data-section-name="coordinate-search-type" data-section-value="range">
+                                    <div>
+                                        <div class="coordinate-input-container">
+                                            <input name="coords-from-x" class="small-input" type="number" />,
+                                            <input name="coords-from-y" class="small-input" type="number" />
+                                        </div>
+                                        to
+                                        <div class="coordinate-input-container">
+                                            <input name="coords-to-x" class="small-input" type="number" />,
+                                            <input name="coords-to-y" class="small-input" type="number" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-section-name="coordinate-search-type" data-section-value="exact">
+                                    <div>
+                                        <div class="coordinate-input-container">
+                                            <input name="coords-exact-x" class="small-input" type="number" />,
+                                            <input name="coords-exact-y" class="small-input" type="number" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Time range</legend>
+                                <div>
+                                    <label for="before">Before</label>
+                                    <input name="before-date" type="date" />
+                                    <input name="before-time" type="time" step=".001" />
+                                    <span id="lblBeforeFeedback" class="lblFeedback text-orange"><i class="icon fa fa-warning"></i> Invalid</span>
+                                </div>
+                                <div>
+                                    <label for="after">After</label>
+                                    <input name="after-date" type="date" />
+                                    <input name="after-time" type="time" step=".001" />
+                                    <span id="lblAfterFeedback" class="lblFeedback text-orange"><i class="icon fa fa-warning"></i> Invalid</span>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Placers</legend>
+                                <ul id="lstPlacers"></ul>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Colors</legend>
+                                <div id="filter-colors" class="color-filter">Loading...</div>
+                            </fieldset>
+                        </div>
+                        <button id="btnQuery" class="btn btn-primary">Query</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Result</h3>
+                </div>
+                <div class="box-body">
+                    <div id="error-box" class="alert alert-error" style="display: none;">
+                        <h4><i class="icon fa fa-times"></i> An error occurred</h4>
+                        <span id="error-text"></span><br/>
+                        Please contact a developer. The error has been logged.
+                    </div>
+                    <div>
+                        <b>Show fields</b>:
+                        <label><input type="checkbox" data-toggle-column="4" checked> Time</label>
+                        <label><input type="checkbox" data-toggle-column="5" checked> Is Most Recent</label>
+                        <label><input type="checkbox" data-toggle-column="6"> Was Undone</label>
+                        <label><input type="checkbox" data-toggle-column="7"> Is Undo</label>
+                        <label><input type="checkbox" data-toggle-column="8"> With Placement Override</label>
+                        <label><input type="checkbox" data-toggle-column="9"> Is Part of a Rollback</label>
+                    </div>
+                    <table id="tblPixels" class="table table-responsive table-bordered table-striped nowrap">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Placer</th>
+                                <th>Coords</th>
+                                <th>Color</th>
+                                <th>Time</th>
+                                <th>Is Most Recent</th>
+                                <th>Was Undone</th>
+                                <th>Is Undo</th>
+                                <th>With Placement Override</th>
+                                <th>Is Part of a Rollback</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <!-- TODO(netux): draw canvas with results? !-->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.css">
+    {{ parent() }}
+    <style>
+        fieldset legend {
+            margin: 1em 0 0.5em 0;
+        }
+
+        .checkerboard-background {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY1i/fv39+/cZgfjChQsAQicJuS/hrEUAAAAASUVORK5CYII=');
+            background-size: cover;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .dynamic-list {
+            padding-left: 1em;
+        }
+        ul.dynamic-list > li {
+            list-style: none;
+        }
+
+        .coordinate-input-container {
+            display: inline-block;
+        }
+        .coordinate-input-container::before {
+            content: "(";
+        }
+        .coordinate-input-container::after {
+            content: ")";
+        }
+        .coordinate-input-container > input {
+            width: 5em;
+            border: none;
+            border-bottom: 1px solid gray;
+        }
+        .coordinate-input-container > input::after {
+            content: ", ";
+        }
+
+        .color-filter > input[type="checkbox"] {
+            position: relative;
+            margin: 2px;
+            width: 2em;
+            height: 2em;
+            border: 1px solid black;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .color-filter > input[type="checkbox"]:checked::after {
+            position: absolute;
+            content: "";
+            width: 100%;
+            height: 3px;
+            bottom: 0;
+            background-color: blue;
+        }
+    </style>
+{% endblock css %}
+
+{% block js %}
+    {{ parent() }}
+    <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/datatables/extensions/Scroller/js/dataTables.scroller.js"></script>
+    {% if not had_error %}
+    <script type="text/javascript">
+        (function() {
+            function error(txt) {
+                $('#error-box').show();
+                $('#error-text').text(txt);
+            }
+
+            let palette;
+            const dtPixels = $('#tblPixels').DataTable({
+                order: [[0, 'asc']],
+                columns: [
+                    { data: "pixel_id" },
+                    {
+                        data: "user_name",
+                        render: (data, type, row, meta) => `<a href="/userinfo/${data}">${data}</a>`
+                    },
+                    {
+                        render: (data, type, row, meta) => `<a href="{{ webroots.game }}/#x=${row.x}&y=${row.y}&scale=50">(${row.x}, ${row.y})</a>`
+                    },
+                    {
+                        data: "color",
+                        render: (data, type, row, meta) => {
+                            const isInsidePalette = palette && data >= 0 && data < palette.length;
+                            const isTransparent = data === 0xFF;
+                            const color = palette && palette[data];
+                            return `<div class="pixel-color"${isInsidePalette ? ` style="background-color: #${color.value}"` : ''}></div> ${isInsidePalette ? color.name : (isTransparent ? 'Transparent' : '???')} (${data})`
+                        }
+                    },
+                    { data: "time" },
+                    { data: "most_recent" },
+                    { data: "undone" },
+                    { data: "undo_action" },
+                    { data: "mod_action" },
+                    { data: "rollback_action" }
+                ]
+            });
+
+            $('input[type="checkbox"][data-toggle-column]').on('change', function(ev) {
+                const column = parseInt(this.dataset.toggleColumn);
+                dtPixels.column(column).visible(this.checked);
+            }).change();
+
+
+            const isValidDate = (d) => !(d === 'Invalid Date' || isNaN(d));
+            const xor = (a, b) => a ? !b : b;
+
+            function parseDateTimeInputs(name) {
+                const dateStr = $(`input[type="date"][name="${name}-date"]`).val();
+                const timeStr = $(`input[type="time"][name="${name}-time"`).val();
+                if (!dateStr && !timeStr) {
+                    return null;
+                }
+                return new Date(`${dateStr} ${timeStr}Z`); // force UTC
+            }
+
+            function parseCoordinateInputs(name) {
+                const x = parseInt($(`input[type="number"][name="coords-${name}-x"]`).val());
+                const y = parseInt($(`input[type="number"][name="coords-${name}-y"]`).val());
+                if (isNaN(x) || isNaN(y)) {
+                    return null;
+                }
+                return [x, y];
+            }
+
+            $('.lblFeedback').hide();
+
+            $('#btnQuery').on('click', function(ev) {
+                ev.preventDefault();
+                $('#error-box').hide();
+
+
+                let qs = '';
+                const qsAdd = (name, value) => {
+                    if (qs.length > 0) {
+                        qs += '&';
+                    }
+                    qs += `${name}=${encodeURIComponent(value.toString())}`;
+                }
+
+                let invalid = false;
+                if ($('.tab-pane.active').attr('id') === 'search-by-id') {
+                    const pixelId = $('input[name="pixel-id"]').val();
+                    if (pixelId) {
+                        qsAdd('pixelId', pixelId);
+                    }
+                } else {
+                    switch ($('input[type="radio"][name="coordinate-search-type"]:checked').val()) {
+                        case 'exact': {
+                            const coords = parseCoordinateInputs('exact');
+                            if (coords != null) {
+                                const [ x, y ] = coords;
+                                qsAdd('coordsX', x);
+                                qsAdd('coordsY', y);
+                            }
+                            break;
+                        }
+                        case 'range': {
+                            const coordsFrom = parseCoordinateInputs('from');
+                            const coordsTo = parseCoordinateInputs('to');
+                            if (coordsFrom != null && coordsTo != null) {
+                                const [ fromX, fromY ] = coordsFrom;
+                                qsAdd('coordsFromX', fromX);
+                                qsAdd('coordsFromY', fromY);
+
+                                const [ toX, toY ] = coordsTo;
+                                qsAdd('coordsToX', toX);
+                                qsAdd('coordsToY', toY);
+                            }
+                        }
+                    }
+
+                    const before = parseDateTimeInputs('before');
+                    if (before != null) {
+                        const lbl = $('#lblBeforeFeedback');
+                        if (isValidDate(before)) {
+                            qsAdd('before', before.getTime());
+                            lbl.hide();
+                        } else {
+                            invalid = true;
+                            lbl.show();
+                        }
+                    }
+
+                    const after = parseDateTimeInputs('after');
+                    if (after != null) {
+                        const lbl = $('#lblAfterFeedback');
+                        if (isValidDate(after)) {
+                            qsAdd('after', after.getTime());
+                            lbl.hide();
+                        } else {
+                            invalid = true;
+                            lbl.show();
+                        }
+                    }
+
+                    const placers = $('input[name="placers[]"]').map((idx, el) => el.value).filter((idx, name) => !!name).toArray();
+                    for (const user of placers) {
+                        qsAdd('placers[]', user);
+                    }
+
+                    const colors = $('#filter-colors input[type="checkbox"]:checked').map((idx, el) => el.dataset.colorIdx).toArray();
+                    for (const cIdx of colors) {
+                        qsAdd('colors[]', cIdx);
+                    }
+                }
+
+                if (invalid) {
+                    return;
+                }
+
+                fetch(`{{ xhr_base }}/pixels?${qs}`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then((res) => res.json()).then((json) => {
+                    if (json.status !== 'success') {
+                        throw json.error;
+                    }
+
+                    dtPixels.clear();
+                    dtPixels.rows.add(json.data);
+                    dtPixels.draw();
+                }).catch((err) => {
+                    console.error(err);
+                    error('Failed to retrieve the queried pixels.');
+                });
+            });
+
+            $('input[type="radio"][name="coordinate-search-type"]').on('change', function(ev) {
+                const sections = $('[data-section-name="coordinate-search-type"]');
+                if (this.checked) {
+                    sections.hide();
+                }
+                sections.filter(`[data-section-value="${this.value}"]`).toggle(this.checked);
+            }).change();
+
+            function makeDynamicList(listEl, itemModel) {
+                listEl = $(listEl);
+
+                const addBtnEl = $('<button class="btn btn-success"> <i class="icon fa fa-plus"/> Add</button>')
+                    .on('click', (ev) => {
+                        ev.preventDefault();
+
+                        const itemEl = $('<li/>');
+                        itemEl.append(
+                            itemModel.clone(),
+                            $('<button class="btn btn-danger"><i class="icon fa fa-times"></i></button>')
+                                .on('click', (ev) => {
+                                    ev.preventDefault();
+                                    itemEl.remove();
+                                })
+                        ).insertBefore(addBtnEl);
+                    });
+
+                listEl.addClass('dynamic-list');
+                listEl.append(addBtnEl);
+            }
+
+            makeDynamicList($('#lstPlacers'), $('<input/>').attr({ name: 'placers[]' }));
+
+            const colorFilter = $('#filter-colors');
+            function initColorFilter() {
+                colorFilter.contents().remove();
+
+                colorFilter.append($(`<input type="checkbox" data-color-idx="255" class="checkerboard-background"/>`));
+                for (const idx in palette) {
+                    const color = palette[idx];
+                    colorFilter.append($(`<input type="checkbox" data-color-idx="${idx}" />`).css('background-color', `#${color.value}`));
+                }
+            }
+
+            fetch('{{ webroots.game }}/info')
+                .then((res) => res.json())
+                .then((info) => { palette = info.palette; })
+                .then(initColorFilter)
+                .catch((err) => {
+                    console.error(err);
+                    colorFilter.addClass('text-red').text('Failed to load colors');
+                });
+        })();
+    </script>
+    {% endif %}
+{% endblock %}
