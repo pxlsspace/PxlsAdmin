@@ -14,13 +14,13 @@
                         <li class="active"><a data-toggle="tab" href="#search-custom">Custom</a></li>
                         <li><a data-toggle="tab" href="#search-by-id">By ID</a></li>
                     </ul>
-                    <div class="tab-content">
+                    <form class="tab-content">
                         <span>Leave any fields empty to ignore them.</span>
                         <div id="search-by-id" class="tab-pane">
-                            <div>
-                                <label for="pixel-id">Pixel ID</label>
+                            <label>
+                                Pixel ID
                                 <input name="pixel-id" type="number" min="0" />
-                            </div>
+                            </label>
                         </div>
                         <div id="search-custom" class="tab-pane active">
                             <fieldset>
@@ -36,39 +36,40 @@
                                 <div data-section-name="coordinate-search-type" data-section-value="range">
                                     <div>
                                         <div class="coordinate-input-container">
-                                            <input name="coords-from-x" class="small-input" type="number" />,
-                                            <input name="coords-from-y" class="small-input" type="number" />
+                                            <input name="coords-from-x" class="small-input" type="number" min="0" placeholder="from x" />,
+                                            <input name="coords-from-y" class="small-input" type="number" min="0" placeholder="from y" />
                                         </div>
                                         to
                                         <div class="coordinate-input-container">
-                                            <input name="coords-to-x" class="small-input" type="number" />,
-                                            <input name="coords-to-y" class="small-input" type="number" />
+                                            <input name="coords-to-x" class="small-input" type="number" min="0" placeholder="to x" />,
+                                            <input name="coords-to-y" class="small-input" type="number" min="0" placeholder="to x" />
                                         </div>
                                     </div>
                                 </div>
                                 <div data-section-name="coordinate-search-type" data-section-value="exact">
                                     <div>
                                         <div class="coordinate-input-container">
-                                            <input name="coords-exact-x" class="small-input" type="number" />,
-                                            <input name="coords-exact-y" class="small-input" type="number" />
+                                            <input name="coords-exact-x" class="small-input" type="number" min="0" placeholder="x" />,
+                                            <input name="coords-exact-y" class="small-input" type="number" min="0" placeholder="y" />
                                         </div>
                                     </div>
                                 </div>
+                                <span id="lblCoordinateFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
                             </fieldset>
                             <fieldset>
                                 <legend>Time range</legend>
-                                <div>
-                                    <label for="before">Before</label>
+                                <label>
+                                    Before
                                     <input name="before-date" type="date" />
                                     <input name="before-time" type="time" step=".001" />
-                                    <span id="lblBeforeFeedback" class="lblFeedback text-orange"><i class="icon fa fa-warning"></i> Invalid</span>
-                                </div>
-                                <div>
-                                    <label for="after">After</label>
+                                    <span id="lblBeforeFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
+                                </label>
+                                <label>
+                                    After
                                     <input name="after-date" type="date" />
                                     <input name="after-time" type="time" step=".001" />
-                                    <span id="lblAfterFeedback" class="lblFeedback text-orange"><i class="icon fa fa-warning"></i> Invalid</span>
-                                </div>
+                                    <span id="lblAfterFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
+                                </label>
                             </fieldset>
                             <fieldset>
                                 <legend>Placers</legend>
@@ -219,7 +220,7 @@
 
             let palette;
             const dtPixels = $('#tblPixels').DataTable({
-                order: [[0, 'asc']],
+                order: [[4, 'desc']],
                 columns: [
                     { data: "pixel_id" },
                     {
@@ -227,6 +228,7 @@
                         render: (data, type, row, meta) => `<a href="/userinfo/${data}">${data}</a>`
                     },
                     {
+                        // coordinates
                         render: (data, type, row, meta) => `<a href="{{ webroots.game }}/#x=${row.x}&y=${row.y}&scale=50">(${row.x}, ${row.y})</a>`
                     },
                     {
@@ -254,7 +256,7 @@
 
 
             const isValidDate = (d) => !(d === 'Invalid Date' || isNaN(d));
-            const xor = (a, b) => a ? !b : b;
+            const isValidCoord = ([x, y]) => !(isNaN(x) || isNaN(y));
 
             function parseDateTimeInputs(name) {
                 const dateStr = $(`input[type="date"][name="${name}-date"]`).val();
@@ -266,27 +268,29 @@
             }
 
             function parseCoordinateInputs(name) {
-                const x = parseInt($(`input[type="number"][name="coords-${name}-x"]`).val());
-                const y = parseInt($(`input[type="number"][name="coords-${name}-y"]`).val());
-                if (isNaN(x) || isNaN(y)) {
+                const xStr = $(`input[type="number"][name="coords-${name}-x"]`).val();
+                const yStr = $(`input[type="number"][name="coords-${name}-y"]`).val();
+                if (!xStr && !yStr) {
                     return null;
                 }
-                return [x, y];
-            }
 
-            $('.lblFeedback').hide();
+                return [parseInt(xStr), parseInt(yStr)];
+            }
 
             $('#btnQuery').on('click', function(ev) {
                 ev.preventDefault();
+                this.disabled = true;
                 $('#error-box').hide();
-
 
                 let qs = '';
                 const qsAdd = (name, value) => {
                     if (qs.length > 0) {
                         qs += '&';
                     }
-                    qs += `${name}=${encodeURIComponent(value.toString())}`;
+                    qs += name;
+                    if (typeof value !== 'undefined') {
+                        qs += `=${encodeURIComponent(value.toString())}`;
+                    }
                 }
 
                 let invalid = false;
@@ -296,13 +300,21 @@
                         qsAdd('pixelId', pixelId);
                     }
                 } else {
+                    const lblCoordinateFeedback = $('#lblCoordinateFeedback');
                     switch ($('input[type="radio"][name="coordinate-search-type"]:checked').val()) {
                         case 'exact': {
                             const coords = parseCoordinateInputs('exact');
                             if (coords != null) {
-                                const [ x, y ] = coords;
-                                qsAdd('coordsX', x);
-                                qsAdd('coordsY', y);
+                                if (isValidCoord(coords)) {
+                                    lblCoordinateFeedback.hide();
+
+                                    const [ x, y ] = coords;
+                                    qsAdd('coordsX', x);
+                                    qsAdd('coordsY', y);
+                                } else {
+                                    invalid = true;
+                                    lblCoordinateFeedback.show();
+                                }
                             }
                             break;
                         }
@@ -310,38 +322,45 @@
                             const coordsFrom = parseCoordinateInputs('from');
                             const coordsTo = parseCoordinateInputs('to');
                             if (coordsFrom != null && coordsTo != null) {
-                                const [ fromX, fromY ] = coordsFrom;
-                                qsAdd('coordsFromX', fromX);
-                                qsAdd('coordsFromY', fromY);
+                                if (isValidCoord(coordsFrom) && isValidCoord(coordsTo)) {
+                                    lblCoordinateFeedback.hide();
 
-                                const [ toX, toY ] = coordsTo;
-                                qsAdd('coordsToX', toX);
-                                qsAdd('coordsToY', toY);
+                                    const [ fromX, fromY ] = coordsFrom;
+                                    qsAdd('coordsFromX', fromX);
+                                    qsAdd('coordsFromY', fromY);
+
+                                    const [ toX, toY ] = coordsTo;
+                                    qsAdd('coordsToX', toX);
+                                    qsAdd('coordsToY', toY);
+                                } else {
+                                    invalid = true;
+                                    lblCoordinateFeedback.show();
+                                }
                             }
                         }
                     }
 
                     const before = parseDateTimeInputs('before');
                     if (before != null) {
-                        const lbl = $('#lblBeforeFeedback');
+                        const lblFeedback = $('#lblBeforeFeedback');
                         if (isValidDate(before)) {
+                            lblFeedback.hide();
                             qsAdd('before', before.getTime());
-                            lbl.hide();
                         } else {
                             invalid = true;
-                            lbl.show();
+                            lblFeedback.show();
                         }
                     }
 
                     const after = parseDateTimeInputs('after');
                     if (after != null) {
-                        const lbl = $('#lblAfterFeedback');
+                        const lblFeedback = $('#lblAfterFeedback');
                         if (isValidDate(after)) {
+                            lblFeedback.hide();
                             qsAdd('after', after.getTime());
-                            lbl.hide();
                         } else {
                             invalid = true;
-                            lbl.show();
+                            lblFeedback.show();
                         }
                     }
 
@@ -383,6 +402,8 @@
                 }).catch((err) => {
                     console.error(err);
                     error('Failed to retrieve the queried pixels.');
+                }).finally(() => {
+                    this.disabled = false;
                 });
             });
 

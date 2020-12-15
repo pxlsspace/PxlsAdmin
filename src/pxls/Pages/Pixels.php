@@ -49,8 +49,8 @@ final class Pixels
                         $rawCoordsTo = ['x' => $params['coordsToX'], 'y' => $params['coordsToY']];
                         if ($this->isAllNumeric($rawCoordsFrom) && $this->isAllNumeric($rawCoordsTo)) {
                             // Fix cases where the "from" is bigger than the "to".
-                            $fromToX = $this->minMax(intval($rawCoordsFrom['x']), intval($rawCoordsTo['x']));
-                            $fromToY = $this->minMax(intval($rawCoordsFrom['y']), intval($rawCoordsTo['y']));
+                            $fromToX = $this->minMax(intval($rawCoordsFrom['x'], 10), intval($rawCoordsTo['x'], 10));
+                            $fromToY = $this->minMax(intval($rawCoordsFrom['y'], 10), intval($rawCoordsTo['y'], 10));
 
                             array_push($where, "p.x >= :fromX AND p.x <= :toX AND p.y >= :fromY AND p.y <= :toY");
                             $input['fromX'] = $fromToX['min'];
@@ -63,12 +63,12 @@ final class Pixels
                     $rawBefore = $params['before'];
                     if (is_numeric($rawBefore)) {
                         array_push($where, "EXTRACT(EPOCH FROM TIMEZONE('UTC', p.time)) <= :before");
-                        $input['before'] = intval($rawBefore) / 1000;
+                        $input['before'] = intval($rawBefore, 10) / 1000;
                     }
                     $rawAfter = $params['after'];
                     if (is_numeric($rawAfter)) {
                         array_push($where, "EXTRACT(EPOCH FROM TIMEZONE('UTC', p.time)) >= :after");
-                        $input['after'] = intval($rawAfter) / 1000;
+                        $input['after'] = intval($rawAfter, 10) / 1000;
                     }
 
                     $rawPlacers = $params['placers'];
@@ -79,7 +79,7 @@ final class Pixels
 
                     $rawColors = $params['colors'];
                     if (is_array($rawColors) && sizeof($rawColors) > 0 && $this->isAllNumeric($rawColors)) {
-                        $coloridx_list = array_map(fn($cIdx) => intval($cIdx), $rawColors);
+                        $coloridx_list = array_map(fn($cIdx) => intval($cIdx, 10), $rawColors);
                         array_push($where, "p.color IN (" . join(", ", $coloridx_list) . ")");
                     }
 
