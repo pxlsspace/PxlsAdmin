@@ -25,7 +25,7 @@ $('#report_info').on('show.bs.modal', function (event) {
             modal.find('#rmd-a-username').closest('.col-md-4').hide();
         } else {
             modal.find('#rmd-a-username').closest('.col-md-4').show();
-            modal.find('#rmd-a-username').html('<a href="/userinfo/' + data.reporter.username + '" target="_blank">' + data.reporter.username + '</a>');
+            modal.find('#rmd-a-username').html(`<a href="${'{{ path_for('profileId', {'id': '{id}'}) }}'.replace('{id}', data.reporter.id)}" target="_blank">${data.reporter.username}</a>`);
             modal.find('#rmd-a-last-ip').html(`<a href="{{ path_for('search') }}?q=${data.reporter.ip.last}&type=ip">${data.reporter.ip.last}</a>`);
             modal.find('#rmd-a-login-ip').html(`<a href="{{ path_for('search') }}?q=${data.reporter.ip.signup}&type=ip">${data.reporter.ip.signup}</a>`);
             modal.find('#rmd-a-login').text(data.reporter.login);
@@ -44,7 +44,7 @@ $('#report_info').on('show.bs.modal', function (event) {
             // This relies on the username existing
             modal.find('#rmd-b-username').closest('.col-md-4').html('<b>Reported data unavailable</b>');
         } else {
-            modal.find('#rmd-b-username').html('<a href="/userinfo/' + data.reported.username + '" target="_blank">' + data.reported.username + '</a>');
+            modal.find('#rmd-b-username').html(`<a href="${'{{ path_for('profileId', {'id': '{id}'}) }}'.replace('{id}', data.reported.id)}" target="_blank">${data.reported.username}</a>`);
             modal.find('#rmd-b-login').text(data.reported.login);
             modal.find('#rmd-b-last-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.last}&type=ip">${data.reported.ip.last}</a>`);
             modal.find('#rmd-b-login-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.signup}&type=ip">${data.reported.ip.signup}</a>`);
@@ -112,7 +112,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
     modal.find('#rmd-g-message').show();
     modal.find('#modal-footer').html(modal_footer);
 
-    $.getJSON('{{ webroots.panel }}/api/report/chatDetails/'+button.data('reportId'),function(data){
+    $.getJSON('{{ webroots.panel }}/api/report/chatDetails/'+button.data('reportid'),function(data){
         if (window.__dynVars && window.__dynVars.viewOnly === true) {
             modal.find('#rmd-claim,#rmd-unclaim,#rmd-resolve').hide();
         }
@@ -120,8 +120,8 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         modal.find('#rmd-g-id').text(data.report.details.id);
 
         //details
-        modal.find('#crm-details-reporter').html($('<a>').attr('href', `/userinfo/${data.reporter.username}`).text(data.reporter.username));
-        modal.find('#crm-details-reported').html($('<a>').attr('href', `/userinfo/${data.reported.username}`).text(data.reported.username));
+        modal.find('#crm-details-reporter').html($('<a>').attr('href', '{{ path_for('profileId', {'id': '{id}'}) }}'.replace('{id}', data.reporter.id)).text(data.reporter.username));
+        modal.find('#crm-details-reported').html($('<a>').attr('href', '{{ path_for('profileId', {'id': '{id}'}) }}'.replace('{id}', data.reported.id)).text(data.reported.username));
         modal.find('#crm-details-sent').text(moment.unix(data.report.details.time).format('MM.DD.YYYY HH:mm:ss'));
         modal.find('#crm-details-reason').text(data.report.details.report_message);
         modal.find('#crm-details-chat-line').text(data.report.message.content);
@@ -168,17 +168,17 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         let unclaimButton = modal.find('#rmd-unclaim').show()[0];
         let resolveButton = modal.find('#rmd-resolve').show()[0];
 
-        claimButton.dataset['reportId'] =  data.report.details.id;
+        claimButton.dataset['reportid'] =  data.report.details.id;
 
-        unclaimButton.dataset['reportId'] = data.report.details.id;
+        unclaimButton.dataset['reportid'] = data.report.details.id;
         unclaimButton.disabled = cannotOverwrite;
 
-        resolveButton.dataset['reportId'] = data.report.details.id;
+        resolveButton.dataset['reportid'] = data.report.details.id;
         resolveButton.disabled = cannotOverwrite;
 
         $(claimButton).click(function(){
             $.ajax({
-                url: "{{ webroots.panel }}/api/report/chatClaim/" + claimButton.dataset['reportId']
+                url: "{{ webroots.panel }}/api/report/chatClaim/" + claimButton.dataset['reportid']
             }).done(function() {
                 modal.find('#rmd-claim').hide();
                 modal.find('#rmd-unclaim').show();
@@ -188,7 +188,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         });
         $(unclaimButton).click(function(){
             $.ajax({
-                url: "{{ webroots.panel }}/api/report/chatUnclaim/" + unclaimButton.dataset['reportId']
+                url: "{{ webroots.panel }}/api/report/chatUnclaim/" + unclaimButton.dataset['reportid']
             }).done(function() {
                 modal.find('#rmd-claim').show();
                 modal.find('#rmd-unclaim').hide();
@@ -198,7 +198,7 @@ $('#chat_report_modal').on('show.bs.modal', function (event) {
         });
         $(resolveButton).click(function(){
             $.ajax({
-                url: "{{ webroots.panel }}/api/report/chatResolve/" + resolveButton.dataset['reportId']
+                url: "{{ webroots.panel }}/api/report/chatResolve/" + resolveButton.dataset['reportid']
             }).done(function() {
                 setTimeout(function(){modal.modal("hide");reloadReports();}, 500);
             });

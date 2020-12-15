@@ -168,7 +168,7 @@
                                     <i class="fa fa-user-times bg-red"></i>
                                     <div class="timeline-item">
                                         <span class="time"></span>
-                                        <h3 class="timeline-header"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> is banned until {{ userinfo.ban_expiry|date("d.m.Y H:i:s") }}</h3>
+                                        <h3 class="timeline-header"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> is banned until {{ userinfo.ban_expiry|date("d.m.Y H:i:s") }}</h3>
                                         <div class="timeline-body">
                                             {{ userinfo.ban_reason }}
                                         </div>
@@ -181,7 +181,7 @@
                                     <i class="fa fa-user-times bg-red"></i>
                                     <div class="timeline-item">
                                         <span class="time"></span>
-                                        <h3 class="timeline-header"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> was  {% if userinfo.is_shadow_banned %}shadow-{% endif %}banned{% if not userinfo.is_shadow_banned and userinfo.is_ban_permanent %} permanently{% endif %}</h3>
+                                        <h3 class="timeline-header"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> was  {% if userinfo.is_shadow_banned %}shadow-{% endif %}banned{% if not userinfo.is_shadow_banned and userinfo.is_ban_permanent %} permanently{% endif %}</h3>
                                         <div class="timeline-body">
                                             {{ userinfo.ban_reason }}
                                         </div>
@@ -201,11 +201,11 @@
                                     <div class="timeline-item">
                                         <span class="time"><i class="fa fa-clock-o"></i> {{ key|date() }}</span>
                                         {% if item.scope == "report_sent" %}
-                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> reported <a href="{{ path_for('profile',{'identifier': item.id.reported.username }) }}">{{ item.id.reported.username }}</a>. (Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#report_info">{{ item.id.id }}</a>)</h3>
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> reported <a href="{{ path_for('profileId',{'id': item.id.reported.id }) }}">{{ item.id.reported.username }}</a>. (Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#report_info">{{ item.id.id }}</a>)</h3>
                                         {% elseif item.scope == "report_recv" %}
-                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> was reported by <a href="{{ path_for('profile',{'identifier': item.id.reporter.username }) }}">{{ item.id.reporter.username }}</a>. (Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#report_info">{{ item.id.id }}</a>)</h3>
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> was reported by <a href="{{ path_for('profileId',{'id': item.id.reporter.id }) }}">{{ item.id.reporter.username }}</a>. (Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#report_info">{{ item.id.id }}</a>)</h3>
                                         {% elseif item.scope == "signup" %}
-                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profile', {'identifier': userinfo.username}) }}">{{ userinfo.username }}</a> signed up.</h3>
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> signed up.</h3>
                                         {% endif %}
 
                                         {% if item.entry != "" %}
@@ -262,7 +262,7 @@
                                             <div class="timeline-item">
                                                 <span class="time"><i class="fa fa-clock-o"></i> {{ item.when|date() }}</span>
                                                 <div class="timeline-body">
-                                                    <a href="{{ base_url() }}/userinfo/{{ item.banner }}" target="_blank">{{ item.banner }}</a> <span>{{ item.action }}ned</span> <span>{{ item.banned }}</span> {% if item.length > 0 %}for <span>{{ item.length }}</span> seconds{% endif %}
+                                                    <a href="{{ path_for('profileId', {'id': item.banner_id}) }}" target="_blank">{{ item.banner }}</a> <span>{{ item.action }}ned</span> <a href="{{ path_for('profileId', {'id': item.banned_id}) }}" target="_blank">{{ item.banned }}</a> {% if item.length > 0 %}for <span>{{ item.length }}</span> seconds{% endif %}
                                                     {% if item.ban_reason|length > 0 %}
                                                         <p><strong>Reason:</strong> <span>{{ item.ban_reason }}</span></p>
                                                     {% endif %}
@@ -325,7 +325,7 @@
                                             <div class="timeline-item">
                                                 <span class="time"><i class="fa fa-clock-o"></i> {{ item.when|date() }}</span>
                                                 <div class="timeline-body">
-                                                    <a href="{{ base_url() }}/userinfo/{{ item.banner }}" target="_blank">{{ item.banner }}</a> <span>{{ item.type == 'UNBAN' ? 'un' : '' }}banned</span> <span>{{ item.banned }}</span> {% if item.length > 0 %} for <span>{{ item.length }}</span> seconds{% endif %}
+                                                    <a href="{{ path_for('profileId', {'id': item.banner_id}) }}" target="_blank">{{ item.banner }}</a> <span>{{ item.type == 'UNBAN' ? 'un' : '' }}banned</span> <a href="{{ path_for('profileId', {'id': item.banned_id}) }}" target="_blank">{{ item.banned }}</a> {% if item.length > 0 %} for <span>{{ item.length }}</span> seconds{% endif %}
                                                     {% if item.ban_reason|length > 0 %}
                                                         <p><strong>Reason:</strong> <span>{{ item.ban_reason }}</span></p>
                                                     {% endif %}
@@ -351,7 +351,7 @@
                                 <div class="user-block">
                                     <img class="img-circle img-bordered-sm" src="{{ base_url() }}/assets/img/image-78.png" alt="user image">
                                     <span class="username">
-                                        <a href="{{ path_for('profile', {'identifier': note.user_name}) }}">{{ note.user_name }}</a>
+                                        <a href="{{ path_for('profileId', {'id': note.user_id}) }}">{{ note.user_name }}</a>
                                         <a href="#" class="pull-right btn-box-tool deletenote" data-targetid="{{ note.id }}"><i class="fa fa-times"></i></a>
                                     </span>
                                     <span class="description">{{ note.timestamp|date("d.m.Y - H:i:s") }}</span>
@@ -503,7 +503,7 @@
                 });
                 $.post("{{ webroots.game }}/admin/forceNameChange", {user: this.dataset.username, newName}, function() {
                     alert('Success');
-                    document.location.href = `{{ webroots.panel }}/userinfo/${newName}`;
+                    document.location.href = `{{ webroots.panel }}${'{{ path_for('profileUsername', {'username': '{username}'}) }}'.replace('{username}', newName)}`;
                 }).fail(function() {
                     alert('An error occurred');
                 });

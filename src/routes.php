@@ -10,7 +10,12 @@ $app->get('/pixels', \pxls\Action\Pixels::class)->setName('pixels');
 $app->map(['GET', 'POST'], '/chatContext', \pxls\Action\ChatContext::class)->setName('ChatContext');
 
 $app->map(['GET', 'POST'], '/search', \pxls\Action\Search::class)->setName('search');
-$app->map(['GET', 'POST'], '/userinfo/{identifier}', \pxls\Action\Profile::class)->setName('profile');
+$app->map(['GET', 'POST'], '/userinfo/{username}', \pxls\Action\Profile::class)->setName('profileUsername');
+$app->map(['GET', 'POST'], '/userinfo/id/{id}', \pxls\Action\Profile::class)->setName('profileId');
+$app->map(['GET', 'POST'], '/profile/{path:.*}', function(Slim\Http\Request $request, Slim\Http\Response $response, $args) use ($app) {
+	$path = $args["path"];
+	return $response->withRedirect("/userinfo/$path", 307);
+})->setName('profileRedirect');
 
 $app->map(['GET','POST'], '/api/private[/{params:.*}]', \pxls\Action\PrivateAPI::class)->setName('prapi');
 $app->get('/api/public[/{params:.*}]', \pxls\Action\PublicAPI::class)->setName('papi');

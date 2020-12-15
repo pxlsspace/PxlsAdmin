@@ -21,17 +21,7 @@
         "wazaari/monolog-mysql": "^1.0",
         "gofabian/negotiation-middleware": "^0.1.3"
     },
-    "require-dev": {
-        "phpunit/phpunit": ">=4.8 < 6.0"
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
 	"scripts": {
-        "start": "php -S 0.0.0.0:8080 -t public public/index.php",
-        "test": "phpunit"
+        "start": "php -S 0.0.0.0:8080 -t public public/index.php"
 	}
-
 }

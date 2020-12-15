@@ -13,7 +13,7 @@ return [
         // Monolog settings
         'logger' => [
             'name' => 'pxlsAdmin',
-            'path' => __DIR__ . '/../logs/app.log',
+            'path' => __DIR__ . '/../logs/app.log', // comment this out to only log to the database
             'level' => \Monolog\Logger::DEBUG
         ],
 
