@@ -35,7 +35,6 @@ final class Pixels
                 $where = array();
                 $params = $request->getQueryParams();
                 $input = array();
-                $this->logger->info("params:", $params); // TODO(netux): remove debug log
                 if (is_numeric($params['pixelId'])) {
                     array_push($where, "p.id = :id");
                     $input['id'] = $params['pixelId'];
@@ -99,11 +98,12 @@ final class Pixels
                     if (isset($params['rollbackAction'])) {
                         array_push($where, "p.rollback_action");
                     }
+
+                    $input['amount'] = is_numeric($params['amount']) ? intval($params['amount'], 10) : 100;
                 }
 
                 try {
-                    $q = "SELECT p.id as \"pixel_id\", p.x, p.y, p.time, p.color, p.undone, p.undo_action, p.mod_action, p.rollback_action, p.most_recent, u.id as \"user_id\", u.username as \"user_name\" FROM pixels p LEFT JOIN users u ON u.id = p.who WHERE " . (sizeof($where) > 0 ? join(" AND ", $where) : "true");
-                    $this->logger->info("query: " . $q, $input); // TODO(netux): remove debug log
+                    $q = "SELECT p.id as \"pixel_id\", p.x, p.y, p.time, p.color, p.undone, p.undo_action, p.mod_action, p.rollback_action, p.most_recent, u.id as \"user_id\", u.username as \"user_name\" FROM pixels p LEFT JOIN users u ON u.id = p.who WHERE " . (sizeof($where) > 0 ? join(" AND ", $where) : "true") . " ORDER BY p.time DESC LIMIT :amount";
                     $query = $this->database->prepare($q);
                     $query->execute($input);
                     $pixels = $query->fetchAll(\PDO::FETCH_ASSOC);

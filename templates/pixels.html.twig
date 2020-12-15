@@ -24,6 +24,12 @@
                         </div>
                         <div id="search-custom" class="tab-pane active">
                             <fieldset>
+                                <label>
+                                    Limit
+                                    <input name="amount" type="number" min="0" value="100" />
+                                </label>
+                            </fieldset>
+                            <fieldset>
                                 <legend>Coordinate</legend>
                                 <label><input type="radio" name="coordinate-search-type" value="range" checked/> Range</label>
                                 <label><input type="radio" name="coordinate-search-type" value="exact" /> Exact</label>
@@ -354,6 +360,8 @@
                             qsAdd(cb.name)
                         }
                     });
+
+                    qsAdd('amount', $('input[name="amount"]').val());
                 }
 
                 if (invalid) {
