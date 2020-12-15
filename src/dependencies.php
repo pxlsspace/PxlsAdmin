@@ -10,10 +10,11 @@ $container['renderer'] = function ($c) {
     $settings = $c->get('settings')['renderer'];
     $view = new Slim\Views\Twig($settings['template_path'], [
         'cache' => $settings['cache_path'],
-        'debug' => true,
+        'debug' => $settings['debug'],
     ]);
     $basePath = rtrim(str_ireplace('index.php', '', $c['request']->getUri()->getBasePath()), '/');
     $view->addExtension(new Slim\Views\TwigExtension($c['router'], $basePath));
+    if ($settings['debug']) {
     $view->addExtension(new Twig_Extension_Debug());
     return $view;
 };
