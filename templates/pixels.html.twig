@@ -72,6 +72,14 @@
                                 <legend>Colors</legend>
                                 <div id="filter-colors" class="color-filter">Loading...</div>
                             </fieldset>
+                            <fieldset>
+                                <legend>Properties</legend>
+                                <label class="pixel-prop"><input name="mostRecent" type="checkbox" /> Only most recent pixels</label>
+                                <label class="pixel-prop"><input name="wasUndone" type="checkbox" /> Only undone pixels</label>
+                                <label class="pixel-prop"><input name="undoAction" type="checkbox" /> Only pixels that are part of an undo</label>
+                                <label class="pixel-prop"><input name="modAction" type="checkbox" /> Only pixels placed with placement overrides</label>
+                                <label class="pixel-prop"><input name="rollbackAction" type="checkbox" /> Only pixels that are part of a rollback</label>
+                            </fieldset>
                         </div>
                         <button id="btnQuery" class="btn btn-primary">Query</button>
                     </form>
@@ -145,6 +153,10 @@
         }
         ul.dynamic-list > li {
             list-style: none;
+        }
+
+        .pixel-prop {
+            display: block;
         }
 
         .coordinate-input-container {
@@ -336,6 +348,12 @@
                     for (const cIdx of colors) {
                         qsAdd('colors[]', cIdx);
                     }
+
+                    $('.pixel-prop input[type="checkbox"]').each((idx, cb) => {
+                        if (cb.checked) {
+                            qsAdd(cb.name)
+                        }
+                    });
                 }
 
                 if (invalid) {

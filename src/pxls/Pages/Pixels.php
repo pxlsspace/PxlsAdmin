@@ -83,6 +83,22 @@ final class Pixels
                         $coloridx_list = array_map(fn($cIdx) => intval($cIdx), $rawColors);
                         array_push($where, "p.color IN (" . join(", ", $coloridx_list) . ")");
                     }
+
+                    if (isset($params['mostRecent'])) {
+                        array_push($where, "p.most_recent");
+                    }
+                    if (isset($params['wasUndone'])) {
+                        array_push($where, "p.undone");
+                    }
+                    if (isset($params['undoAction'])) {
+                        array_push($where, "p.undo_action");
+                    }
+                    if (isset($params['modAction'])) {
+                        array_push($where, "p.mod_action");
+                    }
+                    if (isset($params['rollbackAction'])) {
+                        array_push($where, "p.rollback_action");
+                    }
                 }
 
                 try {
