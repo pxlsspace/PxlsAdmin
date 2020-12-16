@@ -14,8 +14,10 @@ $container['renderer'] = function ($c) {
     ]);
     $basePath = rtrim(str_ireplace('index.php', '', $c['request']->getUri()->getBasePath()), '/');
     $view->addExtension(new Slim\Views\TwigExtension($c['router'], $basePath));
+    $view->getEnvironment()->addGlobal('server_timezone_name', date_default_timezone_get());
     if ($settings['debug']) {
-    $view->addExtension(new Twig_Extension_Debug());
+        $view->addExtension(new Twig_Extension_Debug());
+    }
     return $view;
 };
 
