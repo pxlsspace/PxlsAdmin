@@ -132,6 +132,10 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                    <div>
+                        <button id="btnExportCSV" class="btn btn-link">Export as CSV</button>
+                        <button id="btnExportJSON" class="btn btn-link">Export as JSON</button>
+                    </div>
                     <!-- TODO(netux): draw canvas with results? !-->
                 </div>
             </div>
@@ -253,6 +257,43 @@
                 const column = parseInt(this.dataset.toggleColumn);
                 dtPixels.column(column).visible(this.checked);
             }).change();
+
+
+            function saveAs(blob, name) {
+                const a = document.createElement('a');
+                a.download = name || blob.name;
+                a.rel = 'noopener';
+                a.href = URL.createObjectURL(blob);
+                setTimeout(() => URL.revokeObjectURL(a.href), 40 * 1000);
+                setTimeout(() => a.dispatchEvent(new MouseEvent('click')));
+            }
+
+            function toCSV(data) {
+                if (data.length === 0) {
+                    return '';
+                }
+
+                let result = Object.keys(data[0]).join(',') + '\n';
+                for (const pix of data) {
+                    result += Object.values(pix) + '\n';
+                }
+                return result;
+            }
+
+            $('#btnExportCSV').on('click', () => {
+                const blob = new Blob(
+                    [ toCSV(dtPixels.data().toArray()) ],
+                    { type: 'application/json' }
+                );
+                saveAs(blob, 'pixels.csv');
+            });
+            $('#btnExportJSON').on('click', () => {
+                const blob = new Blob(
+                    [ JSON.stringify(dtPixels.data().toArray()) + '\n' ],
+                    { type: 'application/json' }
+                );
+                saveAs(blob, 'pixels.json');
+            });
 
 
             const isValidDate = (d) => !(d === 'Invalid Date' || isNaN(d));
