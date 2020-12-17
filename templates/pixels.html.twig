@@ -140,7 +140,33 @@
                         <button id="btnExportCSV" class="btn btn-default">Export as CSV</button>
                         <button id="btnExportJSON" class="btn btn-default">Export as JSON</button>
                     </div>
-                    <!-- TODO(netux): draw canvas with results? !-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row board-preview" style="display: none;">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Board</h3>
+                </div>
+                <div class="box-body">
+                    <div class="col-sm-3">
+                        <p class="board-preview__range text-muted text-center">
+                            <span class="board-preview__range__min"></span>
+                            <i class="icon fa fa-arrow-right"></i>
+                            <span class="board-preview__range__max"></span>
+                        </p>
+                        <div class="form-group">
+                            <button id="btnBoardPreviewDownload" class="btn btn-default">Download as PNG</button>
+                        </div>
+                        <div class="form-group">
+                            <label><input id="cbBoardPreviewBackground" type="checkbox" checked /> Show checkerboard pattern</label>
+                        </div>
+                    </div>
+                    <div class="board-preview__layer-container col-sm-9">
+                        <canvas class="board-preview__result-layer"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -205,6 +231,21 @@
             height: 3px;
             bottom: 0;
             background-color: blue;
+        }
+
+        .board-preview canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        .board-preview__range {
+            font-family: monospace;
+        }
+        .board-preview__layer-container {
+            position: relative;
+        }
+        .board-preview__result-layer {
+            width: 100%;
+            box-shadow: 0 0 7px 4px rgba(0, 0, 0, .25);
         }
     </style>
 {% endblock css %}
@@ -294,6 +335,64 @@
                 saveAs(blob, 'pixels.json');
             });
 
+
+            const boardCanvasCtx = $('.board-preview__result-layer')[0].getContext('2d');
+            function showAndUpdatePreviewBoard(data) {
+                const { min, max } = data.reduce((acc, { x, y }) => {
+                    if (x > acc.max.x) {
+                        acc.max.x = x;
+                    }
+                    if (x < acc.min.x) {
+                        acc.min.x = x;
+                    }
+
+                    if (y > acc.max.y) {
+                        acc.max.y = y;
+                    }
+                    if (y < acc.min.y) {
+                        acc.min.y = y;
+                    }
+
+                    return acc;
+                }, { min: { x: +Infinity, y: +Infinity }, max: { x: -Infinity, y: -Infinity } });
+
+                $('.board-preview__range .board-preview__range__min').text(`(${min.x}, ${min.y})`);
+                $('.board-preview__range .board-preview__range__max').text(`(${max.x}, ${max.y})`);
+
+                const width = max.x - min.x + 1;
+                const height = max.y - min.y + 1;
+                boardCanvasCtx.canvas.width = width;
+                boardCanvasCtx.canvas.height = height;
+                boardCanvasCtx.canvas.style.backgroundSize = `${Math.max(1, 100 / width)}%`;
+
+                const id = boardCanvasCtx.getImageData(0, 0, width, height);
+
+                for (const pix of data) {
+                    const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
+                    if (id.data[idx] === 0) {
+                        if (pix.color >= 0 && pix.color < pxlsInfo.palette.length) {
+                            const c = parseInt(pxlsInfo.palette[pix.color].value, 16);
+                            id.data[idx  ] = c >> 16 & 0xFF;
+                            id.data[idx+1] = c >> 8 & 0xFF;
+                            id.data[idx+2] = c & 0xFF;
+                            id.data[idx+3] = 255;
+                        } else if (pix.color === 0xFF) {
+                            id.data[idx] = 127; // half transparency
+                        }
+                    }
+                }
+
+                boardCanvasCtx.putImageData(id, 0, 0);
+
+                $('.board-preview').show();
+            }
+
+            $('#btnBoardPreviewDownload').on('click', () => {
+                boardCanvasCtx.canvas.toBlob((blob) => saveAs(blob, 'pixels.png'));
+            });
+            $('#cbBoardPreviewBackground').on('change', function() {
+                boardCanvasCtx.canvas.classList.toggle('checkerboard-background', this.checked)
+            }).change();
 
             const isValidDate = (d) => !(d === 'Invalid Date' || isNaN(d));
             const isValidCoord = ([x, y]) => !(isNaN(x) || isNaN(y));
@@ -436,9 +535,15 @@
                         throw json.error;
                     }
 
+                    // Update table
                     dtPixels.clear();
                     dtPixels.rows.add(json.data);
                     dtPixels.draw();
+
+                    // Update graphs
+                    if (pxlsInfo.palette) {
+                        showAndUpdatePreviewBoard(json.data);
+                    }
                 }).catch((err) => {
                     console.error('Failed to execute query', err);
                     $('#fetch-error-box').show();
