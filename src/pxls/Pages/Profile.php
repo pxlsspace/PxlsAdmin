@@ -25,8 +25,6 @@ final class Profile
         $this->db = $database;
         $this->discord = $discord;
         $this->discord->setName($settings["discord"]["name"]." - UserInfo");
-
-        $this->data['webroots'] = $settings["webroots"];
     }
 
     public function __invoke(Request $request, Response $response, $args)

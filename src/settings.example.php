@@ -7,13 +7,14 @@ return [
         // Renderer settings
         'renderer' => [
             'template_path' => __DIR__ . '/../templates/',
-            'cache_path'    => __DIR__ . '/../cache/'
+            'cache_path'    => __DIR__ . '/../cache/',
+            'debug'         => false
         ],
 
         // Monolog settings
         'logger' => [
-            'name' => 'pxlsAdmin',
-            'path' => __DIR__ . '/../logs/app.log', // comment this out to only log to the database
+            'name'  => 'pxlsAdmin',
+            'path'  => __DIR__ . '/../logs/app.log', // comment this out to only log to the database
             'level' => \Monolog\Logger::DEBUG
         ],
 

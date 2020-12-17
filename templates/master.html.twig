@@ -49,8 +49,8 @@
                 <ul class="nav navbar-nav">
                     <!-- User Account: style can be found in dropdown.less -->
                     <li class="messages-menu">
-                        <a href="#"><b>CEST Time:</b>
-                            <span id="cest-time"></span>
+                        <a href="#"><b>{{ server_timezone_name }} Time:</b>
+                            <span id="server-time"></span>
                         </a>
                     </li>
                     <li class="dropdown user user-menu">
@@ -185,7 +185,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment-with-locales.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.13/moment-timezone-with-data.min.js"></script>
     <script type="text/javascript">
-        setInterval(function(){$("#cest-time").html(moment().tz('Europe/Berlin').format('YYYY-MM-DD HH:mm:ss'))}, 1000);
+        setInterval(function(){$("#server-time").html(moment().tz('{{ server_timezone_name }}').format('YYYY-MM-DD HH:mm:ss'))}, 1000);
     </script>
 {% endblock %}
 

@@ -27,7 +27,6 @@ final class Search
     public function __invoke(Request $request, Response $response, $args)
     {
         global $app;
-        $data['webroots'] = $app->getContainer()->get("settings")["webroots"];
         $user = new \pxls\User($this->database);
         $data['userdata'] = $user->getUserById($_SESSION['user_id']);
         if(empty($request->getParam('q'))) {
