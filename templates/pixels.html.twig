@@ -217,7 +217,8 @@
     {% if not had_error %}
     <script type="text/javascript">
         (function() {
-            let palette;
+            let pxlsInfo; // initialized at the bottom
+
             const dtPixels = $('#tblPixels').DataTable({
                 order: [[4, 'desc']],
                 columns: [
@@ -236,9 +237,9 @@
                             if (type !== 'display') {
                                 return data;
                             }
-                            const isInsidePalette = palette && data >= 0 && data < palette.length;
+                            const isInsidePalette = pxlsInfo && data >= 0 && data < pxlsInfo.palette.length;
                             const isTransparent = data === 0xFF;
-                            const color = palette && palette[data];
+                            const color = pxlsInfo && pxlsInfo.palette[data];
                             return `<div class="pixel-color"${isInsidePalette ? ` style="background-color: #${color.value}"` : ''}></div> ${isInsidePalette ? color.name : (isTransparent ? 'Transparent' : '???')} (${data})`
                         }
                     },
@@ -484,15 +485,15 @@
                 colorFilter.contents().remove();
 
                 colorFilter.append($(`<input type="checkbox" data-color-idx="255" class="checkerboard-background"/>`));
-                for (const idx in palette) {
-                    const color = palette[idx];
+                for (const idx in pxlsInfo.palette) {
+                    const color = pxlsInfo.palette[idx];
                     colorFilter.append($(`<input type="checkbox" data-color-idx="${idx}" />`).css('background-color', `#${color.value}`));
                 }
             }
 
             fetch('{{ webroots.game }}/info')
                 .then((res) => res.json())
-                .then((info) => { palette = info.palette; })
+                .then((info) => { pxlsInfo = info; })
                 .then(initColorFilter)
                 .catch((err) => {
                     console.error('Failed to fetch game info', err);
