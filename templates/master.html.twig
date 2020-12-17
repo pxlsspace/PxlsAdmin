@@ -28,13 +28,13 @@
     {% endblock %}
 </head>
 
-<body class="hold-transition skin-red sidebar-mini">
+<body class="hold-transition skin-black-light sidebar-mini">
 <div class="wrapper">
     <header class="main-header">
         <!-- Logo -->
         <a href="{{ path_for('home') }}" class="logo">
             <!-- mini logo for sidebar mini 50x50 pixels -->
-            <span class="logo-mini"><b>pxAdm</b></span>
+            <span class="logo-mini">pxls</span>
             <!-- logo for regular state and mobile devices -->
             <span class="logo-lg">pxls<b>Admin</b></span>
         </a>
@@ -159,6 +159,37 @@
             {% endblock content %}
         </section>
     </div>
+
+    <!-- The Right Sidebar (Settings) -->
+    <aside class="control-sidebar control-sidebar-dark">
+        <div class="tab-content">
+            <h4 class="control-sidebar-heading">Skins</h4>
+            <div class="form-group">
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="skin-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Select a skin<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="skin-dropdown">
+                        <li><a href="#" data-skin="red">Red</a></li>
+                        <li><a href="#" data-skin="red-light">Red (light)</a></li>
+                        <li><a href="#" data-skin="blue">Blue</a></li>
+                        <li><a href="#" data-skin="blue-light">Blue (light)</a></li>
+                        <li><a href="#" data-skin="black">Black</a></li>
+                        <li><a href="#" data-skin="black-light">Black (light)</a></li>
+                        <li><a href="#" data-skin="purple">Purple</a></li>
+                        <li><a href="#" data-skin="purple-light">Purple (light)</a></li>
+                        <li><a href="#" data-skin="green">Green</a></li>
+                        <li><a href="#" data-skin="green-light">Green (light)</a></li>
+                        <li><a href="#" data-skin="yellow">Yellow</a></li>
+                        <li><a href="#" data-skin="yellow-light">Yellow (light)</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <!-- The sidebar's background -->
+    <!-- This div must placed right after the sidebar for it to work-->
+    <div class="control-sidebar-bg"></div>
 </div>
 
 {% block js %}
@@ -186,6 +217,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.13/moment-timezone-with-data.min.js"></script>
     <script type="text/javascript">
         setInterval(function(){$("#server-time").html(moment().tz('{{ server_timezone_name }}').format('YYYY-MM-DD HH:mm:ss'))}, 1000);
+    </script>
+    <script type="text/javascript">
+        (() => {
+            function setSkin(name) {
+                // remove old skin
+                document.body.classList.forEach((cls) => {
+                    if (cls.match(/skin-\w+(?:-light)?/)) {
+                        document.body.classList.remove(cls);
+                    }
+                });
+                document.body.classList.add(`skin-${name}`);
+                localStorage.setItem('skin', name);
+            }
+
+            setSkin(localStorage.getItem('skin') || 'red');
+
+            $('a[data-skin]').on('click', function() {
+                setSkin(this.dataset.skin);
+            });
+        })();
     </script>
 {% endblock %}
 

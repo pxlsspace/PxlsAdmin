@@ -59,3 +59,7 @@ select.form-control.dark:focus,select.form-control.dark:active {
 .mtop2 {
     margin-top: 2px;
 }
+
+.sidebar-toggle {
+    font-size: 14px;
+}
