@@ -92,7 +92,7 @@
                                 <div><label class="pixel-prop"><input name="rollbackAction" type="checkbox" /> Only pixels that are part of a rollback</label></div>
                             </fieldset>
                         </div>
-                        <button id="btnQuery" class="btn btn-primary">Query</button>
+                        <button id="btnQuery" class="btn btn-primary" disabled>Query</button>
                     </form>
                 </div>
             </div>
@@ -498,6 +498,9 @@
                 .catch((err) => {
                     console.error(err);
                     colorFilter.addClass('text-red').text('Failed to load colors');
+                })
+                .finally(() => {
+                    $('#btnQuery').removeAttr('disabled');
                 });
         })();
     </script>
