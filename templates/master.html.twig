@@ -123,12 +123,12 @@
                 <li class="header">MAIN NAVIGATION</li>
                 <li><a href="{{ path_for('home') }}"><i class="fa fa-dashboard text-aqua"></i> <span>Dashboard</span></a></li>
                 <li><a href="{{ path_for('reportList') }}"><i class="fa fa-clipboard text-aqua"></i> <span>Reports</span></a></li>
-                <li><a href="{{ path_for('factions') }}"><i class="fa fa-list text-aqua"></i> <span>Factions</span></a></li>
-                <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-list text-aqua"></i> <span>Chat Context (dev tool)</span></a></li>
+                <li><a href="{{ path_for('factions') }}"><i class="fa fa-flag text-aqua"></i> <span>Factions</span></a></li>
+                <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-comments text-aqua"></i> <span>Chat Context</span></a></li>
 
                 {% if ('administrator' in userdata.roles or 'developer' in userdata.roles) %}
                     <li><a href="{{ path_for('logs') }}"><i class="fa fa-list text-aqua"></i> <span>Logs</span></a></li>
-                    <li><a href="{{ path_for('notifications') }}"><i class="fa fa-exclamation-circle text-aqua"></i> <span>Notifications</span></a></li>
+                    <li><a href="{{ path_for('notifications') }}"><i class="fa fa-envelope text-aqua"></i> <span>Notifications</span></a></li>
                 {% endif %}
             </ul>
         </section>
