@@ -233,6 +233,9 @@
                     {
                         data: "color",
                         render: (data, type, row, meta) => {
+                            if (type !== 'display') {
+                                return data;
+                            }
                             const isInsidePalette = palette && data >= 0 && data < palette.length;
                             const isTransparent = data === 0xFF;
                             const color = palette && palette[data];
