@@ -163,6 +163,10 @@
                         <div class="form-group">
                             <label><input id="cbBoardPreviewBackground" type="checkbox" checked /> Show checkerboard pattern</label>
                         </div>
+                        <div class="form-group">
+                            <label><input id="cbBoardPreviewUserMode" type="checkbox" /> Color-coded users mode</label>
+                            <p class="help-block">Color each pixel by their placer, using the colors defined above.</p>
+                        </div>
                     </div>
                     <div class="board-preview__layer-container col-sm-9">
                         <canvas class="board-preview__result-layer"></canvas>
@@ -231,6 +235,24 @@
             height: 3px;
             bottom: 0;
             background-color: blue;
+        }
+
+        .placer-color {
+            position: relative;
+            padding: 0;
+            margin: 0;
+            width: 32px;
+        }
+        .placer-color > input[type="color"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 0;
+            margin: 0;
+            appearance: none;
         }
 
         .board-preview canvas {
@@ -337,7 +359,7 @@
 
 
             const boardCanvasCtx = $('.board-preview__result-layer')[0].getContext('2d');
-            function showAndUpdatePreviewBoard(data) {
+            function updatePreviewBoard(data) {
                 const { min, max } = data.reduce((acc, { x, y }) => {
                     if (x > acc.max.x) {
                         acc.max.x = x;
@@ -367,24 +389,52 @@
 
                 const id = boardCanvasCtx.getImageData(0, 0, width, height);
 
-                for (const pix of data) {
-                    const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
-                    if (id.data[idx] === 0) {
-                        if (pix.color >= 0 && pix.color < pxlsInfo.palette.length) {
-                            const c = parseInt(pxlsInfo.palette[pix.color].value, 16);
-                            id.data[idx  ] = c >> 16 & 0xFF;
-                            id.data[idx+1] = c >> 8 & 0xFF;
-                            id.data[idx+2] = c & 0xFF;
-                            id.data[idx+3] = 255;
-                        } else if (pix.color === 0xFF) {
-                            id.data[idx] = 127; // half transparency
+                if ($('#cbBoardPreviewUserMode')[0].checked) {
+                    // color with user map
+                    const userToColor = {};
+
+                    for (const pix of data) {
+                        const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
+                        if (id.data[idx] !== 0) {
+                            continue;
+                        }
+
+                        if (!(pix.user_name in userToColor)) {
+                            let c = getPlacerColor(pix.user_name);
+                            if (c != null) {
+                                c = parseInt(c.substr(1), 16)
+                            }
+                            userToColor[pix.user_name] = c;
+                        }
+
+                        const c = userToColor[pix.user_name];
+                        if (c == null) {
+                            continue;
+                        }
+                        id.data[idx  ] = c >> 16 & 0xFF;
+                        id.data[idx+1] = c >> 8 & 0xFF;
+                        id.data[idx+2] = c & 0xFF;
+                        id.data[idx+3] = 255;
+                    }
+                } else {
+                    for (const pix of data) {
+                        const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
+                        if (id.data[idx] === 0) {
+                            // color with palette
+                            if (pix.color >= 0 && pix.color < pxlsInfo.palette.length) {
+                                const c = parseInt(pxlsInfo.palette[pix.color].value, 16);
+                                id.data[idx  ] = c >> 16 & 0xFF;
+                                id.data[idx+1] = c >> 8 & 0xFF;
+                                id.data[idx+2] = c & 0xFF;
+                                id.data[idx+3] = 255;
+                            } else if (pix.color === 0xFF) {
+                                id.data[idx] = 127; // half transparency
+                            }
                         }
                     }
                 }
 
                 boardCanvasCtx.putImageData(id, 0, 0);
-
-                $('.board-preview').show();
             }
 
             $('#btnBoardPreviewDownload').on('click', () => {
@@ -393,6 +443,9 @@
             $('#cbBoardPreviewBackground').on('change', function() {
                 boardCanvasCtx.canvas.classList.toggle('checkerboard-background', this.checked)
             }).change();
+            $('#cbBoardPreviewUserMode').on('change', () => {
+                updatePreviewBoard(dtPixels.data().toArray());
+            });
 
             const isValidDate = (d) => !(d === 'Invalid Date' || isNaN(d));
             const isValidCoord = ([x, y]) => !(isNaN(x) || isNaN(y));
@@ -542,7 +595,8 @@
 
                     // Update graphs
                     if (pxlsInfo.palette) {
-                        showAndUpdatePreviewBoard(json.data);
+                        updatePreviewBoard(json.data);
+                        $('.board-preview').show();
                     }
                 }).catch((err) => {
                     console.error('Failed to execute query', err);
@@ -561,29 +615,55 @@
                 sections.filter(`[data-section-value="${this.value}"]`).toggle(this.checked);
             }).change();
 
-            function makeDynamicList(listEl, itemModel) {
-                listEl = $(listEl);
+            $.fn.DynamicList = function(itemModel) {
+                const $this = $(this);
+                itemModel = Array.isArray(itemModel) ? itemModel : [itemModel];
 
                 const addBtnEl = $('<button class="btn btn-success"> <i class="icon fa fa-plus"/> Add</button>')
                     .on('click', (ev) => {
                         ev.preventDefault();
 
-                        const itemEl = $('<li/>');
-                        itemEl.append(
-                            itemModel.clone(),
-                            $('<button class="btn btn-danger"><i class="icon fa fa-times"></i></button>')
-                                .on('click', (ev) => {
-                                    ev.preventDefault();
-                                    itemEl.remove();
-                                })
-                        ).insertBefore(addBtnEl);
+                        const itemEl = $('<li class="input-group col-sm-4" />')
+                            .append(
+                                itemModel.map((el) => el.clone(true)),
+                                $('<span class="input-group-btn" />')
+                                    .append($('<button class="btn btn-danger"><i class="icon fa fa-times"></i></button>')
+                                        .on('click', (ev) => {
+                                            ev.preventDefault();
+                                            itemEl.remove();
+                                        })
+                                    )
+                            );
+
+                        const addEv = new $.Event('itemAdd', {
+                            relatedTarget: itemEl[0]
+                        });
+                        $this.trigger(addEv);
+
+                        if (!addEv.isDefaultPrevented()) {
+                            itemEl.insertBefore(addBtnEl);
+                        }
                     });
 
-                listEl.addClass('dynamic-list');
-                listEl.append(addBtnEl);
+                $this.addClass('dynamic-list');
+                $this.append(addBtnEl);
+
+                return $this;
             }
 
-            makeDynamicList($('#lstPlacers'), $('<input/>').attr({ name: 'placers[]' }));
+            const lstPlacers = $('#lstPlacers');
+            function getPlacerColor(username) {
+                return $('#lstPlacers input').filter((idx, el) => el.value === username).first()
+                    .parent().find('.placer-color input').val();
+            }
+            lstPlacers.DynamicList([
+                $('<div class="input-group-addon placer-color" />')
+                    .append($('<input type="color" />')),
+                $('<input class="form-control" name="placers[]" placeholder="Username" />')
+            ]).on('itemAdd', (ev) => {
+                $(ev.relatedTarget).find('.placer-color input[type="color"]')
+                    .val(`#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')}`);
+            });
 
             const colorFilter = $('#filter-colors');
             function initColorFilter() {
