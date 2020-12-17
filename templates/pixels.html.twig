@@ -58,18 +58,22 @@
                             </fieldset>
                             <fieldset>
                                 <legend>Time range</legend>
-                                <label>
-                                    Before
-                                    <input name="before-date" type="date" />
-                                    <input name="before-time" type="time" step=".001" />
-                                    <span id="lblBeforeFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
-                                </label>
-                                <label>
-                                    After
-                                    <input name="after-date" type="date" />
-                                    <input name="after-time" type="time" step=".001" />
-                                    <span id="lblAfterFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
-                                </label>
+                                <div>
+                                    <label>
+                                        Before
+                                        <input name="before-date" type="date" />
+                                        <input name="before-time" type="time" step=".001" />
+                                        <span id="lblBeforeFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>
+                                        After
+                                        <input name="after-date" type="date" />
+                                        <input name="after-time" type="time" step=".001" />
+                                        <span id="lblAfterFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
+                                    </label>
+                                </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Placers</legend>
@@ -81,11 +85,11 @@
                             </fieldset>
                             <fieldset>
                                 <legend>Properties</legend>
-                                <label class="pixel-prop"><input name="mostRecent" type="checkbox" /> Only most recent pixels</label>
-                                <label class="pixel-prop"><input name="wasUndone" type="checkbox" /> Only undone pixels</label>
-                                <label class="pixel-prop"><input name="undoAction" type="checkbox" /> Only pixels that are part of an undo</label>
-                                <label class="pixel-prop"><input name="modAction" type="checkbox" /> Only pixels placed with placement overrides</label>
-                                <label class="pixel-prop"><input name="rollbackAction" type="checkbox" /> Only pixels that are part of a rollback</label>
+                                <div><label class="pixel-prop"><input name="mostRecent" type="checkbox" /> Only most recent pixels</label></div>
+                                <div><label class="pixel-prop"><input name="wasUndone" type="checkbox" /> Only undone pixels</label></div>
+                                <div><label class="pixel-prop"><input name="undoAction" type="checkbox" /> Only pixels that are part of an undo</label></div>
+                                <div><label class="pixel-prop"><input name="modAction" type="checkbox" /> Only pixels placed with placement overrides</label></div>
+                                <div><label class="pixel-prop"><input name="rollbackAction" type="checkbox" /> Only pixels that are part of a rollback</label></div>
                             </fieldset>
                         </div>
                         <button id="btnQuery" class="btn btn-primary">Query</button>
@@ -98,7 +102,7 @@
         <div class="col-xs-12">
             <div class="box">
                 <div class="box-header">
-                    <h3 class="box-title">Result</h3>
+                    <h3 class="box-title">Results</h3>
                 </div>
                 <div class="box-body">
                     <div id="error-box" class="alert alert-error" style="display: none;">
@@ -108,12 +112,12 @@
                     </div>
                     <div>
                         <b>Show fields</b>:
-                        <label><input type="checkbox" data-toggle-column="4" checked> Time</label>
-                        <label><input type="checkbox" data-toggle-column="5" checked> Is Most Recent</label>
-                        <label><input type="checkbox" data-toggle-column="6"> Was Undone</label>
-                        <label><input type="checkbox" data-toggle-column="7"> Is Undo</label>
-                        <label><input type="checkbox" data-toggle-column="8"> With Placement Override</label>
-                        <label><input type="checkbox" data-toggle-column="9"> Is Part of a Rollback</label>
+                        <label><input type="checkbox" data-toggle-column="4" checked /> Time</label>
+                        <label><input type="checkbox" data-toggle-column="5" checked /> Is Most Recent</label>
+                        <label><input type="checkbox" data-toggle-column="6" /> Was Undone</label>
+                        <label><input type="checkbox" data-toggle-column="7" /> Is Undo</label>
+                        <label><input type="checkbox" data-toggle-column="8" /> With Placement Override</label>
+                        <label><input type="checkbox" data-toggle-column="9" /> Is Part of a Rollback</label>
                     </div>
                     <table id="tblPixels" class="table table-responsive table-bordered table-striped nowrap">
                         <thead>
@@ -164,10 +168,6 @@
         }
         ul.dynamic-list > li {
             list-style: none;
-        }
-
-        .pixel-prop {
-            display: block;
         }
 
         .coordinate-input-container {
