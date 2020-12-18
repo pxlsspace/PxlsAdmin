@@ -594,9 +594,11 @@
                     dtPixels.draw();
 
                     // Update graphs
-                    if (pxlsInfo.palette) {
+                    if (pxlsInfo && json.data.length > 0) {
                         updatePreviewBoard(json.data);
                         $('.board-preview').show();
+                    } else {
+                        $('.board-preview').hide();
                     }
                 }).catch((err) => {
                     console.error('Failed to execute query', err);
