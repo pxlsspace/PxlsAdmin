@@ -389,49 +389,42 @@
 
                 const id = boardCanvasCtx.getImageData(0, 0, width, height);
 
-                if ($('#cbBoardPreviewUserMode')[0].checked) {
-                    // color with user map
-                    const userToColor = {};
+                const userColorMode = $('#cbBoardPreviewUserMode')[0].checked;
+                const userToColor = {};
+                for (const pix of data) {
+                    const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
+                    if (id.data[idx + 3] !== 0) {
+                        // pixel already drawn
+                        continue;
+                    }
 
-                    for (const pix of data) {
-                        const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
-                        if (id.data[idx] !== 0) {
-                            continue;
-                        }
-
+                    let a = 255;
+                    let c = 0;
+                    if (userColorMode) {
+                        // color with user map
                         if (!(pix.user_name in userToColor)) {
-                            let c = getPlacerColor(pix.user_name);
-                            if (c != null) {
-                                c = parseInt(c.substr(1), 16)
-                            }
-                            userToColor[pix.user_name] = c;
+                            const hex = getPlacerColor(pix.user_name);
+                            userToColor[pix.user_name] = hex == null ? null : parseInt(hex.substr(1), 16);
                         }
 
-                        const c = userToColor[pix.user_name];
-                        if (c == null) {
-                            continue;
-                        }
-                        id.data[idx  ] = c >> 16 & 0xFF;
-                        id.data[idx+1] = c >> 8 & 0xFF;
-                        id.data[idx+2] = c & 0xFF;
-                        id.data[idx+3] = 255;
-                    }
-                } else {
-                    for (const pix of data) {
-                        const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
-                        if (id.data[idx] === 0) {
-                            // color with palette
-                            if (pix.color >= 0 && pix.color < pxlsInfo.palette.length) {
-                                const c = parseInt(pxlsInfo.palette[pix.color].value, 16);
-                                id.data[idx  ] = c >> 16 & 0xFF;
-                                id.data[idx+1] = c >> 8 & 0xFF;
-                                id.data[idx+2] = c & 0xFF;
-                                id.data[idx+3] = 255;
-                            } else if (pix.color === 0xFF) {
-                                id.data[idx] = 127; // half transparency
-                            }
+                        c = userToColor[pix.user_name];
+                    } else {
+                        // color with palette
+                        if (pix.color >= 0 && pix.color < pxlsInfo.palette.length) {
+                            c = parseInt(pxlsInfo.palette[pix.color].value, 16);
+                        } else if (pix.color === 0xFF) {
+                            a = 0x7F; // half transparency
                         }
                     }
+
+                    if (c == null) {
+                        continue;
+                    }
+
+                    id.data[idx  ] = c >> 16 & 0xFF;
+                    id.data[idx+1] = c >> 8 & 0xFF;
+                    id.data[idx+2] = c & 0xFF;
+                    id.data[idx+3] = a;
                 }
 
                 boardCanvasCtx.putImageData(id, 0, 0);
