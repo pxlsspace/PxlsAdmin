@@ -452,7 +452,7 @@
 
             function parseDateTimeInputs(name) {
                 const dateStr = $(`input[type="date"][name="${name}-date"]`).val();
-                const timeStr = $(`input[type="time"][name="${name}-time"`).val();
+                const timeStr = $(`input[type="time"][name="${name}-time"]`).val();
                 if (!dateStr && !timeStr) {
                     return null;
                 }
