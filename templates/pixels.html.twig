@@ -35,23 +35,14 @@
                                 <label><input type="radio" name="coordinate-search-type--toggle" value="exact" /> Exact</label>
                                 <div data-section-name="coordinate-search-type" data-section-value="range">
                                     <div>
-                                        <div class="coordinate-input-container">
-                                            <input name="coords-from-x" class="small-input" type="number" min="0" placeholder="from x" />,
-                                            <input name="coords-from-y" class="small-input" type="number" min="0" placeholder="from y" />
-                                        </div>
+                                        <div id="coordsFrom"></div>
                                         to
-                                        <div class="coordinate-input-container">
-                                            <input name="coords-to-x" class="small-input" type="number" min="0" placeholder="to x" />,
-                                            <input name="coords-to-y" class="small-input" type="number" min="0" placeholder="to x" />
-                                        </div>
+                                        <div id="coordsTo"></div>
                                     </div>
                                 </div>
                                 <div data-section-name="coordinate-search-type" data-section-value="exact">
                                     <div>
-                                        <div class="coordinate-input-container">
-                                            <input name="coords-exact-x" class="small-input" type="number" min="0" placeholder="x" />,
-                                            <input name="coords-exact-y" class="small-input" type="number" min="0" placeholder="y" />
-                                        </div>
+                                        <div id="coordsExact"></div>
                                     </div>
                                 </div>
                                 <span id="lblCoordinateFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
@@ -200,22 +191,20 @@
             list-style: none;
         }
 
-        .coordinate-input-container {
+        .coordinate-input {
             display: inline-block;
         }
-        .coordinate-input-container::before {
+        .coordinate-input::before {
             content: "(";
         }
-        .coordinate-input-container::after {
+        .coordinate-input::after {
             content: ")";
         }
-        .coordinate-input-container > input {
+        .coordinate-input > input {
             width: 5em;
+            padding: 0 0.25em;
             border: none;
             border-bottom: 1px solid gray;
-        }
-        .coordinate-input-container > input::after {
-            content: ", ";
         }
 
         .color-filter > input[type="checkbox"] {
@@ -316,6 +305,48 @@
 
                 return $this;
             };
+
+            $.fn.coordinates = function(opts) {
+                opts = opts || {};
+                const $this = $(this);
+
+                const inputX = $('<input type="number" min="0" />');
+                if (opts.placeholderX != null) {
+                    inputX.attr('placeholder', opts.placeholderX);
+                }
+                if (opts.maxX != null) {
+                    inputX.attr('max', opts.maxX);
+                }
+
+                const inputY = $('<input type="number" min="0" />');
+                if (opts.placeholderY != null) {
+                    inputY.attr('placeholder', opts.placeholderX);
+                }
+                if (opts.maxY != null) {
+                    inputY.attr('max', opts.maxY);
+                }
+
+                inputX.on('keydown', (ev) => {
+                    if (ev.key === ',') {
+                        ev.preventDefault();
+                        inputY.focus();
+                    }
+                });
+
+                $this.addClass('coordinate-input');
+                $this.append(inputX, ', ', inputY);
+                $this.val = function() {
+                    const xStr = inputX.val();
+                    const yStr = inputY.val();
+                    if (!xStr && !yStr) {
+                        return null;
+                    }
+
+                    return [parseInt(xStr), parseInt(yStr)];
+                };
+
+                return $this;
+            }
 
             function SectionToggle(name) {
                 this.elements = {
@@ -479,12 +510,27 @@
                     form: $('form[name="search"]'),
                     btnQuery: $('#btnQuery'),
                     errorBox: $('#fetch-error-box'),
+                    coordsFrom: $('#coordsFrom'),
+                    coordsTo: $('#coordsTo'),
+                    coordsExact: $('#coordsExact'),
                     lblCoordinateFeedback: $('#lblCoordinateFeedback'),
                     lblBeforeFeedback: $('#lblBeforeFeedback'),
                     lblAfterFeedback: $('#lblAfterFeedback')
                 };
 
                 const coordinateSectionToggle = new SectionToggle('coordinate-search-type');
+                const coordsFrom = this.elements.coordsFrom.coordinates({
+                    placeholderX: 'from X',
+                    placeholderY: 'from Y'
+                });
+                const coordsTo = this.elements.coordsTo.coordinates({
+                    placeholderX: 'to X',
+                    placeholderY: 'to Y'
+                });
+                const coordsExact = this.elements.coordsExact.coordinates({
+                    placeholderX: 'x',
+                    placeholderY: 'y'
+                });
 
                 const getActiveTab = () => this.elements.form.find('.tab-pane.active').first().attr('id');
 
@@ -495,16 +541,6 @@
                         return null;
                     }
                     return new Date(`${dateStr} ${timeStr}Z`); // force UTC
-                }
-
-                function parseCoordinateInputs(name) {
-                    const xStr = $(`input[type="number"][name="coords-${name}-x"]`).val();
-                    const yStr = $(`input[type="number"][name="coords-${name}-y"]`).val();
-                    if (!xStr && !yStr) {
-                        return null;
-                    }
-
-                    return [parseInt(xStr), parseInt(yStr)];
                 }
 
                 this.showError = function() {
@@ -527,12 +563,12 @@
                         case 'search-custom': {
                             switch (coordinateSectionToggle.activeSection) {
                                 case 'exact': {
-                                    const coords = parseCoordinateInputs('exact');
-                                    if (coords != null) {
-                                        if (utils.isValidCoord(coords)) {
+                                    const coordsExactVal = coordsExact.val();
+                                    if (coordsExactVal != null) {
+                                        if (utils.isValidCoord(coordsExactVal)) {
                                             this.elements.lblCoordinateFeedback.hide();
 
-                                            const [ x, y ] = coords;
+                                            const [ x, y ] = coordsExactVal;
                                             qs.set('coordsX', x);
                                             qs.set('coordsY', y);
                                         } else {
@@ -543,17 +579,17 @@
                                     break;
                                 }
                                 case 'range': {
-                                    const coordsFrom = parseCoordinateInputs('from');
-                                    const coordsTo = parseCoordinateInputs('to');
-                                    if (coordsFrom != null && coordsTo != null) {
-                                        if (utils.isValidCoord(coordsFrom) && utils.isValidCoord(coordsTo)) {
+                                    const coordsFromVal = coordsFrom.val();
+                                    const coordsToVal = coordsTo.val();
+                                    if (coordsFromVal != null && coordsToVal != null) {
+                                        if (utils.isValidCoord(coordsFromVal) && utils.isValidCoord(coordsToVal)) {
                                             this.elements.lblCoordinateFeedback.hide();
 
-                                            const [ fromX, fromY ] = coordsFrom;
+                                            const [ fromX, fromY ] = coordsFromVal;
                                             qs.set('coordsFromX', fromX);
                                             qs.set('coordsFromY', fromY);
 
-                                            const [ toX, toY ] = coordsTo;
+                                            const [ toX, toY ] = coordsToVal;
                                             qs.set('coordsToX', toX);
                                             qs.set('coordsToY', toY);
                                         } else {
