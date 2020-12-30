@@ -332,8 +332,8 @@
                 this.update = (value, show) => {
                     if (show) {
                         this.elements.sections.hide();
+                        activeSection = value;
                     }
-                    activeSection = show ? value : null;
                     this.elements.sections
                         .filter(`[data-section-value="${value}"]`)
                         .toggle(show);
