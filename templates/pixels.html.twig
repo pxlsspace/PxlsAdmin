@@ -672,17 +672,35 @@
                     cbColumnToggles: $('input[type="checkbox"][data-toggle-column]')
                 };
 
+                const renderBoolean = (data, type, row, meta) => {
+                    if (type !== 'display') {
+                        return data;
+                    }
+                    return `<i class="icon fa fa-${data ? 'check' : 'times'}"></i> ${data ? 'Yes' : 'No'}`;
+                }
+
                 this.datatable = this.elements.table.DataTable({
                     order: [[4, 'desc']],
                     columns: [
                         { data: "pixel_id" },
                         {
                             data: "user_name",
-                            render: (data, type, row, meta) => `<a href="/userinfo/${data}">${data}</a>`
+                            render: (data, type, row, meta) => {
+                                if (type !== 'display') {
+                                    return data;
+                                }
+                                return `<a href="/userinfo/${data}">${data}</a>`
+                            }
                         },
                         {
                             // coordinates
-                            render: (data, type, row, meta) => `<a href="{{ webroots.game }}/#x=${row.x}&y=${row.y}&scale=50">(${row.x}, ${row.y})</a>`
+                            render: (data, type, row, meta) => {
+                                const pretty = `(${row.x}, ${row.y})`;
+                                if (type !== 'display') {
+                                    return pretty;
+                                }
+                                return `<a href="{{ webroots.game }}/#x=${row.x}&y=${row.y}&scale=50">${pretty}</a>`
+                            }
                         },
                         {
                             data: "color",
@@ -697,11 +715,11 @@
                             }
                         },
                         { data: "time" },
-                        { data: "most_recent" },
-                        { data: "undone" },
-                        { data: "undo_action" },
-                        { data: "mod_action" },
-                        { data: "rollback_action" }
+                        { data: "most_recent", class: 'dt-center', render: renderBoolean },
+                        { data: "undone", class: 'dt-center', render: renderBoolean },
+                        { data: "undo_action", class: 'dt-center', render: renderBoolean },
+                        { data: "mod_action", class: 'dt-center', render: renderBoolean },
+                        { data: "rollback_action", class: 'dt-center', render: renderBoolean }
                     ]
                 });
 
