@@ -930,7 +930,8 @@
                 }
 
                 this.elements.btnDownload.on('click', () => {
-                    this.ctx.canvas.toBlob((blob) => saveAs(blob, 'pixels.png'));
+                    const fileName = `pixels${gameInfo.hasData ? `-canvas_${gameInfo.info.canvasCode}` : ''}-pixels_${rangeSlider.result.from_value}_to_${rangeSlider.result.to_value}.png`;
+                    this.ctx.canvas.toBlob((blob) => utils.saveAs(blob, fileName));
                 });
                 this.elements.cbCheckerboardBackground.on('change', (ev) => {
                     this.ctx.canvas.classList.toggle('checkerboard-background', ev.target.checked)
