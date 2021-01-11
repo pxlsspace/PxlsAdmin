@@ -35,7 +35,7 @@ final class Factions
                 $response = $response->withStatus(200)->withJson(['status' => 'success', 'data' => $factions]);
                 break;
             case 'text/html':
-                $this->view->render($response, 'factions.html.twig', ['args' => $args, 'userdata' => (new \pxls\User($this->database))->getUserById($_SESSION['user_id']), 'webroots' => $app->getContainer()->get("settings")["webroots"]]);
+                $this->view->render($response, 'factions.html.twig', ['args' => $args, 'userdata' => (new \pxls\User($this->database))->getUserById($_SESSION['user_id'])]);
                 break;
         }
 

@@ -82,3 +82,7 @@ input[type="date"]:invalid,
 input[type="time"]:invalid {
     outline: red 2px groove;
 }
+
+.sidebar-toggle {
+    font-size: 14px;
+}

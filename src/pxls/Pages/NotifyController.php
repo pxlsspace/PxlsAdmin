@@ -30,7 +30,6 @@ final class NotifyController
 
         //region Meta
         $data['args'] = $args;
-        $data['webroots'] = $app->getContainer()->get("settings")["webroots"];
         //endregion
 
         //region UserData

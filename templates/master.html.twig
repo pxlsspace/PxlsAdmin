@@ -28,13 +28,13 @@
     {% endblock %}
 </head>
 
-<body class="hold-transition skin-red sidebar-mini">
+<body class="hold-transition skin-black-light sidebar-mini">
 <div class="wrapper">
     <header class="main-header">
         <!-- Logo -->
         <a href="{{ path_for('home') }}" class="logo">
             <!-- mini logo for sidebar mini 50x50 pixels -->
-            <span class="logo-mini"><b>pxAdm</b></span>
+            <span class="logo-mini">pxls</span>
             <!-- logo for regular state and mobile devices -->
             <span class="logo-lg">pxls<b>Admin</b></span>
         </a>
@@ -49,8 +49,8 @@
                 <ul class="nav navbar-nav">
                     <!-- User Account: style can be found in dropdown.less -->
                     <li class="messages-menu">
-                        <a href="#"><b>CEST Time:</b>
-                            <span id="cest-time"></span>
+                        <a href="#"><b>{{ server_timezone_name }} Time:</b>
+                            <span id="server-time"></span>
                         </a>
                     </li>
                     <li class="dropdown user user-menu">
@@ -123,13 +123,13 @@
                 <li class="header">MAIN NAVIGATION</li>
                 <li><a href="{{ path_for('home') }}"><i class="fa fa-dashboard text-aqua"></i> <span>Dashboard</span></a></li>
                 <li><a href="{{ path_for('reportList') }}"><i class="fa fa-clipboard text-aqua"></i> <span>Reports</span></a></li>
-                <li><a href="{{ path_for('factions') }}"><i class="fa fa-list text-aqua"></i> <span>Factions</span></a></li>
-                <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-list text-aqua"></i> <span>Chat Context (dev tool)</span></a></li>
+                <li><a href="{{ path_for('factions') }}"><i class="fa fa-flag text-aqua"></i> <span>Factions</span></a></li>
+                <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-comments text-aqua"></i> <span>Chat Context</span></a></li>
                 <li><a href="{{ path_for('pixels') }}"><i class="fa fa-clone text-aqua"></i> <span>Pixels Lookup</span></a></li>
 
                 {% if ('administrator' in userdata.roles or 'developer' in userdata.roles) %}
                     <li><a href="{{ path_for('logs') }}"><i class="fa fa-list text-aqua"></i> <span>Logs</span></a></li>
-                    <li><a href="{{ path_for('notifications') }}"><i class="fa fa-exclamation-circle text-aqua"></i> <span>Notifications</span></a></li>
+                    <li><a href="{{ path_for('notifications') }}"><i class="fa fa-envelope text-aqua"></i> <span>Notifications</span></a></li>
                 {% endif %}
             </ul>
         </section>
@@ -160,6 +160,37 @@
             {% endblock content %}
         </section>
     </div>
+
+    <!-- The Right Sidebar (Settings) -->
+    <aside class="control-sidebar control-sidebar-dark">
+        <div class="tab-content">
+            <h4 class="control-sidebar-heading">Skins</h4>
+            <div class="form-group">
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="skin-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Select a skin<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="skin-dropdown">
+                        <li><a href="#" data-skin="red">Red</a></li>
+                        <li><a href="#" data-skin="red-light">Red (light)</a></li>
+                        <li><a href="#" data-skin="blue">Blue</a></li>
+                        <li><a href="#" data-skin="blue-light">Blue (light)</a></li>
+                        <li><a href="#" data-skin="black">Black</a></li>
+                        <li><a href="#" data-skin="black-light">Black (light)</a></li>
+                        <li><a href="#" data-skin="purple">Purple</a></li>
+                        <li><a href="#" data-skin="purple-light">Purple (light)</a></li>
+                        <li><a href="#" data-skin="green">Green</a></li>
+                        <li><a href="#" data-skin="green-light">Green (light)</a></li>
+                        <li><a href="#" data-skin="yellow">Yellow</a></li>
+                        <li><a href="#" data-skin="yellow-light">Yellow (light)</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <!-- The sidebar's background -->
+    <!-- This div must placed right after the sidebar for it to work-->
+    <div class="control-sidebar-bg"></div>
 </div>
 
 {% block js %}
@@ -186,7 +217,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment-with-locales.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.13/moment-timezone-with-data.min.js"></script>
     <script type="text/javascript">
-        setInterval(function(){$("#cest-time").html(moment().tz('Europe/Berlin').format('YYYY-MM-DD HH:mm:ss'))}, 1000);
+        setInterval(function(){$("#server-time").html(moment().tz('{{ server_timezone_name }}').format('YYYY-MM-DD HH:mm:ss'))}, 1000);
+    </script>
+    <script type="text/javascript">
+        (() => {
+            function setSkin(name) {
+                // remove old skin
+                document.body.classList.forEach((cls) => {
+                    if (cls.match(/skin-\w+(?:-light)?/)) {
+                        document.body.classList.remove(cls);
+                    }
+                });
+                document.body.classList.add(`skin-${name}`);
+                localStorage.setItem('skin', name);
+            }
+
+            setSkin(localStorage.getItem('skin') || 'red');
+
+            $('a[data-skin]').on('click', function() {
+                setSkin(this.dataset.skin);
+            });
+        })();
     </script>
 {% endblock %}
 

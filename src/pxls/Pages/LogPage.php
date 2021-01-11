@@ -28,7 +28,6 @@ final class LogPage
         global $app;
         $data = [];
         $data['args'] = $args;
-        $data['webroots'] = $app->getContainer()->get("settings")["webroots"];
 
         //region UserData
         $user = new \pxls\User($this->database);
