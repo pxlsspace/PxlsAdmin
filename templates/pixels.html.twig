@@ -170,8 +170,13 @@
                             <p class="help-block">Color each pixel by their placer, using the colors defined above.</p>
                         </div>
                     </div>
-                    <div class="board-preview__layer-container col-sm-9">
-                        <canvas class="board-preview__result-layer"></canvas>
+                    <div class="col-sm-9">
+                        <div class="board-preview__rangeslider-container">
+                            <input type="text" class="board-preview__rangeslider"></span>
+                        </div>
+                        <div class="board-preview__layer-container">
+                            <canvas class="board-preview__result-layer"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,6 +187,7 @@
 {% block css %}
     <link rel="stylesheet" href="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.css">
     <link rel="stylesheet" href="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.css">
+    <link rel="stylesheet" href="{{ base_url() }}/assets/plugins/ionslider/ion.rangeSlider.min.css">
     {{ parent() }}
     <style>
         fieldset legend {
@@ -270,6 +276,9 @@
             width: 100%;
             box-shadow: 0 0 7px 4px rgba(0, 0, 0, .25);
         }
+        .board-preview__rangeslider-container {
+            margin-bottom: 1em;
+        }
     </style>
 {% endblock css %}
 
@@ -278,6 +287,7 @@
     <script src="{{ base_url() }}/assets/plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="{{ base_url() }}/assets/plugins/datatables/dataTables.bootstrap.min.js"></script>
     <script src="{{ base_url() }}/assets/plugins/datatables/extensions/Scroller/js/dataTables.scroller.js"></script>
+    <script src="{{ base_url() }}/assets/plugins/ionslider/ion.rangeSlider.min.js"></script>
     {% if not had_error %}
     <script type="text/javascript">
         (function() {
@@ -704,7 +714,7 @@
 
                         // Update graphs
                         if (gameInfo.hasData && json.data.length > 0) {
-                            boardPreview.update(json.data);
+                            boardPreview.reinit();
                             boardPreview.elements.row.show();
                         } else {
                             boardPreview.elements.row.hide();
@@ -817,6 +827,7 @@
                 this.elements = {
                     row: $('.board-preview'),
                     resultCanvas: $('.board-preview__result-layer'),
+                    inpRangeSlider: $('.board-preview__rangeslider'),
                     txtPreviewRangeMin: $('.board-preview__range .board-preview__range__min'),
                     txtPreviewRangeMax: $('.board-preview__range .board-preview__range__max'),
                     cbCheckerboardBackground: $('#cbBoardPreviewBackground'),
@@ -826,60 +837,97 @@
 
                 this.ctx = this.elements.resultCanvas[0].getContext('2d');
 
-                this.update = (data) => {
-                    const { min, max } = utils.getPixelBounds(data);
+                this.updateCanvas = (from, to) => {
+                    const data = table.getData()
+                        .filter(({ pixel_id }) => pixel_id >= from && pixel_id <= to)
+                        .toArray();
 
-                    this.elements.txtPreviewRangeMin.text(`(${min.x}, ${min.y})`);
-                    this.elements.txtPreviewRangeMax.text(`(${max.x}, ${max.y})`);
+                    const { min: topLeft, max: bottomRight } = utils.getPixelBounds(data);
 
-                    const width = max.x - min.x + 1;
-                    const height = max.y - min.y + 1;
+                    this.elements.txtPreviewRangeMin.text(`(${topLeft.x}, ${topLeft.y})`);
+                    this.elements.txtPreviewRangeMax.text(`(${bottomRight.x}, ${bottomRight.y})`);
+
+                    const width = bottomRight.x - topLeft.x + 1;
+                    const height = bottomRight.y - topLeft.y + 1;
                     this.ctx.canvas.width = width;
                     this.ctx.canvas.height = height;
                     this.ctx.canvas.style.backgroundSize = `${Math.max(1, 100 / width)}%`;
 
-                    const id = this.ctx.getImageData(0, 0, width, height);
+                    if (width > 0 && height > 0) {
+                        const id = this.ctx.getImageData(0, 0, width, height);
 
-                    const userColorMode = this.elements.cbUserColorMode[0].checked;
-                    const userToColor = {};
-                    for (const pix of data) {
-                        const idx = ((pix.x - min.x) + (pix.y - min.y) * width) * 4;
-                        if (id.data[idx + 3] !== 0) {
-                            // pixel already drawn
-                            continue;
-                        }
-
-                        let a = 255;
-                        let c = 0;
-                        if (userColorMode) {
-                            // color with user map
-                            if (!(pix.user_name in userToColor)) {
-                                const hex = placersList.getPlacerColor(pix.user_name);
-                                userToColor[pix.user_name] = hex == null ? null : parseInt(hex.substr(1), 16);
+                        const userColorMode = this.elements.cbUserColorMode[0].checked;
+                        const userToColor = {};
+                        for (const pix of data) {
+                            const idx = ((pix.x - topLeft.x) + (pix.y - topLeft.y) * width) * 4;
+                            if (id.data[idx + 3] !== 0) {
+                                // pixel already drawn
+                                continue;
                             }
 
-                            c = userToColor[pix.user_name];
-                        } else {
-                            // color with palette
-                            if (pix.color >= 0 && pix.color < gameInfo.info.palette.length) {
-                                c = parseInt(gameInfo.info.palette[pix.color].value, 16);
-                            } else if (pix.color === 0xFF) {
-                                a = 0x7F; // half transparency
+                            let a = 255;
+                            let c = 0;
+                            if (userColorMode) {
+                                // color with user map
+                                if (!(pix.user_name in userToColor)) {
+                                    const hex = placersList.getPlacerColor(pix.user_name);
+                                    userToColor[pix.user_name] = hex == null ? null : parseInt(hex.substr(1), 16);
+                                }
+
+                                c = userToColor[pix.user_name];
+                            } else {
+                                // color with palette
+                                if (pix.color >= 0 && pix.color < gameInfo.info.palette.length) {
+                                    c = parseInt(gameInfo.info.palette[pix.color].value, 16);
+                                } else if (pix.color === 0xFF) {
+                                    a = 0x7F; // half transparency
+                                }
                             }
+
+                            if (c == null) {
+                                continue;
+                            }
+
+                            id.data[idx  ] = c >> 16 & 0xFF;
+                            id.data[idx+1] = c >> 8 & 0xFF;
+                            id.data[idx+2] = c & 0xFF;
+                            id.data[idx+3] = a;
                         }
 
-                        if (c == null) {
-                            continue;
-                        }
-
-                        id.data[idx  ] = c >> 16 & 0xFF;
-                        id.data[idx+1] = c >> 8 & 0xFF;
-                        id.data[idx+2] = c & 0xFF;
-                        id.data[idx+3] = a;
+                        this.ctx.putImageData(id, 0, 0);
                     }
-
-                    this.ctx.putImageData(id, 0, 0);
                 };
+
+
+                const handleRangeSliderUpdate = (ev) => this.updateCanvas(ev.to_value, ev.from_value);
+
+                let rangeSliderDebouncingTimeout;
+                const rangeSlider = this.elements.inpRangeSlider.ionRangeSlider({
+                    skin: 'round',
+                    type: 'double',
+                    force_edges: true,
+                    prettify: (pixelID) => `ID #${pixelID}`,
+                    onUpdate: (ev) => this.updateCanvas(ev.from_value, ev.to_value),
+                    onChange: (ev) => {
+                        if (rangeSliderDebouncingTimeout != null) {
+                            clearTimeout(rangeSliderDebouncingTimeout);
+                        }
+                        rangeSliderDebouncingTimeout = setTimeout(() => this.updateCanvas(ev.from_value, ev.to_value), 100);
+                    }
+                }).data('ionRangeSlider');
+
+                this.reinit = () => {
+                    const data = table.getData()
+                        .toArray()
+                        .sort(() => 1); // reverse - oldest pixels first
+
+                    const values = data.map(({ pixel_id }) => pixel_id);
+                    rangeSlider.update({
+                        values,
+                        from: 0,
+                        to: values.length
+                    });
+                }
 
                 this.elements.btnDownload.on('click', () => {
                     this.ctx.canvas.toBlob((blob) => saveAs(blob, 'pixels.png'));
@@ -888,7 +936,7 @@
                     this.ctx.canvas.classList.toggle('checkerboard-background', ev.target.checked)
                 }).change();
                 this.elements.cbUserColorMode.on('change', () => {
-                    this.update(table.getData().toArray());
+                    this.updateCanvas(rangeSlider.result.from_value, rangeSlider.result.to_value);
                 });
 
                 return this;
