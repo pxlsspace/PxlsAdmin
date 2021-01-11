@@ -17,22 +17,30 @@
                     <form name="search" class="tab-content">
                         <p>Leave any fields empty to ignore them.</p>
                         <div id="search-by-id" class="tab-pane">
-                            <label>
-                                Pixel ID
-                                <input name="pixel-id" type="number" min="0" />
-                            </label>
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    <label for="pixel-id">Pixel ID</label>
+                                    <input name="pixel-id" class="form-control" type="number" min="0" />
+                                </div>
+                            </div>
                         </div>
                         <div id="search-custom" class="tab-pane active">
-                            <fieldset>
-                                <label>
-                                    Limit
-                                    <input name="amount" type="number" min="0" value="100" />
-                                </label>
+                            <fieldset class="form-inline">
+                                <div class="form-group">
+                                    <label for="amount">Limit</label>
+                                    <input name="amount" class="form-control" type="number" min="0" value="1000" />
+                                </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Coordinate</legend>
-                                <label><input type="radio" name="coordinate-search-type--toggle" value="range" checked/> Range</label>
-                                <label><input type="radio" name="coordinate-search-type--toggle" value="exact" /> Exact</label>
+                                <div>
+                                    <label>
+                                        <input type="radio" name="coordinate-search-type--toggle" value="range" checked/> Range
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="coordinate-search-type--toggle" value="exact" /> Exact
+                                    </label>
+                                </div>
                                 <div data-section-name="coordinate-search-type" data-section-value="range">
                                     <div>
                                         <div id="coordsFrom"></div>
@@ -45,25 +53,16 @@
                                         <div id="coordsExact"></div>
                                     </div>
                                 </div>
-                                <span id="lblCoordinateFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
+                                <span id="lblCoordinateFeedback" class="help-block text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
                             </fieldset>
-                            <fieldset>
+                            <fieldset class="form-inline">
                                 <legend>Time range</legend>
-                                <div>
-                                    <label>
-                                        Before
-                                        <input name="before-date" type="date" />
-                                        <input name="before-time" type="time" step=".001" />
-                                        <span id="lblBeforeFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
-                                    </label>
-                                </div>
-                                <div>
-                                    <label>
-                                        After
-                                        <input name="after-date" type="date" />
-                                        <input name="after-time" type="time" step=".001" />
-                                        <span id="lblAfterFeedback" class="text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Invalid</span>
-                                    </label>
+                                <div class="form-group">
+                                    <input name="timerange-start" class="form-control" type="text" placeholder="YYYY/MM/DD hh:mm:ss A"></input>
+                                    to
+                                    <input name="timerange-end" class="form-control" type"text" placeholder="YYYY/MM/DD hh:mm:ss A"></input>
+                                    <span id="lblBeforeFeedback" class="help-block text-orange" style="display: none;"><i class="icon fa fa-warning"></i> Start date time is invalid</span>
+                                    <span id="lblBeforeAfter" class="help-block text-orange" style="display: none;"><i class="icon fa fa-warning"></i> End date time is invalid</span>
                                 </div>
                             </fieldset>
                             <fieldset>
@@ -76,11 +75,23 @@
                             </fieldset>
                             <fieldset>
                                 <legend>Properties</legend>
-                                <div><label class="pixel-prop"><input name="mostRecent" type="checkbox" /> Only most recent pixels</label></div>
-                                <div><label class="pixel-prop"><input name="wasUndone" type="checkbox" /> Only undone pixels</label></div>
-                                <div><label class="pixel-prop"><input name="undoAction" type="checkbox" /> Only pixels that are part of an undo</label></div>
-                                <div><label class="pixel-prop"><input name="modAction" type="checkbox" /> Only pixels placed with placement overrides</label></div>
-                                <div><label class="pixel-prop"><input name="rollbackAction" type="checkbox" /> Only pixels that are part of a rollback</label></div>
+                                <div class="form-group">
+                                    <div class="checkbox">
+                                        <label class="pixel-prop"><input name="mostRecent" type="checkbox" /> Only most recent pixels</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label class="pixel-prop"><input name="wasUndone" type="checkbox" /> Only undone pixels</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label class="pixel-prop"><input name="undoAction" type="checkbox" /> Only pixels that are part of an undo</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label class="pixel-prop"><input name="modAction" type="checkbox" /> Only pixels placed with placement overrides</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label class="pixel-prop"><input name="rollbackAction" type="checkbox" /> Only pixels that are part of a rollback</label>
+                                    </div>
+                                </div>
                             </fieldset>
                         </div>
                         <button id="btnQuery" class="btn btn-primary" disabled>Query</button>
@@ -185,7 +196,7 @@
         }
 
         .dynamic-list {
-            padding-left: 1em;
+            padding-left: 0;
         }
         ul.dynamic-list > li {
             list-style: none;
@@ -204,7 +215,7 @@
             width: 5em;
             padding: 0 0.25em;
             border: none;
-            border-bottom: 1px solid gray;
+            border-bottom: 1px solid #D7D7D7;
         }
 
         .color-filter > input[type="checkbox"] {
@@ -518,6 +529,25 @@
                     lblAfterFeedback: $('#lblAfterFeedback')
                 };
 
+                const timerangeStart = $('input[name="timerange-start"]').daterangepicker({
+                    singleDatePicker: true,
+                    timePicker: true,
+                    showDropdowns: true,
+                    locale: {
+                        format: 'YYYY/MM/DD hh:mm:ss A',
+                        cancelLabel: 'Clear'
+                    }
+                }).on('cancel.daterangepicker', (_, picker) => picker.element.val('')).val('');
+                const timerangeEnd = $('input[name="timerange-end"]').daterangepicker({
+                    singleDatePicker: true,
+                    timePicker: true,
+                    showDropdowns: true,
+                    locale: {
+                        format: 'YYYY/MM/DD hh:mm:ss A',
+                        cancelLabel: 'Clear'
+                    }
+                }).on('cancel.daterangepicker', (_, picker) => picker.element.val('')).val('');
+
                 const coordinateSectionToggle = new SectionToggle('coordinate-search-type');
                 const coordsFrom = this.elements.coordsFrom.coordinates({
                     placeholderX: 'from X',
@@ -533,15 +563,6 @@
                 });
 
                 const getActiveTab = () => this.elements.form.find('.tab-pane.active').first().attr('id');
-
-                function parseDateTimeInputs(name) {
-                    const dateStr = $(`input[type="date"][name="${name}-date"]`).val();
-                    const timeStr = $(`input[type="time"][name="${name}-time"]`).val();
-                    if (!dateStr && !timeStr) {
-                        return null;
-                    }
-                    return new Date(`${dateStr} ${timeStr}Z`); // force UTC
-                }
 
                 this.showError = function() {
                     this.elements.errorBox.show();
@@ -600,22 +621,24 @@
                                 }
                             }
 
-                            const before = parseDateTimeInputs('before');
-                            if (before != null) {
-                                if (utils.isValidDate(before)) {
+                            const timerangeEndVal = timerangeEnd.val();
+                            if (timerangeEndVal.length > 0) {
+                                const beforeDate = new Date(timerangeEndVal);
+                                if (utils.isValidDate(beforeDate)) {
                                     this.elements.lblBeforeFeedback.hide();
-                                    qs.set('before', before.getTime());
+                                    qs.set('before', beforeDate.getTime());
                                 } else {
                                     invalid = true;
                                     this.elements.lblBeforeFeedback.show();
                                 }
                             }
 
-                            const after = parseDateTimeInputs('after');
-                            if (after != null) {
-                                if (utils.isValidDate(after)) {
+                            const timerangeStartVal = timerangeStart.val();
+                            if (timerangeStartVal.length > 0) {
+                                const afterDate = new Date(timerangeStartVal);
+                                if (utils.isValidDate(afterDate)) {
                                     this.elements.lblAfterFeedback.hide();
-                                    qs.set('after', after.getTime());
+                                    qs.set('after', afterDate.getTime());
                                 } else {
                                     invalid = true;
                                     this.elements.lblAfterFeedback.show();
