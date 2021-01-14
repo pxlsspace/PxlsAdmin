@@ -172,7 +172,7 @@
                                 <th>ID</th>
                                 <th>Username</th>
                                 <th>Signup Time</th>
-                                <th>Login</th>
+                                <th>Logins</th>
                                 <th>Signup IP</th>
                                 <th>Last IP</th>
                                 <th>Pixel Count (this canvas)</th>
@@ -187,7 +187,7 @@
                                 <th>ID</th>
                                 <th>Username</th>
                                 <th>Signup Time</th>
-                                <th>Login</th>
+                                <th>Logins</th>
                                 <th>Signup IP</th>
                                 <th>Pixel Count (this canvas)</th>
                                 <th>Last IP</th>
@@ -285,7 +285,10 @@
                     { "data": "id" },
                     { "data": "username" },
                     { "data": "signup_time" },
-                    { "data": "login" },
+                    {
+                        "data": "logins",
+                        render: data => data.join(' ')
+                    },
                     {
                         "data": "signup_ip",
                         render: data => `<a href="{{ path_for('search') }}?q=${data}&type=ip">${data}</a>`

@@ -45,7 +45,7 @@ class ReportHandler {
     }
 
     public function discordinfo($uid) {
-        $execUser = $this->getUserdataById($_SESSION['user_id'])->username;
+        $execUser = $this->getUserdataById($_SESSION['user_id'])['username'];
         $this->discord->setName($this->settings["discord"]["whois"]["name"]);
         $this->discord->setUrl($this->settings["discord"]["whois"]["url"]);
         $this->discord->setMessage("!whois $uid $execUser");
@@ -63,8 +63,8 @@ class ReportHandler {
         }
 
         while($report = $qReports->fetch(\PDO::FETCH_ASSOC)) {
-            $report['who_name'] = $report['who'] ? $this->getUserdataById($report['who'])->username : 'Server';
-            $report['claimed_name'] = ($report['claimed_by']==0)?'':$this->getUserdataById($report['claimed_by'])->username;
+            $report['who_name'] = $report['who'] ? $this->getUserdataById($report['who'])['username'] : 'Server';
+            $report['claimed_name'] = ($report['claimed_by']==0)?'':$this->getUserdataById($report['claimed_by'])['username'];
             $report['position_url'] = $report['who'] ? '<a href="'.$this->formatCoordsLink($report['x'], $report['y']).'" target="_blank">X:'.$report['x'].'; Y:'.$report['y'].'</a>' : 'N/A';
             $report['who_url'] = $report['who'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['who']]).'" target="_blank">'.$report['who_name'].'</a>' : 'Server';
             $report['reported_url'] = $report['reported'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['reported']]).'" target="_blank">'.$report['reported_name'].'</a>' : 'Server';
@@ -82,20 +82,9 @@ class ReportHandler {
         return $reports;
     }
 
-    public function getUserdataById($s) {
-        $getUser = $this->db->prepare("SELECT * FROM users WHERE id = :uid LIMIT 1");
-        $getUser->bindParam(":uid",$s,\PDO::PARAM_INT);
-        $getUser->execute();
-        $fetched = $getUser->fetch(\PDO::FETCH_OBJ);
-        $fetched->roles = $this->getRolesById($s);
-        return $fetched;
-    }
-
-    public function getRolesById($s) {
-        $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
-        $getRoles->bindParam(":uid",$s,\PDO::PARAM_INT);
-        $getRoles->execute();
-        return $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
+    public function getUserdataById($uid) {
+        $userinfo = (new \pxls\User($this->db))->getUserById($uid);
+        return $userinfo;
     }
 
     public function getUserdataByPixel($s) {
@@ -123,7 +112,7 @@ class ReportHandler {
     }
     public function resolve($rId) {
         $execUser = $this->getUserdataById($_SESSION['user_id']);
-        if (in_array('administrator', $execUser->roles)) return $this->_resolve($rId);
+        if (in_array('administrator', $execUser['roles'])) return $this->_resolve($rId);
         if ($this->whoClaimedReport($rId) != $_SESSION['user_id']) return false;
         return $this->_resolve($rId);
     }
@@ -146,9 +135,9 @@ class ReportHandler {
         $qR->execute();
         while($gData = $qR->fetch(\PDO::FETCH_OBJ)) {
             $report['self'] = [
-                'id' => $self->id,
-                'username' => $self->username,
-                'roles' => $self->roles
+                'id' => $self['id'],
+                'username' => $self['username'],
+                'roles' => $self['roles']
             ];
             $report['general']['id'] = $gData->id;
             $report['general']['pixel'] = $gData->pixel_id;
@@ -159,24 +148,24 @@ class ReportHandler {
             $report['general']['time'] = date("d.m.Y - H:i:s", $gData->time);
 
             $reporterData = $this->getUserdataById($gData->who);
-            $report['reporter']['id']               = $reporterData->id;
-            $report['reporter']['username']         = $reporterData->username;
-            $report['reporter']['login']            = $reporterData->login;
-            $report['reporter']['signup']           = $reporterData->signup_time;
-            $report['reporter']['roles']            = $reporterData->roles;
-            $report['reporter']['pixelcount']       = $reporterData->pixel_count;
-            $report['reporter']['ip']               = ["last"=>$reporterData->last_ip,"signup"=>$reporterData->signup_ip];
-            $report['reporter']['ban']              = ["expiry"=>$reporterData->ban_expiry,"reason"=>$reporterData->ban_reason];
+            $report['reporter']['id']               = $reporterData['id'];
+            $report['reporter']['username']         = $reporterData['username'];
+            $report['reporter']['logins']           = $reporterData['logins'];
+            $report['reporter']['signup']           = $reporterData['signup_time'];
+            $report['reporter']['roles']            = $reporterData['roles'];
+            $report['reporter']['pixelcount']       = $reporterData['pixel_count'];
+            $report['reporter']['ip']               = ["last"=>$reporterData['last_ip'],"signup"=>$reporterData['signup_ip']];
+            $report['reporter']['ban']              = ["expiry"=>$reporterData['ban_expiry'],"reason"=>$reporterData['ban_reason']];
 
             $reportedData = $this->getUserdataById($gData->reported);
-            $report['reported']['id']               = $reportedData->id;
-            $report['reported']['username']         = $reportedData->username;
-            $report['reported']['login']            = $reportedData->login;
-            $report['reported']['signup']           = $reportedData->signup_time;
-            $report['reported']['roles']            = $reportedData->roles;
-            $report['reported']['pixelcount']       = $reportedData->pixel_count;
-            $report['reported']['ip']               = ["last"=>$reportedData->last_ip,"signup"=>$reportedData->signup_ip];
-            $report['reported']['ban']              = ["expiry"=>$reportedData->ban_expiry,"reason"=>$reportedData->ban_reason];
+            $report['reported']['id']               = $reportedData['id'];
+            $report['reported']['username']         = $reportedData['username'];
+            $report['reported']['logins']           = $reportedData['logins'];
+            $report['reported']['signup']           = $reportedData['signup_time'];
+            $report['reported']['roles']            = $reportedData['roles'];
+            $report['reported']['pixelcount']       = $reportedData['pixel_count'];
+            $report['reported']['ip']               = ["last"=>$reportedData['last_ip'],"signup"=>$reportedData['signup_ip']];
+            $report['reported']['ban']              = ["expiry"=>$reportedData['ban_expiry'],"reason"=>$reportedData['ban_reason']];
         }
         return $report;
     }

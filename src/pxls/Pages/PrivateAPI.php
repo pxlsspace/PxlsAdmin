@@ -90,18 +90,23 @@ final class PrivateAPI
         global $app;
 
         $toRet = [];
-        $qSignups = $this->database->query("SELECT id,username,signup_time,login,ban_reason,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",signup_ip,last_ip,pixel_count FROM users ORDER BY signup_time DESC LIMIT 100");
+        $qSignups = $this->database->query("SELECT id,username,signup_time,ban_reason,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",signup_ip,last_ip,pixel_count FROM users ORDER BY signup_time DESC LIMIT 100");
         $qSignups->execute();
+
+        $user = new \pxls\User($this->database);
 
         while ($signup = $qSignups->fetch(\PDO::FETCH_ASSOC)) {
             $parsedTime = $signup["signup_time"];
 
-            $loginData = Utils::MakeUserLoginURL($signup["login"], true);
-            if ($loginData["service"] == "discord") {
-                $signup["login"] = '<button class="btn btn-link" style="padding: 0; margin: 0;" data-discord-id="'.$loginData["id"].'" onclick="askDiscord(\''.$loginData["ID"].'\');" target="_blank">'.$loginData["service"].':'.$loginData["ID"].'</a>';;
-            } else {
-                $signup["login"] = '<a href="'.$loginData["URL"].'" target="_blank">'.$loginData["service"].':'.$loginData["ID"].'</a>';
-            }
+            $logins = $user->getUserLoginsById($signup["id"]);
+            $signup["logins"] = array_map(function (array $login) {
+                $loginURL = Utils::MakeUserLoginURL($login);
+                if ($login["service"] == "discord") {
+                    return '<button class="btn btn-link" style="padding: 0; margin: 0;" data-discord-id="'.$login["service_uid"].'" onclick="askDiscord(\''.$login["service_uid"].'\');" target="_blank">'.$login["service"].':'.$login["service_uid"].'</a>';;
+                } else {
+                    return '<a href="'.$loginURL.'" target="_blank">'.$login["service"].':'.$login["service_uid"].'</a>';
+                }
+            }, $logins);
 
             $signup["signup_ip"] = $signup["signup_ip"];
             $signup["last_ip"] = $signup["last_ip"];

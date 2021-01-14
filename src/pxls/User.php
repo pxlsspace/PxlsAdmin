@@ -49,6 +49,7 @@ class User {
     private function populateUserData($usr) {
         $usr["signup_ip"] = $usr["signup_ip"];
         $usr["last_ip"] = $usr["last_ip"];
+        $usr["logins"] = $this->getUserLoginsById($usr["id"]);
         $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
         $getRoles->bindParam(":uid",$usr["id"],\PDO::PARAM_INT);
         $getRoles->execute();
@@ -92,6 +93,13 @@ class User {
             $userBufferName[$uname] = false;
             return false;
         }
+    }
+
+    public function getUserLoginsById($uid) {
+        $getLogins = $this->db->prepare("SELECT service, service_uid FROM user_logins WHERE uid = :uid");
+        $getLogins->bindParam(":uid", $uid, \PDO::PARAM_INT);
+        $getLogins->execute();
+        return $getLogins->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function getUserNotesById($uid) {

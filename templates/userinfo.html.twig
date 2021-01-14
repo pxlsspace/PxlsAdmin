@@ -93,7 +93,12 @@
                 <div class="box-body">
                     <b><i class="fa fa-user margin-r-5"></i> User ID: <span>{{ userinfo.id }}</span></b>
                     <br />
-                    <b><i class="fa fa-sign-in margin-r-5"></i> Login Type: <a href="{{ userinfo.login_url|raw }}">{{ userinfo.login }}</a></b>
+                    <b>
+                        <i class="fa fa-sign-in margin-r-5"></i> Logins:
+                        {% for login in userinfo.logins %}
+                            <a href="{{ login.url|raw }}">{{ login.service }}:{{ login.service_uid }}</a>
+                        {% endfor %}
+                    </b>
                     <br />
                     <b><i class="fa fa-globe margin-r-5"></i> Signup IP: <a href="{{ path_for('search') }}?q={{ userinfo.signup_ip }}&type=ip">{{ userinfo.signup_ip }}</a></b>
                     <br />

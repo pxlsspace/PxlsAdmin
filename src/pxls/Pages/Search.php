@@ -15,7 +15,7 @@ final class Search
     private $logger;
     private $database;
     protected $result = [];
-    private static $qs = "u.id, u.username, u.login, u.signup_time, u.cooldown_expiry, u.signup_ip, u.last_ip, u.pixel_count, u.pixel_count_alltime, u.is_shadow_banned, u.ban_expiry, u.ban_reason, u.perma_chat_banned, u.chat_ban_expiry, u.chat_ban_reason, u.ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT u.is_shadow_banned OR u.ban_expiry = to_timestamp(0) OR (now() < u.ban_expiry)) AS \"banned\", (u.perma_chat_banned OR now() < u.chat_ban_expiry) AS \"chat_banned\"";
+    private static $qs = "u.id, u.username, u.signup_time, u.cooldown_expiry, u.signup_ip, u.last_ip, u.pixel_count, u.pixel_count_alltime, u.is_shadow_banned, u.ban_expiry, u.ban_reason, u.perma_chat_banned, u.chat_ban_expiry, u.chat_ban_reason, u.ban_expiry = to_timestamp(0) AS \"is_ban_permanent\", (SELECT u.is_shadow_banned OR u.ban_expiry = to_timestamp(0) OR (now() < u.ban_expiry)) AS \"banned\", (u.perma_chat_banned OR now() < u.chat_ban_expiry) AS \"chat_banned\"";
 
     public function __construct(Twig $view, LoggerInterface $logger, \PDO $database)
     {
@@ -46,8 +46,9 @@ final class Search
             }
         }
         if(!$resultExists) {
-            $newUser["login_url"] = Utils::MakeUserLoginURL($newUser["login"]);
-
+            $newUser["logins"] = array_map(function(array $login) {
+                return array_merge(['url' => Utils::MakeUserLoginURL($login)], $login);
+            }, $newUser["logins"]);
             $newUser['reason'] = [$reason];
             $this->result[] = $newUser;
         }
@@ -94,9 +95,14 @@ final class Search
     }
 
     protected function searchByLogin($needle) {
-        $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE UPPER(login) LIKE UPPER(:login) LIMIT 30", [
+        $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE id IN (SELECT uid FROM user_logins WHERE CONCAT(UPPER(service), ':', UPPER(service_uid)) LIKE UPPER(:login)) LIMIT 30", [
             ':login' => [sprintf("%%%s%%", str_replace('_', '\_', $needle)), \PDO::PARAM_STR]
         ]);
+    }
+
+    private function populateLogins($usr) {
+        $usr['logins'] = (new \pxls\User($this->database))->getUserLoginsById($usr['id']);
+        return $usr;
     }
 
     private function populateRoles($usr) {
@@ -121,6 +127,7 @@ final class Search
         }
         if ($query->execute()) {
             while ($row = $query->fetch(\PDO::FETCH_ASSOC)) {
+                $row = $this->populateLogins($row);
                 $row = $this->populateRoles($row);
                 $this->addResult($row, $reason);
                 $toRet[] = $row;

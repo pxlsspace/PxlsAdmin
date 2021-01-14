@@ -3,7 +3,7 @@ namespace pxls;
 
 
 class Utils {
-    public static function MakeUserLoginURL($login, $returnWithData=false) {
+    public static function MakeUserLoginURL($login) {
         $replacers = [
             "reddit" => "https://reddit.com/u/%%LOGIN",
             "google" => "https://plus.google.com/%%LOGIN",
@@ -13,21 +13,8 @@ class Utils {
         ];
         $toRet = "#";
 
-        $splitPos = strpos($login, ":");
-        $loginData = [
-            "service" => substr($login, 0, $splitPos),
-            "ID" => substr($login, $splitPos+1)
-        ];
-        if (array_key_exists($loginData["service"], $replacers)) {
-           $toRet = str_replace("%%LOGIN", $loginData["ID"], $replacers[$loginData["service"]]);
-        }
-
-        if ($returnWithData === true) {
-            return [
-                "service" => $loginData["service"],
-                "ID" => $loginData["ID"],
-                "URL" => $toRet
-            ];
+        if (array_key_exists($login["service"], $replacers)) {
+           $toRet = str_replace("%%LOGIN", $login["service_uid"], $replacers[$login["service"]]);
         }
 
         return $toRet;
