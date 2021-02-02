@@ -6,7 +6,7 @@ use pxls\Action\NotifyController;
 $app->get('/', \pxls\Action\Home::class)->setName('home');
 $app->get('/logs', \pxls\Action\LogPage::class)->setName('logs');
 $app->get('/reports', \pxls\Action\ReportList::class)->setName('reportList');
-$app->get('/pixels', \pxls\Action\Pixels::class)->setName('pixels');
+//$app->get('/chatContext', \pxls\Action\ChatContext::class)->setName('chatContext');
 $app->map(['GET', 'POST'], '/chatContext', \pxls\Action\ChatContext::class)->setName('ChatContext');
 
 $app->map(['GET', 'POST'], '/search', \pxls\Action\Search::class)->setName('search');
