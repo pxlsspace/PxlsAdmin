@@ -60,6 +60,29 @@ select.form-control.dark:focus,select.form-control.dark:active {
     margin-top: 2px;
 }
 
+.pixel-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #000;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover,
+.dataTables_wrapper .dataTables_paginate .paginate_button:active,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+input[type="date"]:invalid,
+input[type="time"]:invalid {
+    outline: red 2px groove;
+}
+
 .sidebar-toggle {
     font-size: 14px;
 }

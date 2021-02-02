@@ -125,6 +125,7 @@
                 <li><a href="{{ path_for('reportList') }}"><i class="fa fa-clipboard text-aqua"></i> <span>Reports</span></a></li>
                 <li><a href="{{ path_for('factions') }}"><i class="fa fa-flag text-aqua"></i> <span>Factions</span></a></li>
                 <li><a href="{{ path_for('ChatContext') }}"><i class="fa fa-comments text-aqua"></i> <span>Chat Context</span></a></li>
+                <li><a href="{{ path_for('pixels') }}"><i class="fa fa-clone text-aqua"></i> <span>Pixels Lookup</span></a></li>
 
                 {% if ('administrator' in userdata.roles or 'developer' in userdata.roles) %}
                     <li><a href="{{ path_for('logs') }}"><i class="fa fa-list text-aqua"></i> <span>Logs</span></a></li>
