@@ -21,7 +21,7 @@ final class Pixels
     }
 
     private function isAllNumeric(array $arr) {
-        return !in_array(false, array_map(fn($v) => is_numeric($v), $arr), true);
+        return !in_array(false, array_map(is_numeric, $arr), true);
     }
     private function minMax($a, $b) {
         return ["min" => min($a, $b), "max" => max($a, $b)];
@@ -73,13 +73,17 @@ final class Pixels
 
                     $rawPlacers = $params['placers'];
                     if (is_array($rawPlacers) && sizeof($rawPlacers) > 0) {
-                        $username_list = array_map(fn($name) => $this->database->quote($name), $rawPlacers);
+                        $username_list = array_map(function ($name) {
+                            return $this->database->quote($name);
+                        }, $rawPlacers);
                         array_push($where, "p.who IN (SELECT id FROM users WHERE username IN (" . join(", ", $username_list) . "))");
                     }
 
                     $rawColors = $params['colors'];
                     if (is_array($rawColors) && sizeof($rawColors) > 0 && $this->isAllNumeric($rawColors)) {
-                        $coloridx_list = array_map(fn($cIdx) => intval($cIdx, 10), $rawColors);
+                        $coloridx_list = array_map(function ($cIdx) {
+                            return intval($cIdx, 10);
+                        }, $rawColors);
                         array_push($where, "p.color IN (" . join(", ", $coloridx_list) . ")");
                     }
 
