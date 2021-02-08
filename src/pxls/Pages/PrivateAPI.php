@@ -115,7 +115,7 @@ final class PrivateAPI
         return $toRet;
     }
 
-    protected function lastActionLog($scope=null,$max=5000) {
+    protected function lastActionLog($scope=null,$max=1000) {
         global $app;
 
         $logs = [];
