@@ -27,6 +27,10 @@ class LogParser {
         $regex['addroles'] = '/Added roles "(.+)" to (\S*)/i';
         $regex['removeroles'] = '/Removed roles "(.+)" from (\S*)/i';
         $regex['removeallroles'] = '/Removed (\S*)\'s roles/i';
+        $regex['setlogins'] = '/Set (\S*)\'s login methods to (\S*)/i';
+        $regex['addlogins'] = '/Added login methods "(.+)" to (\S*)/i';
+        $regex['removelogins'] = '/Removed login methods "(.+)" from (\S*)/i';
+        $regex['removealllogins'] = '/Removed (\S*)\'s login methods/i';
         $regex['flagrename'] = '/((?:un)?flagged) (\S*) \((\d+)\) for name change/i';
         $regex['rename'] = '/User (\S*) \((\d+)\) has just changed their name to (\S*)/i';
         $regex['forcedrename'] = '/Changed (\S*)\'s name to (\S*) \(uid: (\d*)\)/i';
@@ -101,15 +105,19 @@ class LogParser {
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[4][0], 'target_id' => $matches[5][0], 'extra' => $matches[3][0]];
                     break;
                 case 'setroles':
+                case 'setlogins':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[1][0], 'extra' => $matches[2][0]];
                     break;
                 case 'addroles':
+                case 'addlogins':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[2][0], 'extra' => $matches[1][0]];
                     break;
                 case 'removeroles':
+                case 'removelogins':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[2][0], 'extra' => $matches[1][0]];
                     break;
                 case 'removeallroles':
+                case 'removealllogins':
                     return ['scope' => 'modaction', 'action' => $action, 'target' => $matches[1][0]];
                     break;
                 case 'flagrename':
@@ -166,6 +174,10 @@ class LogParser {
         $messageTpl["modaction"]["chatunban"]       = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a> was chat unbanned.';
         $messageTpl["modaction"]["chatpurge"]       = '%extra% messages from <a href="'.$router->pathFor('profileId', ['id' => '%target_id%']).'" target="_blank">%target% (UID %target_id%)</a> were purged from chat.';
         $messageTpl["modaction"]["chatdelete"]      = 'Message <a href="'.$router->pathFor('ChatContext').'?cmid=%extra%" target="_blank">ID %extra%</a> from <a href="'.$router->pathFor('profileId', ['id' => '%target_id%']).'" target="_blank">%target% (UID %target_id%)</a> was deleted from chat.';
+        $messageTpl["modaction"]["setlogins"]        = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a>\'s login method(s) were set to %extra%.';
+        $messageTpl["modaction"]["addlogins"]        = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a> can now login with %extra%.';
+        $messageTpl["modaction"]["removelogins"]     = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a> can no longer login with the service(s) %extra%.';
+        $messageTpl["modaction"]["removealllogins"]  = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a> had all of their login methods removed.';
         $messageTpl["modaction"]["setroles"]        = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a>\'s role(s) were set to %extra%.';
         $messageTpl["modaction"]["addroles"]        = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a> was given the role(s) %extra%.';
         $messageTpl["modaction"]["removeroles"]     = '<a href="'.$router->pathFor('profileUsername', ['username' => '%target%']).'" target="_blank">%target%</a> was revoked of the role(s) %extra%.';

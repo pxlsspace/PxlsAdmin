@@ -77,7 +77,9 @@ final class Profile
         }
 
         if(!is_null($userinfo) && $userinfo) {
-            $userinfo["login_url"] = Utils::MakeUserLoginURL($userinfo["login"]);
+            $userinfo["logins"] = array_map(function(array $login) {
+                return array_merge(['url' => Utils::MakeUserLoginURL($login)], $login);
+            }, $userinfo['logins']);
             $userinfo["signup_ip_detail"] = $this->ip2loc($userinfo['signup_ip']);
             $userinfo["last_ip_detail"] = $this->ip2loc($userinfo['last_ip']);
             $userinfo["reports_sent"] = $this->reportsSentByUser($userinfo["id"]);
@@ -123,15 +125,6 @@ final class Profile
             $this->addToTimeline($row->rtime, "report_recv", $row->rmessage, ["id"=>$row->rid, "reporter"=>$reporter]);
         }
         return $query->rowCount();
-    }
-
-    protected function login2url($login) {
-        $replace = [
-            "reddit:"=>"http://reddit.com/u/",
-            "google:"=>"http://plus.google.com/",
-            "discord:"=>"!uid ",
-        ];
-        $newUser['login_url'] = strtr($login,$replace);
     }
 
     protected function ip2loc($ip) {

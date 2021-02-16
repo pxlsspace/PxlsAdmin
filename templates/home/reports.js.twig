@@ -28,7 +28,7 @@ $('#report_info').on('show.bs.modal', function (event) {
             modal.find('#rmd-a-username').html(`<a href="${'{{ path_for('profileId', {'id': '{id}'}) }}'.replace('{id}', data.reporter.id)}" target="_blank">${data.reporter.username}</a>`);
             modal.find('#rmd-a-last-ip').html(`<a href="{{ path_for('search') }}?q=${data.reporter.ip.last}&type=ip">${data.reporter.ip.last}</a>`);
             modal.find('#rmd-a-login-ip').html(`<a href="{{ path_for('search') }}?q=${data.reporter.ip.signup}&type=ip">${data.reporter.ip.signup}</a>`);
-            modal.find('#rmd-a-login').text(data.reporter.login);
+            modal.find('#rmd-a-logins').text(data.reporter.logins.map(({ service, service_uid }) => `${service}:${service_uid}`).join(', '));
             modal.find('#rmd-a-signup').text(data.reporter.signup);
             modal.find('#rmd-a-role').text(data.reporter.role);
             modal.find('#rmd-a-pixel').text(data.reporter.pixelcount);
@@ -45,7 +45,7 @@ $('#report_info').on('show.bs.modal', function (event) {
             modal.find('#rmd-b-username').closest('.col-md-4').html('<b>Reported data unavailable</b>');
         } else {
             modal.find('#rmd-b-username').html(`<a href="${'{{ path_for('profileId', {'id': '{id}'}) }}'.replace('{id}', data.reported.id)}" target="_blank">${data.reported.username}</a>`);
-            modal.find('#rmd-b-login').text(data.reported.login);
+            modal.find('#rmd-b-logins').text(data.reported.logins.map(({ service, service_uid }) => `${service}:${service_uid}`).join(', '));
             modal.find('#rmd-b-last-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.last}&type=ip">${data.reported.ip.last}</a>`);
             modal.find('#rmd-b-login-ip').html(`<a href="{{ path_for('search') }}?q=${data.reported.ip.signup}&type=ip">${data.reported.ip.signup}</a>`);
             modal.find('#rmd-b-signup').text(data.reported.signup);

@@ -20,7 +20,7 @@
                             <tr>
                                 <th>id#</th>
                                 <th>Username</th>
-                                <th>Login</th>
+                                <th>Logins</th>
                                 <th>Signup Time</th>
                                 <th>Cooldown Expiry</th>
                                 <th>Roles</th>
@@ -43,7 +43,11 @@
                                             {{ user.username }}
                                         </a>
                                     </td>
-                                    <td><a href="{{ user.login_url|raw }}">{{ user.login }}</a></td>
+                                    <td>
+                                        {% for login in user.logins %}
+                                            <a href="{{ user.login.url|raw }}">{{ login.service }}:{{ login.service_uid }}</a>
+                                        {% endfor %}
+                                    </td>
                                     <td>{{ user.signup_time }}</td>
                                     <td>{{ user.cooldown_expiry }}</td>
                                     <td>{{ user.roles|join(' ') }}</td>
@@ -110,7 +114,7 @@
                             <tr>
                                 <th>id#</th>
                                 <th>Username</th>
-                                <th>Login</th>
+                                <th>Logins</th>
                                 <th>Signup Time</th>
                                 <th>Cooldown Expiry</th>
                                 <th>Role</th>
