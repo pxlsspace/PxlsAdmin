@@ -96,10 +96,10 @@
                                             <ul class="dropdown-menu">
                                                 <li><span class="action" data-username="{{ user.username }}" data-action="tempban" onclick="handleSearchAction('tempban', '{{ user.username }}', this)">Tempban</span></li>
                                                 <li><span class="action" data-username="{{ user.username }}" data-action="permaban" onclick="handleSearchAction('permaban', '{{ user.username }}', this)">Permaban</span></li>
-                                                {% if (userdata.role == "ADMIN" or userdata.role == "DEVELOPER") %}
+                                                {% if ('administrator' in userdata.roles or 'developer' in userdata.roles) %}
                                                     <li><span class="action" data-username="{{ user.username }}" data-action="shadowban" onclick="handleSearchAction('shadowban', '{{ user.username }}', this)">Shadowban</span></li>
                                                 {% endif %}
-                                                {% if (user.ban_expiry|date() > date() or user.role == "BANNED" or user.role == "SHADOWBANNED") %}
+                                                {% if (user.ban_expiry|date() > date() or user.banned or user.is_shadow_banned) %}
                                                     <li class="divider"></li>
                                                     <li><span class="action" data-username="{{ user.username }}" data-action="unban" onclick="handleSearchAction('unban', '{{ user.username }}', this)">Unban</span></li>
                                                 {% endif %}
