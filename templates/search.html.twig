@@ -45,7 +45,7 @@
                                     </td>
                                     <td>
                                         {% for login in user.logins %}
-                                            <a href="{{ user.login.url|raw }}">{{ login.service }}:{{ login.service_uid }}</a>
+                                            <a href="{{ login.url|raw }}">{{ login.service }}:{{ login.service_uid }}</a>
                                         {% endfor %}
                                     </td>
                                     <td>{{ user.signup_time }}</td>
