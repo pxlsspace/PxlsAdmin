@@ -141,7 +141,7 @@ class ReportHandler {
             ];
             $report['general']['id'] = $gData->id;
             $report['general']['pixel'] = $gData->pixel_id;
-            $report['general']['claimed'] = ($gData->claimed_by == 0)?'no one':$this->getUserdataById($gData->claimed_by)->username;
+            $report['general']['claimed'] = ($gData->claimed_by == 0)?'no one':$this->getUserdataById($gData->claimed_by)['username'];
             $report['general']['claimed_by_you']=$gData->claimed_by == $self->id;
             $report['general']['position'] = '<a href="'.$this->formatCoordsLink($gData->x, $gData->y).'" target="_blank">X: ' . $gData->x . ' &mdash; Y: ' . $gData->y . '</a>';
             $report['general']['message'] = htmlentities($gData->message);
