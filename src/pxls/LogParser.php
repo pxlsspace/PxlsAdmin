@@ -203,7 +203,7 @@ class LogParser {
             "%target%" => $m["target"],
             "%target_id%" => $m["target_id"],
             "%user_name%" => $user_name,
-            "%extra%" => $m["extra"],
+            "%extra%" => htmlspecialchars($m["extra"], ENT_QUOTES, 'UTF-8'),
             "%raw%" => $raw_message
         ];
         if (is_array($m["extra"])) {
