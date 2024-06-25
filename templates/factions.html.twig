@@ -106,7 +106,7 @@
                 {
                     data: "owner",
                     render: (data, type, row, meta) => {
-                        return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.id)}">${data}</a>`
+                        return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.ownerId)}">${data}</a>`
                     }
                 },
                 {

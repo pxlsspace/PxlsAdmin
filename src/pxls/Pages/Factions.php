@@ -25,7 +25,7 @@ final class Factions
         global $app;
         switch(strtolower(trim($request->getAttribute('negotiation')->getMediaType()))) {
             case 'application/json':
-                $qFactions = $this->database->query("SELECT f.id,f.name,f.tag,f.color,u.username as \"owner\",f.created,f.\"canvasCode\" FROM faction f INNER JOIN users u ON u.id = f.owner ORDER BY f.id;");
+                $qFactions = $this->database->query("SELECT f.id,f.name,f.tag,f.color,u.username as \"owner\", u.id as \"ownerId\",f.created,f.\"canvasCode\" FROM faction f INNER JOIN users u ON u.id = f.owner ORDER BY f.id;");
                 $factions = array();
 
                 try {
