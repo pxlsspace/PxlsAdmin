@@ -17,10 +17,6 @@ session_start();
 $settings = require __DIR__ . '/../src/settings.php';
 $app = new \Slim\App($settings);
 
-$app->add(new \Gofabian\Negotiation\NegotiationMiddleware([
-    'accept' => ['text/html', 'application/json']
-], true));
-
 // Loading Pxls Stuff
 $classes = glob(__DIR__ .'/../src/pxls/*.{php}', GLOB_BRACE);
 foreach($classes as $class) {

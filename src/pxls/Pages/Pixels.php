@@ -30,7 +30,7 @@ final class Pixels
     public function __invoke(Request $request, Response $response, $args)
     {
         global $app;
-        switch(strtolower(trim($request->getAttribute('negotiation')->getMediaType()))) {
+        switch(strtolower(trim($request->getAttribute('negotiated_type')))) {
             case 'application/json':
                 $where = array();
                 $params = $request->getQueryParams();
