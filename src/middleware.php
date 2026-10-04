@@ -28,7 +28,6 @@ $error = function(\Slim\Http\Request $request, \Slim\Http\Response $response, To
     return $response->withJson($output, 401);
 };
 
-
 $app->add(new TokenAuthentication([
     'path' => '/',
     'authenticator' => $authenticator,
@@ -43,6 +42,18 @@ $app->add(function($request,$response,$next) {
     $userdata = new pxls\User($this->database);
     $userdata = $userdata->getUserById($_SESSION['user_id']);
     $request = $request->withAttribute('userdata', $userdata);
+    $response = $next($request, $response);
+    return $response;
+});
+
+$app->add(function($request,$response,$next) {
+    $supportedTypes = ['text/html', 'application/json'];
+    $accept = $request->getHeaderLine('Accept');
+    $bestMatch = new Negotiation\Negotiator()->getBest($accept, $supportedTypes);
+    $contentType = $bestMatch
+        ? $bestMatch->getBasePart() . '/' . $bestMatch->getSubPart()
+        : $supportedTypes[0];
+    $request = $request->withAttribute('negotiated_type', $contentType);
     $response = $next($request, $response);
     return $response;
 });
