@@ -64,7 +64,7 @@
                                 <img src="/assets/img/image-78.png" class="img-circle" alt="User Image">
 
                                 <p>
-                                    {{ userdata.username }} - {{ userdata.role }}
+                                    {{ userdata.username }} - {{ userdata.roles | last }}
                                     <small>{{ userdata.signup_time }}</small>
                                 </p>
                             </li>
@@ -74,7 +74,7 @@
                                     <a target="_blank" href="{{ webroots.game }}/profile" class="btn btn-default btn-flat">Profile</a>
                                 </div>
                                 <div class="pull-right">
-                                    <a target="_blank" href="{{ webroots.game }}/logout" class="btn btn-default btn-flat">Sign out</a>
+                                    <a href="{{ base_url() }}/logout" class="btn btn-default btn-flat">Sign out</a>
                                 </div>
                             </li>
                         </ul>
