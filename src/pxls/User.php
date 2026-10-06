@@ -47,7 +47,7 @@ class User {
         // also hardcoding of roles all over the place—like the master template.
         // Oh well.
         $roles_sort_order = ["staff", "trialmod", "moderator", "developer", "administrator"];
-        $usr["roles"] = array_intersect($roles_sort_order, $roles);
+        $usr["roles"] = array_values(array_intersect($roles_sort_order, $roles));
         return $usr;
     }
 
