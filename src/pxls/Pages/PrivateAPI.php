@@ -50,7 +50,7 @@ final class PrivateAPI
                     $data = [
                         'draw' => $_GET['draw'],
                         'recordsTotal' => $totalResults,
-                        'recordsFiltered' => $totalResults,
+                        'recordsFiltered' => $filteredResults,
                         'data' => $this->lastActionLog($scope, $offset, $limit, $search)
                     ];
                     return $response->withStatus(200)->withJson($data);
