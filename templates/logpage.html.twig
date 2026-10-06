@@ -11,7 +11,19 @@
                 </div>
                 <div class="box-body">
                     <div class="table-responsive">
-                        {# {% block adminlog %} {% include "adminlog.html.twig" %} {% endblock %} #}
+                        <table id="adminlog" class="table table-responsive table-bordered table-striped nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Channel</th>
+                                    <th>Level</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th>Username</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -23,7 +35,19 @@
                 </div>
                 <div class="box-body">
                     <div class="table-responsive">
-                        {# {% block canvaslog %} {% include "canvaslog.html.twig" %} {% endblock %} #}
+                        <table id="canvaslog" class="table table-responsive table-bordered table-striped nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Channel</th>
+                                    <th>Level</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th>Username</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -37,7 +61,19 @@
                 </div>
                 <div class="box-body">
                     <div class="table-responsive">
-                        {# {% block apilog %} {% include "apilog.html.twig" %} {% endblock %} #}
+                        <table id="apilog" class="table table-responsive table-bordered table-striped nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Channel</th>
+                                    <th>Level</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th>Username</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -49,7 +85,19 @@
                 </div>
                 <div class="box-body">
                     <div class="table-responsive">
-                        {# {% block consolelog %} {% include "consolelog.html.twig" %} {% endblock %} #}
+                        <table id="consolelog" class="table table-responsive table-bordered table-striped nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Channel</th>
+                                    <th>Level</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th>Username</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -64,6 +112,8 @@
     <script type="text/javascript">
         $(function() {
             var adminlog = $("#adminlog").DataTable({
+                "processing": true,
+                "serverSide": true,
                 "ajax": {
                     "dataType": 'json',
                     "contentType": "application/json; charset=utf-8",
@@ -87,6 +137,8 @@
                 "autoWidth": false
             });
             var canvaslog = $("#canvaslog").DataTable({
+                "processing": true,
+                "serverSide": true,
                 "ajax": {
                     "dataType": 'json',
                     "contentType": "application/json; charset=utf-8",
@@ -110,6 +162,8 @@
                 "autoWidth": false
             });
             var consolelog = $("#consolelog").DataTable({
+                "processing": true,
+                "serverSide": true,
                 "ajax": {
                     "dataType": 'json',
                     "contentType": "application/json; charset=utf-8",
@@ -133,6 +187,8 @@
                 "autoWidth": false
             });
             var apilog = $("#apilog").DataTable({
+                "processing": true,
+                "serverSide": true,
                 "ajax": {
                     "dataType": 'json',
                     "contentType": "application/json; charset=utf-8",

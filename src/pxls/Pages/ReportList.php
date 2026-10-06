@@ -37,11 +37,6 @@ final class ReportList
         $data['userdata'] = $user->getUserById($_SESSION['user_id']);
         //endregion
 
-        //region Reports
-        $reports = new \pxls\ReportHandler($this->database,$this->discord);
-        $data['reports'] = $reports->getReports(false);
-        //endregion
-
         $this->view->render($response, 'reportList.html.twig', $data);
         return $response;
     }

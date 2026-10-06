@@ -59,10 +59,6 @@ final class Home
         $data['activity']['hourly_pixels'] = array_reverse($data['activity']['hourly_pixels']);
         //endregion
 
-        //region Reports
-        $reports = new \pxls\ReportHandler($this->database,$this->discord);
-        $data['reports'] = $reports->getReports();
-
         //endregion
         $this->view->render($response, 'home.html.twig', $data);
         return $response;

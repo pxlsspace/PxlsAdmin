@@ -25,8 +25,51 @@ class ChatReportHandler {
         return false;
     }
 
-    public function getReports($open=true) {
-        $query = $this->db->query("SELECT r.id,r.time,r.cmid,r.target,r.initiator,r.claimed_by,m.purged_by,u.username as \"target_name\",u1.username as \"initiator_name\",u2.username as \"claimed_name\",u3.username as \"purged_name\" FROM chat_reports r INNER JOIN chat_messages m ON m.id=r.cmid LEFT OUTER JOIN users u ON u.id=r.target LEFT OUTER JOIN users u1 ON u1.id=r.initiator LEFT OUTER JOIN users u2 ON u2.id=r.claimed_by LEFT OUTER JOIN users u3 ON u3.id=m.purged_by WHERE ".($open !== false ? 'r.closed = false;' : 'true;'));
+    public function getReportCount($onlyOpen, $search) {
+        $search = "%$search%";
+        if ($onlyOpen) {
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM chat_reports WHERE closed = false AND coalesce(report_message, '') ILIKE :search");
+        } else {
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM chat_reports AND coalesce(report_message, '') ILIKE :search");
+        }
+        $query->bindParam(":search", $search, \PDO::PARAM_STR);
+        $query->execute();
+        
+        $report = $query->fetch(\PDO::FETCH_ASSOC);
+        return $report['total'];
+    }
+    
+    public function getReports($onlyOpen, $search, $offset, $limit) {
+        $search = "%$search%";
+        $query = $this->db->prepare(
+            'SELECT ' .
+            'r.id, ' .
+            'r.time, ' .
+            'r.cmid, ' .
+            'r.target, ' .
+            'r.initiator, ' .
+            'r.claimed_by, ' .
+            'm.purged_by, ' .
+            'u.username as "target_name", ' .
+            'u1.username as "initiator_name", ' .
+            'u2.username as "claimed_name", '.
+            'u3.username as "purged_name" ' .
+            'FROM chat_reports r ' .
+            'INNER JOIN chat_messages m ON m.id = r.cmid ' .
+            'LEFT OUTER JOIN users u ON u.id = r.target ' .
+            'LEFT OUTER JOIN users u1 ON u1.id = r.initiator ' .
+            'LEFT OUTER JOIN users u2 ON u2.id = r.claimed_by ' .
+            'LEFT OUTER JOIN users u3 ON u3.id = m.purged_by ' .
+            'WHERE ' . ($onlyOpen !== false ? 'r.closed = false ' : 'true ') .
+            "AND coalesce(r.report_message, '') ILIKE :search " .
+            'ORDER BY r.id DESC ' .
+            'OFFSET :offset ' .
+            'LIMIT :limit'
+        );
+        $query->bindParam(":offset", $offset, \PDO::PARAM_INT);
+        $query->bindParam(":limit", $limit, \PDO::PARAM_INT);
+        $query->bindParam(":search", $search, \PDO::PARAM_STR);
+        $query->execute();
 
         try {
             return $query->fetchAll(\PDO::FETCH_ASSOC);

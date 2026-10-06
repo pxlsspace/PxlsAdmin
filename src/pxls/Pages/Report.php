@@ -127,12 +127,40 @@ final class Report
                     }
                 break;
 
-            case 'reload':
+            case 'canvasdata':
+                $offset = isset($_GET['start']) ? intval($_GET['start']) : 0;
+                $limit = isset($_GET['length']) ? intval($_GET['length']) : 100;
+                $onlyOpen = isset($_GET['open']) ? $_GET['open'] == 'true' : false;
+                $search = isset($_GET['search']) ? $_GET['search'] : [];
+                $search = isset($search['value']) ? $search['value'] : '';
+
+                $totalReports = $this->reportInterface->getReportCount($onlyOpen, $search);
+                
                 $toReturn = [
-                    "canvasReports" => $this->reportInterface->getReports(!isset($_REQUEST['all'])),
-                    "chatReports" => $this->chatReportInterface->getReports(!isset($_REQUEST['all']))
+                    'draw' => $_GET['draw'],
+                    'recordsTotal' => $totalReports,
+                    'recordsFiltered' => $totalReports,
+                    'data' => $this->reportInterface->getReports($onlyOpen, $search, $offset, $limit),
+                    // 'chatReports' => $this->chatReportInterface->getReports($onlyOpen, $offset, $limit)
                 ];
-                return $response->withStatus(200)->withJson(["data"=>$toReturn]);
+                return $response->withStatus(200)->withJson($toReturn);
+                break;
+            case 'chatdata':
+                $offset = isset($_GET['start']) ? intval($_GET['start']) : 0;
+                $limit = isset($_GET['length']) ? intval($_GET['length']) : 100;
+                $onlyOpen = isset($_GET['open']) ? $_GET['open'] == 'true' : false;
+                $search = isset($_GET['search']) ? $_GET['search'] : [];
+                $search = isset($search['value']) ? $search['value'] : '';
+
+                $totalReports = $this->chatReportInterface->getReportCount($onlyOpen, $search);
+                
+                $toReturn = [
+                    'draw' => $_GET['draw'],
+                    'recordsTotal' => $totalReports,
+                    'recordsFiltered' => $totalReports,
+                    'data' => $this->chatReportInterface->getReports($onlyOpen, $search, $offset, $limit),
+                ];
+                return $response->withStatus(200)->withJson($toReturn);
                 break;
 
         }

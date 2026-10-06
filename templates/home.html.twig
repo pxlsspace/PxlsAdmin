@@ -250,6 +250,8 @@
         {% include "ban.js.twig" %}
         $(function() {
             var actionLog = $("#actionlog").DataTable({
+                "processing": true,
+                "serverSide": true,
                 "ajax": {
                     "dataType": 'json',
                     "contentType": "application/json; charset=utf-8",
@@ -315,111 +317,100 @@
                 "autoWidth": false,
                 "scrollX": true
             });
-
-            reloadReports();
+            
+            var reports = $("#reports").DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "dataType": "json",
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": "{{ xhr_base }}/api/report/canvasdata?open=true"
+                },
+                "columns": [
+                    {
+                        "data": "id",
+                        "render": function(data, type, row) {
+                            return `<a href="#" data-toggle="modal" data-reportid="${data}" data-target="#report_info">${data}</a>`;
+                        }
+                    },
+                    { "data": "who_url" },
+                    { "data": "position_url" },
+                    { "data": "human_time" },
+                    { "data": "action" }
+                ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, "desc" ]],
+                "info": true,
+                "autoWidth": false,
+                "scrollX": true
+            });
+            
+            var chatReports = $("#chatReports").DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "dataType": "json",
+                    "contentType": "application/json; charset=utf-8",
+                    "type": "GET",
+                    "url": "{{ xhr_base }}/api/report/chatdata?open=true"
+                },
+                "columns": [
+                    {
+                        "data": "id",
+                        "render": function(data, type, row) {
+                            return `<a href="#" data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal'>${data}</a>`;
+                        }
+                    },
+                    {
+                        "data": "initiator_name",
+                        "render": (data, type, row) => {
+                            return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.initiator)}">${data}</a>`;
+                        }
+                    },
+                    {
+                        "data": "target_name",
+                        "render": (data, type, row) => {
+                            return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.target)}">${data}</a>`;
+                        }
+                    },
+                    {
+                        "data": "time",
+                        render: (data, type, row) => {
+                            return moment.unix(data >> 0).format('MM.DD.YYYY - HH:mm:ss');
+                        }
+                    },
+                    {
+                        "data": "nonce",
+                        "render": (data, type, row) => {
+                            if (row.claimed_by >> 0 > 0) {
+                                if (row.claimed_by == "{{ userdata.id }}") {
+                                    return `<button type='button' class='btn btn-success btn-xs' data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal'>View</button>`;
+                                } else {
+                                    return `<button type='button' class='btn btn-default btn-xs' data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal' disabled>Claimed by ${row.claimed_name}</button>`;
+                                }
+                            } else {
+                                return `<button type='button' class='btn btn-warning btn-xs' data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal'>View</button>`;
+                            }
+                        }
+                    }
+                ],
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "order": [[ 0, 'desc' ]],
+                "info": true,
+                "autoWidth": false,
+                "scrollX": true
+            });
 
             function reloadReports() {
-                $.get("{{ xhr_base }}/api/report/reload?_=" + (new Date() >> 0), function(data) {
-                    _reloadCanvasReports(data.data.canvasReports);
-                    _reloadChatReports(data.data.chatReports);
-                });
-            }
-
-            function _reloadCanvasReports(data) {
-                if ($.fn.DataTable.isDataTable('#chatReports')) {
-                    let dt = $('#reports').DataTable();
-                    const curPage = dt.page();
-                    dt.clear();
-                    dt.rows.add(data);
-                    dt.draw();
-                    dt.page(curPage).draw(false);
-                } else {
-                    $("#reports").DataTable({
-                        data: data,
-                        "columns": [
-                            {
-                                "data": "id",
-                                "render": function(data, type, row) {
-                                    return `<a href="#" data-toggle="modal" data-reportid="${data}" data-target="#report_info">${data}</a>`;
-                                }
-                            },
-                            { "data": "who_url" },
-                            { "data": "position_url" },
-                            { "data": "human_time" },
-                            { "data": "action" }
-                        ],
-                        "paging": true,
-                        "lengthChange": false,
-                        "searching": true,
-                        "ordering": true,
-                        "order": [[ 0, "desc" ]],
-                        "info": true,
-                        "autoWidth": false,
-                        "scrollX": true
-                    });
-                }
-            }
-            function _reloadChatReports(data) {
-                if ($.fn.DataTable.isDataTable('#chatReports')) {
-                    let dt = $('#chatReports').DataTable();
-                    const curPage = dt.page();
-                    dt.clear();
-                    dt.rows.add(data);
-                    dt.draw();
-                    dt.page(curPage).draw(false);
-                } else {
-                    $("#chatReports").DataTable({
-                        data: data,
-                        "columns": [
-                            {
-                                "data": "id",
-                                "render": function(data, type, row) {
-                                    return `<a href="#" data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal'>${data}</a>`;
-                                }
-                            },
-                            {
-                                "data": "initiator_name",
-                                "render": (data, type, row) => {
-                                    return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.initiator)}">${data}</a>`;
-                                }
-                            },
-                            {
-                                "data": "target_name",
-                                "render": (data, type, row) => {
-                                    return `<a href="${'{{path_for('profileId', {'id': '{ID}'})}}'.replace('{ID}', row.target)}">${data}</a>`;
-                                }
-                            },
-                            {
-                                "data": "time",
-                                render: (data, type, row) => {
-                                    return moment.unix(data >> 0).format('MM.DD.YYYY - HH:mm:ss');
-                                }
-                            },
-                            {
-                                "data": "nonce",
-                                "render": (data, type, row) => {
-                                    if (row.claimed_by >> 0 > 0) {
-                                        if (row.claimed_by == "{{ userdata.id }}") {
-                                            return `<button type='button' class='btn btn-success btn-xs' data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal'>View</button>`;
-                                        } else {
-                                            return `<button type='button' class='btn btn-default btn-xs' data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal' disabled>Claimed by ${row.claimed_name}</button>`;
-                                        }
-                                    } else {
-                                        return `<button type='button' class='btn btn-warning btn-xs' data-toggle='modal' data-reportid='${row.id}' data-message-id='${row.cmid}' data-target='#chat_report_modal'>View</button>`;
-                                    }
-                                }
-                            }
-                        ],
-                        "paging": true,
-                        "lengthChange": false,
-                        "searching": true,
-                        "ordering": true,
-                        "order": [[ 0, 'desc' ]],
-                        "info": true,
-                        "autoWidth": false,
-                        "scrollX": true
-                    });
-                }
+                reports.ajax.reload();
+                chatReports.ajax.reload();
             }
 
             var intervalListener = null;

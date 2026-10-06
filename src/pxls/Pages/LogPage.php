@@ -36,15 +36,6 @@ final class LogPage
 
         if(in_array('administrator', $data['userdata']['roles'])) return $response->withStatus(403)->getBody()->write("lol, nope. you don't belong here.");
 
-        $data['logs'] = [];
-        $data['logs']['total']      = $this->getTotal();
-        $data['logs']['admin']      = $this->getLogs("pxlsAdmin");
-        $data['logs']['canvas']     = $this->getLogs("pxlsCanvas");
-        $data['logs']['console']    = $this->getLogs("pxlsConsole");
-
-        //$pixelsLog = new \pxls\PixelsLogParser();
-        //var_dump($pixelsLog);
-
         $this->view->render($response, 'logpage.html.twig', $data);
         return $response;
     }

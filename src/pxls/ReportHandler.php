@@ -53,18 +53,80 @@ class ReportHandler {
         return true;
     }
 
-    public function getReports($onlyOpen=1, $specificType=null) {
+    public function getReportCount($onlyOpen, $search) {
+        $search = "%$search%";
+        if ($onlyOpen) {
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM reports WHERE closed = false AND reported IS NOT NULL AND coalesce(message, '') ILIKE :search");
+        } else {
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM reports WHERE reported IS NOT NULL AND coalesce(message, '') ILIKE :search");
+        }
+        $query->bindParam(":search", $search, \PDO::PARAM_STR);
+        $query->execute();
+        
+        $report = $query->fetch(\PDO::FETCH_ASSOC);
+        return $report['total'];
+    }
+    
+    public function getReports($onlyOpen, $search, $offset, $limit) {
         global $app;
         $reports = [];
-        if($onlyOpen==1) {
-            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE closed = false AND reported IS NOT NULL");
+        $search = "%$search%";
+        
+        if($onlyOpen) {
+            $qReports = $this->db->prepare(
+                'SELECT ' .
+                'r.id, ' .
+                'r.who, ' .
+                'who_u.username as who_name, ' .
+                'claim_u.username as claimed_name, ' .
+                'rep_u.username as reported_name, ' .
+                'r.x, ' .
+                'r.y, ' .
+                'r.claimed_by, ' .
+                'r.time, ' .
+                'r.reported, ' .
+                'r.closed ' .
+                'FROM reports r ' .
+                'LEFT OUTER JOIN users rep_u ON rep_u.id = r.reported ' .
+                'LEFT OUTER JOIN users who_u ON who_u.id = r.who ' .
+                'LEFT OUTER JOIN users claim_u ON claim_u.id = r.claimed_by ' .
+                'WHERE closed = false AND reported IS NOT NULL ' .
+                "AND coalesce(r.message, '') ILIKE :search " .
+                'ORDER BY r.id DESC ' .
+                'OFFSET :offset ' .
+                'LIMIT :limit'
+            );
         } else {
-            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported,r.closed FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE reported IS NOT NULL");
+            $qReports = $this->db->prepare(
+                'SELECT ' .
+                'r.id,' .
+                'r.who,' .
+                'who_u.username as who_name, ' .
+                'claim_u.username as claimed_name, ' .
+                'rep_u.username as reported_name, ' .
+                'r.x,' .
+                'r.y,' .
+                'r.claimed_by,' .
+                'r.time, ' .
+                'r.reported, ' .
+                'r.closed ' .
+                'FROM reports r ' .
+                'LEFT OUTER JOIN users rep_u ON rep_u.id = r.reported ' .
+                'LEFT OUTER JOIN users who_u ON who_u.id = r.who ' .
+                'LEFT OUTER JOIN users claim_u ON claim_u.id = r.claimed_by ' .
+                'WHERE reported IS NOT NULL ' .
+                "AND coalesce(r.message, '') ILIKE :search " .
+                'ORDER BY r.id DESC ' .
+                'OFFSET :offset ' .
+                'LIMIT :limit'
+            );
         }
+        $qReports->bindParam(":offset", $offset, \PDO::PARAM_INT);
+        $qReports->bindParam(":limit", $limit, \PDO::PARAM_INT);
+        $qReports->bindParam(":search", $search, \PDO::PARAM_STR);
+        $qReports->execute();
 
         while($report = $qReports->fetch(\PDO::FETCH_ASSOC)) {
-            $report['who_name'] = $report['who'] ? $this->getUserdataById($report['who'])['username'] : 'Server';
-            $report['claimed_name'] = ($report['claimed_by']==0)?'':$this->getUserdataById($report['claimed_by'])['username'];
             $report['position_url'] = $report['who'] ? '<a href="'.$this->formatCoordsLink($report['x'], $report['y']).'" target="_blank">X:'.$report['x'].'; Y:'.$report['y'].'</a>' : 'N/A';
             $report['who_url'] = $report['who'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['who']]).'" target="_blank">'.$report['who_name'].'</a>' : 'Server';
             $report['reported_url'] = $report['reported'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['reported']]).'" target="_blank">'.$report['reported_name'].'</a>' : 'Server';
@@ -141,8 +203,9 @@ class ReportHandler {
             ];
             $report['general']['id'] = $gData->id;
             $report['general']['pixel'] = $gData->pixel_id;
-            $report['general']['claimed'] = ($gData->claimed_by == 0)?'no one':$this->getUserdataById($gData->claimed_by)['username'];
-            $report['general']['claimed_by_you']=$gData->claimed_by == $self->id;
+            $claimedUserData = $this->getUserdataById($gData->claimed_by);
+            $report['general']['claimed'] = ($gData->claimed_by == 0) ? 'no one' : ($claimedUserData['username']);
+            $report['general']['claimed_by_you']=$gData->claimed_by == $self['id'];
             $report['general']['position'] = '<a href="'.$this->formatCoordsLink($gData->x, $gData->y).'" target="_blank">X: ' . $gData->x . ' &mdash; Y: ' . $gData->y . '</a>';
             $report['general']['message'] = htmlentities($gData->message);
             $report['general']['time'] = date("d.m.Y - H:i:s", $gData->time);
@@ -155,7 +218,7 @@ class ReportHandler {
             $report['reporter']['roles']            = $reporterData['roles'];
             $report['reporter']['pixelcount']       = $reporterData['pixel_count'];
             $report['reporter']['ip']               = ["last"=>$reporterData['last_ip'],"signup"=>$reporterData['signup_ip']];
-            $report['reporter']['ban']              = ["expiry"=>$reporterData['ban_expiry'],"reason"=>$reporterData['ban_reason']];
+            $report['reporter']['ban']              = ["expiry"=>$reporterData['ban_expiry'],"reason"=>$reporterData['ban_reason'],"shadow"=>$reporterData['is_shadow_banned']];
 
             $reportedData = $this->getUserdataById($gData->reported);
             $report['reported']['id']               = $reportedData['id'];
@@ -165,7 +228,7 @@ class ReportHandler {
             $report['reported']['roles']            = $reportedData['roles'];
             $report['reported']['pixelcount']       = $reportedData['pixel_count'];
             $report['reported']['ip']               = ["last"=>$reportedData['last_ip'],"signup"=>$reportedData['signup_ip']];
-            $report['reported']['ban']              = ["expiry"=>$reportedData['ban_expiry'],"reason"=>$reportedData['ban_reason']];
+            $report['reported']['ban']              = ["expiry"=>$reportedData['ban_expiry'],"reason"=>$reportedData['ban_reason'],"shadow"=>$reportedData['is_shadow_banned']];
         }
         return $report;
     }
