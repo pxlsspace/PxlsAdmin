@@ -34,7 +34,9 @@ final class LogPage
         $data['userdata'] = $user->getUserById($_SESSION['user_id']);
         //endregion
 
-        if(in_array('administrator', $data['userdata']['roles'])) return $response->withStatus(403)->getBody()->write("lol, nope. you don't belong here.");
+        if(!in_array('administrator', $data['userdata']['roles'])) {
+            return $response->withStatus(403)->getBody()->write("lol, nope. you don't belong here.");
+        }
 
         $this->view->render($response, 'logpage.html.twig', $data);
         return $response;
