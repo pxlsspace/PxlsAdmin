@@ -33,7 +33,11 @@ $('#report_info').on('show.bs.modal', function (event) {
             modal.find('#rmd-a-role').text(data.reporter.role);
             modal.find('#rmd-a-pixel').text(data.reporter.pixelcount);
             if (data.reporter.ban.expiry == null) {
-                modal.find('#rmd-a-ban').html('None')
+                if (data.reporter.ban.shadow) {
+                    modal.find('#rmd-a-ban').html('Shadow (' + data.reporter.ban.reason + ')');
+                } else {
+                    modal.find('#rmd-a-ban').html('None')
+                }
             } else {
                 modal.find('#rmd-a-ban').html(data.reporter.ban.expiry + " (" + data.reporter.ban.reason + ")");
             }
@@ -52,7 +56,11 @@ $('#report_info').on('show.bs.modal', function (event) {
             modal.find('#rmd-b-roles').text(data.reported.roles);
             modal.find('#rmd-b-pixel').text(data.reported.pixelcount);
             if (data.reported.ban.expiry == null) {
-                modal.find('#rmd-b-ban').html('None')
+                if (data.reported.ban.shadow) {
+                    modal.find('#rmd-b-ban').html('Shadow (' + data.reported.ban.reason + ')');
+                } else {
+                    modal.find('#rmd-b-ban').html('None')
+                }
             } else {
                 modal.find('#rmd-b-ban').html(data.reported.ban.expiry + " (" + data.reported.ban.reason + ")");
             }

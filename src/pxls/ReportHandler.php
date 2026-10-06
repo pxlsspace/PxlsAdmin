@@ -141,8 +141,9 @@ class ReportHandler {
             ];
             $report['general']['id'] = $gData->id;
             $report['general']['pixel'] = $gData->pixel_id;
-            $report['general']['claimed'] = ($gData->claimed_by == 0)?'no one':$this->getUserdataById($gData->claimed_by)['username'];
-            $report['general']['claimed_by_you']=$gData->claimed_by == $self->id;
+            $claimedUserData = $this->getUserdataById($gData->claimed_by);
+            $report['general']['claimed'] = ($gData->claimed_by == 0) ? 'no one' : ($claimedUserData['username']);
+            $report['general']['claimed_by_you']=$gData->claimed_by == $self['id'];
             $report['general']['position'] = '<a href="'.$this->formatCoordsLink($gData->x, $gData->y).'" target="_blank">X: ' . $gData->x . ' &mdash; Y: ' . $gData->y . '</a>';
             $report['general']['message'] = htmlentities($gData->message);
             $report['general']['time'] = date("d.m.Y - H:i:s", $gData->time);
@@ -155,7 +156,7 @@ class ReportHandler {
             $report['reporter']['roles']            = $reporterData['roles'];
             $report['reporter']['pixelcount']       = $reporterData['pixel_count'];
             $report['reporter']['ip']               = ["last"=>$reporterData['last_ip'],"signup"=>$reporterData['signup_ip']];
-            $report['reporter']['ban']              = ["expiry"=>$reporterData['ban_expiry'],"reason"=>$reporterData['ban_reason']];
+            $report['reporter']['ban']              = ["expiry"=>$reporterData['ban_expiry'],"reason"=>$reporterData['ban_reason'],"shadow"=>$reporterData['is_shadow_banned']];
 
             $reportedData = $this->getUserdataById($gData->reported);
             $report['reported']['id']               = $reportedData['id'];
@@ -165,7 +166,7 @@ class ReportHandler {
             $report['reported']['roles']            = $reportedData['roles'];
             $report['reported']['pixelcount']       = $reportedData['pixel_count'];
             $report['reported']['ip']               = ["last"=>$reportedData['last_ip'],"signup"=>$reportedData['signup_ip']];
-            $report['reported']['ban']              = ["expiry"=>$reportedData['ban_expiry'],"reason"=>$reportedData['ban_reason']];
+            $report['reported']['ban']              = ["expiry"=>$reportedData['ban_expiry'],"reason"=>$reportedData['ban_reason'],"shadow"=>$reportedData['is_shadow_banned']];
         }
         return $report;
     }
