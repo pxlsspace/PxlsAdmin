@@ -49,7 +49,8 @@ $app->add(function($request,$response,$next) {
 $app->add(function($request,$response,$next) {
     $supportedTypes = ['text/html', 'application/json'];
     $accept = $request->getHeaderLine('Accept');
-    $bestMatch = new Negotiation\Negotiator()->getBest($accept, $supportedTypes);
+    $negotiator = new Negotiation\Negotiator();
+    $bestMatch = $negotiator->getBest($accept, $supportedTypes);
     $contentType = $bestMatch
         ? $bestMatch->getBasePart() . '/' . $bestMatch->getSubPart()
         : $supportedTypes[0];
