@@ -41,27 +41,4 @@ final class LogPage
         $this->view->render($response, 'logpage.html.twig', $data);
         return $response;
     }
-
-    public function getTotal() {
-        return $this->database->query("SELECT COUNT(id) as total FROM admin_log")->fetch(\PDO::FETCH_OBJ)->total;
-    }
-
-    public function getLogs($channel) {
-        $logParser = new \pxls\LogParser(); $rt = [];
-
-        $logs = $this->database->prepare("SELECT * FROM admin_log WHERE channel = :channel;");
-        $logs->bindParam(":channel",$channel,\PDO::PARAM_STR);
-        $logs->execute();
-        while($row = $logs->fetch(\PDO::FETCH_ASSOC)) {
-            $qUser = $this->database->prepare("SELECT username FROM users WHERE id = :uid");
-            $qUser->bindParam(":uid", $row['userid']);
-            $qUser->execute();
-            $username = $qUser->fetch(\PDO::FETCH_ASSOC)['username'];
-
-            $row["message"] = $logParser->parse($row["message"]);
-            $row['user_name'] = $username;
-            $rt[] = $row;
-        }
-        return $rt;
-    }
 }
