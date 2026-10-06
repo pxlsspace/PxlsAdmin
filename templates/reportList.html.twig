@@ -44,12 +44,14 @@
         var reportList = $("#tblReports").on("init.dt", () => {
             $("#loading").fadeOut(200);
         }).DataTable({
+            "processing": true,
+            "serverSide": true,
             "ajax": {
                 "dataType": "json",
                 "contentType": "application/json; charset=utf-8",
                 "type": "GET",
-                "url": "{{ xhr_base }}/api/report/reload?all",
-                "dataSrc": "data.canvasReports"
+                "url": "{{ xhr_base }}/api/report/canvasdata",
+                "dataSrc": "canvasReports",
             },
             "columns": [
                 {data: "id"},

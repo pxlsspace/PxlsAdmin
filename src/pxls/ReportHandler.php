@@ -53,18 +53,73 @@ class ReportHandler {
         return true;
     }
 
-    public function getReports($onlyOpen=1, $specificType=null) {
+    public function getReportCount($onlyOpen) {
+        if ($onlyOpen) {
+            $query = $this->db->query('SELECT COUNT(*) as total FROM reports WHERE closed = false AND reported IS NOT NULL');
+        } else {
+            $query = $this->db->query('SELECT COUNT(*) as total FROM reports WHERE reported IS NOT NULL');
+        }
+        
+        $report = $query->fetch(\PDO::FETCH_ASSOC);
+        return $report['total'];
+    }
+    
+    public function getReports($onlyOpen, $offset, $limit) {
         global $app;
         $reports = [];
-        if($onlyOpen==1) {
-            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE closed = false AND reported IS NOT NULL");
+        
+        if($onlyOpen) {
+            $qReports = $this->db->prepare(
+                'SELECT ' .
+                'r.id, ' .
+                'r.who, ' .
+                'who_u.username as who_name, ' .
+                'claim_u.username as claimed_name, ' .
+                'rep_u.username as reported_name, ' .
+                'r.x, ' .
+                'r.y, ' .
+                'r.claimed_by, ' .
+                'r.time, ' .
+                'r.reported, ' .
+                'r.closed ' .
+                'FROM reports r ' .
+                'LEFT OUTER JOIN users rep_u ON rep_u.id = r.reported ' .
+                'LEFT OUTER JOIN users who_u ON who_u.id = r.who ' .
+                'LEFT OUTER JOIN users claim_u ON claim_u.id = r.claimed_by ' .
+                'WHERE closed = false AND reported IS NOT NULL ' .
+                'ORDER BY r.id DESC ' .
+                'OFFSET :offset ' .
+                'LIMIT :limit'
+            );
         } else {
-            $qReports = $this->db->query("SELECT r.id,r.who,u.username as reported_name,r.x,r.y,r.claimed_by,r.time,r.reported,r.closed FROM reports r LEFT OUTER JOIN users u ON u.id=r.reported WHERE reported IS NOT NULL");
+            $qReports = $this->db->prepare(
+                'SELECT ' .
+                'r.id,' .
+                'r.who,' .
+                'who_u.username as who_name, ' .
+                'claim_u.username as claimed_name, ' .
+                'rep_u.username as reported_name, ' .
+                'r.x,' .
+                'r.y,' .
+                'r.claimed_by,' .
+                'r.time, ' .
+                'r.reported, ' .
+                'r.closed ' .
+                'FROM reports r ' .
+                'LEFT OUTER JOIN users rep_u ON rep_u.id = r.reported ' .
+                'LEFT OUTER JOIN users who_u ON who_u.id = r.who ' .
+                'LEFT OUTER JOIN users claim_u ON claim_u.id = r.claimed_by ' .
+                'WHERE reported IS NOT NULL ' .
+                'ORDER BY r.id DESC ' .
+                'OFFSET :offset ' .
+                'LIMIT :limit'
+            );
         }
+        $qReports->bindParam(":offset", $offset, \PDO::PARAM_INT);
+        $qReports->bindParam(":limit", $limit, \PDO::PARAM_INT);
+        $qReports->execute();
 
         while($report = $qReports->fetch(\PDO::FETCH_ASSOC)) {
-            $report['who_name'] = $report['who'] ? $this->getUserdataById($report['who'])['username'] : 'Server';
-            $report['claimed_name'] = ($report['claimed_by']==0)?'':$this->getUserdataById($report['claimed_by'])['username'];
             $report['position_url'] = $report['who'] ? '<a href="'.$this->formatCoordsLink($report['x'], $report['y']).'" target="_blank">X:'.$report['x'].'; Y:'.$report['y'].'</a>' : 'N/A';
             $report['who_url'] = $report['who'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['who']]).'" target="_blank">'.$report['who_name'].'</a>' : 'Server';
             $report['reported_url'] = $report['reported'] ? '<a href="'.$app->getContainer()->router->pathFor('profileId', ['id' => $report['reported']]).'" target="_blank">'.$report['reported_name'].'</a>' : 'Server';

@@ -25,8 +25,45 @@ class ChatReportHandler {
         return false;
     }
 
-    public function getReports($open=true) {
-        $query = $this->db->query("SELECT r.id,r.time,r.cmid,r.target,r.initiator,r.claimed_by,m.purged_by,u.username as \"target_name\",u1.username as \"initiator_name\",u2.username as \"claimed_name\",u3.username as \"purged_name\" FROM chat_reports r INNER JOIN chat_messages m ON m.id=r.cmid LEFT OUTER JOIN users u ON u.id=r.target LEFT OUTER JOIN users u1 ON u1.id=r.initiator LEFT OUTER JOIN users u2 ON u2.id=r.claimed_by LEFT OUTER JOIN users u3 ON u3.id=m.purged_by WHERE ".($open !== false ? 'r.closed = false;' : 'true;'));
+    public function getReportCount($onlyOpen) {
+        if ($onlyOpen) {
+            $query = $this->db->query('SELECT COUNT(*) as total FROM chat_reports WHERE closed = false');
+        } else {
+            $query = $this->db->query('SELECT COUNT(*) as total FROM chat_reports');
+        }
+        
+        $report = $query->fetch(\PDO::FETCH_ASSOC);
+        return $report['total'];
+    }
+    
+    public function getReports($onlyOpen, $offset, $limit) {
+        $query = $this->db->prepare(
+            'SELECT ' .
+            'r.id, ' .
+            'r.time, ' .
+            'r.cmid, ' .
+            'r.target, ' .
+            'r.initiator, ' .
+            'r.claimed_by, ' .
+            'm.purged_by, ' .
+            'u.username as "target_name", ' .
+            'u1.username as "initiator_name", ' .
+            'u2.username as "claimed_name", '.
+            'u3.username as "purged_name" ' .
+            'FROM chat_reports r ' .
+            'INNER JOIN chat_messages m ON m.id = r.cmid ' .
+            'LEFT OUTER JOIN users u ON u.id = r.target ' .
+            'LEFT OUTER JOIN users u1 ON u1.id = r.initiator ' .
+            'LEFT OUTER JOIN users u2 ON u2.id = r.claimed_by ' .
+            'LEFT OUTER JOIN users u3 ON u3.id = m.purged_by ' .
+            'WHERE ' . ($onlyOpen !== false ? 'r.closed = false ' : 'true ') .
+            'ORDER BY r.id DESC ' .
+            'OFFSET :offset ' .
+            'LIMIT :limit'
+        );
+        $query->bindParam(":offset", $offset, \PDO::PARAM_INT);
+        $query->bindParam(":limit", $limit, \PDO::PARAM_INT);
+        $query->execute();
 
         try {
             return $query->fetchAll(\PDO::FETCH_ASSOC);
