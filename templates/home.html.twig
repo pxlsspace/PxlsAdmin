@@ -250,6 +250,8 @@
         {% include "ban.js.twig" %}
         $(function() {
             var actionLog = $("#actionlog").DataTable({
+                "processing": true,
+                "serverSide": true,
                 "ajax": {
                     "dataType": 'json',
                     "contentType": "application/json; charset=utf-8",
