@@ -21,7 +21,9 @@ final class Pixels
     }
 
     private function isAllNumeric(array $arr) {
-        return !in_array(false, array_map(is_numeric, $arr), true);
+        return !in_array(false, array_map(function($n) {
+            return is_numeric($n);
+        }, $arr), true);
     }
     private function minMax($a, $b) {
         return ["min" => min($a, $b), "max" => max($a, $b)];
