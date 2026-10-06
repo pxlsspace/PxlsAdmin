@@ -899,7 +899,7 @@
                 };
 
 
-                const handleRangeSliderUpdate = (ev) => this.updateCanvas(ev.to_value, ev.from_value);
+                const handleRangeSliderUpdate = (ev) => this.updateCanvas(ev.from_value, ev.to_value);
 
                 let rangeSliderDebouncingTimeout;
                 const rangeSlider = this.elements.inpRangeSlider.ionRangeSlider({
@@ -919,7 +919,7 @@
                 this.reinit = () => {
                     const data = table.getData()
                         .toArray()
-                        .sort(() => 1); // reverse - oldest pixels first
+                        .sort((a, b) => a.pixel_id - b.pixel_id);
 
                     const values = data.map(({ pixel_id }) => pixel_id);
                     rangeSlider.update({
