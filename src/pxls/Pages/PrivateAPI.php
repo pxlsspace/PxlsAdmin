@@ -204,7 +204,7 @@ final class PrivateAPI
                     "SELECT $fields FROM admin_log l " .
                     "LEFT OUTER JOIN users u on u.id = l.userid " .
                     "WHERE message LIKE '%public api%' " .
-                    "AND message LIKE :search " .
+                    "AND message ILIKE :search " .
                     "ORDER BY id DESC " .
                     "OFFSET :offset " .
                     "LIMIT :limit"
@@ -215,7 +215,7 @@ final class PrivateAPI
                     "SELECT $fields FROM admin_log l " .
                     "LEFT OUTER JOIN users u on u.id = l.userid " .
                     "WHERE message NOT LIKE '%public api%' " .
-                    "AND message LIKE :search " .
+                    "AND message ILIKE :search " .
                     "ORDER BY id DESC " .
                     "OFFSET :offset " .
                     "LIMIT :limit"
