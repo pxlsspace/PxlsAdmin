@@ -10,8 +10,8 @@ class LogParser {
 
     public function parse($logline) {
         $regex = []; $action = null;
-        $regex['alert'] = '/Sent a server-wide broadcast with the content: (\S*)/i';
-        $regex['alertuser'] = '/Sent an alert to (\S*) \(UID: (\d*)\) with the content: (\S*)/i';
+        $regex['alert'] = '/Sent a server-wide broadcast with the content: (.*)/i';
+        $regex['alertuser'] = '/Sent an alert to (\S*) \(UID: (\d*)\) with the content: (.*)/i';
         $regex['selfshadow'] = '/self-shadowban via (.+)/i';
         $regex['selfban'] = '/self-ban via script/i';
         $regex['permaban'] = '/^(permaban) (\S*)/i';
@@ -208,7 +208,7 @@ class LogParser {
         ];
         if (is_array($m["extra"])) {
             foreach ($m["extra"] as $key => $value) {
-                $messageData["%extra.$key%"] = $value;
+                $messageData["%extra.$key%"] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
             }
         }
 
