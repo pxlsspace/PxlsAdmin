@@ -53,20 +53,24 @@ class ReportHandler {
         return true;
     }
 
-    public function getReportCount($onlyOpen) {
+    public function getReportCount($onlyOpen, $search) {
+        $search = "%$search%";
         if ($onlyOpen) {
-            $query = $this->db->query('SELECT COUNT(*) as total FROM reports WHERE closed = false AND reported IS NOT NULL');
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM reports WHERE closed = false AND reported IS NOT NULL AND coalesce(message, '') ILIKE :search");
         } else {
-            $query = $this->db->query('SELECT COUNT(*) as total FROM reports WHERE reported IS NOT NULL');
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM reports WHERE reported IS NOT NULL AND coalesce(message, '') ILIKE :search");
         }
+        $query->bindParam(":search", $search, \PDO::PARAM_STR);
+        $query->execute();
         
         $report = $query->fetch(\PDO::FETCH_ASSOC);
         return $report['total'];
     }
     
-    public function getReports($onlyOpen, $offset, $limit) {
+    public function getReports($onlyOpen, $search, $offset, $limit) {
         global $app;
         $reports = [];
+        $search = "%$search%";
         
         if($onlyOpen) {
             $qReports = $this->db->prepare(
@@ -87,6 +91,7 @@ class ReportHandler {
                 'LEFT OUTER JOIN users who_u ON who_u.id = r.who ' .
                 'LEFT OUTER JOIN users claim_u ON claim_u.id = r.claimed_by ' .
                 'WHERE closed = false AND reported IS NOT NULL ' .
+                "AND coalesce(r.message, '') ILIKE :search " .
                 'ORDER BY r.id DESC ' .
                 'OFFSET :offset ' .
                 'LIMIT :limit'
@@ -110,6 +115,7 @@ class ReportHandler {
                 'LEFT OUTER JOIN users who_u ON who_u.id = r.who ' .
                 'LEFT OUTER JOIN users claim_u ON claim_u.id = r.claimed_by ' .
                 'WHERE reported IS NOT NULL ' .
+                "AND coalesce(r.message, '') ILIKE :search " .
                 'ORDER BY r.id DESC ' .
                 'OFFSET :offset ' .
                 'LIMIT :limit'
@@ -117,6 +123,7 @@ class ReportHandler {
         }
         $qReports->bindParam(":offset", $offset, \PDO::PARAM_INT);
         $qReports->bindParam(":limit", $limit, \PDO::PARAM_INT);
+        $qReports->bindParam(":search", $search, \PDO::PARAM_STR);
         $qReports->execute();
 
         while($report = $qReports->fetch(\PDO::FETCH_ASSOC)) {

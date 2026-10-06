@@ -25,18 +25,22 @@ class ChatReportHandler {
         return false;
     }
 
-    public function getReportCount($onlyOpen) {
+    public function getReportCount($onlyOpen, $search) {
+        $search = "%$search%";
         if ($onlyOpen) {
-            $query = $this->db->query('SELECT COUNT(*) as total FROM chat_reports WHERE closed = false');
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM chat_reports WHERE closed = false AND coalesce(report_message, '') ILIKE :search");
         } else {
-            $query = $this->db->query('SELECT COUNT(*) as total FROM chat_reports');
+            $query = $this->db->prepare("SELECT COUNT(*) as total FROM chat_reports AND coalesce(report_message, '') ILIKE :search");
         }
+        $query->bindParam(":search", $search, \PDO::PARAM_STR);
+        $query->execute();
         
         $report = $query->fetch(\PDO::FETCH_ASSOC);
         return $report['total'];
     }
     
-    public function getReports($onlyOpen, $offset, $limit) {
+    public function getReports($onlyOpen, $search, $offset, $limit) {
+        $search = "%$search%";
         $query = $this->db->prepare(
             'SELECT ' .
             'r.id, ' .
@@ -57,12 +61,14 @@ class ChatReportHandler {
             'LEFT OUTER JOIN users u2 ON u2.id = r.claimed_by ' .
             'LEFT OUTER JOIN users u3 ON u3.id = m.purged_by ' .
             'WHERE ' . ($onlyOpen !== false ? 'r.closed = false ' : 'true ') .
+            "AND coalesce(r.report_message, '') ILIKE :search " .
             'ORDER BY r.id DESC ' .
             'OFFSET :offset ' .
             'LIMIT :limit'
         );
         $query->bindParam(":offset", $offset, \PDO::PARAM_INT);
         $query->bindParam(":limit", $limit, \PDO::PARAM_INT);
+        $query->bindParam(":search", $search, \PDO::PARAM_STR);
         $query->execute();
 
         try {
