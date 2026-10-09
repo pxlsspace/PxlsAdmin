@@ -15,7 +15,7 @@ class ReportHandler {
     }
 
     public function announce($openChatReports = 0) {
-        $reports = $this->getReports(1);
+        $reports = $this->getReports(1, "", 0, PHP_INT_MAX);
         $claimedCount = 0;
         foreach($reports as $report) {
             if(!$report['claimed_by'] == 0) $claimedCount++;
