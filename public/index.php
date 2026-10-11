@@ -31,6 +31,7 @@ foreach($classes as $class) {
 require __DIR__ . '/../src/dependencies.php';
 
 // Register middleware
+require __DIR__ . '/../src/authentication.php';
 require __DIR__ . '/../src/middleware.php';
 
 // Register routes

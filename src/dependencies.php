@@ -91,5 +91,19 @@ $container[\pxls\Action\NotifyController::class] = function ($c) {
 $container[\pxls\Action\Factions::class] = function ($c) {
     return new \pxls\Action\Factions($c->get('renderer'), $c->get('logger'), $c->get('database'));
 };
+$container[\pxls\Action\Login::class] = function ($c) {
+    $settings = $c->get('settings');
+    $provider = new OidcProvider(
+        $settings['webroots']['panel'] . '/login',
+        $settings['authentication']['clientId'],
+        $settings['authentication']['clientSecret'],
+        $settings['authentication']['issuer'],
+        $settings['authentication']['secure'],
+    );
+    return new \pxls\Action\Login($provider, $c->get('database'));
+};
+$container[\pxls\Action\Logout::class] = function ($c) {
+    return new \pxls\Action\Logout();
+};
 
 //endregion

@@ -1,50 +1,37 @@
 <?php
-// Application middleware
 
-// e.g: $app->add(new \Slim\Csrf\Guard);
-
-use \Slim\Middleware\TokenAuthentication as TokenAuthentication;
-
-$authenticator = function($request, TokenAuthentication $tokenAuth){
-    global $app;
-    $bypassToken = $app->getContainer()->get("settings")["tokens"]["bypass"];
-    if (!isset($bypassToken) || empty($bypassToken)) {
-        $bypassToken = false;
+$app->add(function($request,$response,$next) use($app) {
+    function isPassthrough($path): bool {
+        if (str_starts_with($path, '/api/public')) { return true; }
+        if ($path == '/api/report/announce') { return true; }
+        if ($path == '/login') { return true; }
+        if ($path == '/logout') { return true; }
+        
+        return false;
     }
-    $token = $tokenAuth->findToken($request);
-    $user = new pxls\User($app->getContainer()->get('database'));
-    $user = $user->checkToken($token, $bypassToken);
-    $_SESSION['user_id'] = $user['id'];
-};
+    
+    if (isPassthrough($request->getUri()->getPath())) {
+        return $next($request, $response);
+    }
 
-$error = function(\Slim\Http\Request $request, \Slim\Http\Response $response, TokenAuthentication $tokenAuth) {
-    $output = [];
-    $output['error'] = [
-        'msg' => $tokenAuth->getResponseMessage(),
-        'token' => $tokenAuth->getResponseToken(),
-        'status' => 401,
-        'error' => true
-    ];
-    return $response->withJson($output, 401);
-};
-
-$app->add(new TokenAuthentication([
-    'path' => '/',
-    'authenticator' => $authenticator,
-    'cookie' => 'pxls-token',
-    'secure' =>  $app->getContainer()->get("settings")["authentication"]["secure"] === true,
-    'passthrough' => ['/api/public','/api/report/announce'],
-    'error' => $error,
-]));
-
-
-$app->add(function($request,$response,$next) {
-    $userdata = new pxls\User($this->database);
-    $userdata = $userdata->getUserById($_SESSION['user_id']);
-    $request = $request->withAttribute('userdata', $userdata);
-    $response = $next($request, $response);
-    return $response;
+    if (isset($_SESSION['user_id'])) {
+        $user_db = new pxls\User($app->getContainer()->get('database'));
+        $user = $user_db->getUserById($_SESSION['user_id']);
+        if ($user_db->checkRole($user)) {
+            $request = $request->withAttribute('userdata', $user);
+            return $next($request, $response);
+        }  else {
+            $view = $app->getContainer()->get('renderer');
+            $data = ['userdata' => $user];
+            return $view->render($response, 'error/403.html.twig', $data);
+        }
+    } else {
+        $view = $app->getContainer()->get('renderer');
+        return $view->render($response, 'error/401.html.twig', []);
+    }
 });
+
+$settings = $app->getContainer()->get('settings');
 
 $app->add(function($request,$response,$next) {
     $supportedTypes = ['text/html', 'application/json'];

@@ -12,38 +12,26 @@ class User {
         $this->db = $db;
     }
 
-    public function checkToken($token, $bypassToken) {
-        if($bypassToken !== false && $token == $bypassToken) return true;
-        $queryToken = $this->db->prepare("SELECT * FROM sessions WHERE token = :token LIMIT 1");
-        $queryToken->bindParam(":token",$token,\PDO::PARAM_STR);
-        $queryToken->execute();
-        if($queryToken->rowCount() > 0) {
-            $token = $queryToken->fetch(\PDO::FETCH_OBJ);
-            $user = $this->checkRole($token->who);
-            if($user) {
-                return $user;
-            } else {
-                throw new UnauthorizedException('User scope not permitted. Your role is not in the permitted scope. Please talk to your supervisor about this.');
-            }
-        } else {
-            throw new UnauthorizedException('Token not found in database. Seems like your session is invalid.');
+    public function subToId($sub) {
+        $querySub = $this->db->prepare("SELECT id FROM users WHERE sub = :sub LIMIT 1");
+        $querySub->bindParam(":sub",$sub,\PDO::PARAM_STR);
+        $querySub->execute();
+        if($querySub->rowCount() == 0) {
+            return null;
         }
-        $queryToken->closeCursor();
-    }
+        $data = $querySub->fetch(\PDO::FETCH_OBJ);
+        $querySub->closeCursor();
+        return $data->id;
+     }
 
-    protected function checkRole($uid) {
+
+    public function checkRole($user): bool {
+        if (!$user) {
+            return false;
+        }
         // TODO (Flying)
-        $allowRoles = ["staff", "trialmod", "moderator", "administrator"];
-
-        $getRole = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
-        $getRole->bindParam(":uid",$uid,\PDO::PARAM_INT);
-        $getRole->execute();
-        while($row = $getRole->fetchAll(\PDO::FETCH_COLUMN, 0)) {
-            if(!empty(array_intersect($row, $allowRoles))) {
-                return $this->getUserById($uid);
-            }
-        }
-        return false;
+        $allowRoles = ["staff", "trialmod", "moderator", "developer", "administrator"];
+        return !empty(array_intersect($user['roles'], $allowRoles));
     }
 
     private function populateUserData($usr) {
@@ -53,12 +41,21 @@ class User {
         $getRoles = $this->db->prepare("SELECT role FROM roles WHERE id = :uid");
         $getRoles->bindParam(":uid",$usr["id"],\PDO::PARAM_INT);
         $getRoles->execute();
-        $usr["roles"] = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
+        $roles = $getRoles->fetchAll(\PDO::FETCH_COLUMN, 0);
+        // TODO ([  ]): as with the TODO for Flying above, these should probably
+        // come from the config and not be hardcoded. On that matter, there's 
+        // also hardcoding of roles all over the place—like the master template.
+        // Oh well.
+        $roles_sort_order = ["staff", "trialmod", "moderator", "developer", "administrator"];
+        $usr["roles"] = array_values(array_intersect($roles_sort_order, $roles));
         return $usr;
     }
 
     private $userBufferId = [];
     public function getUserById($uid) {
+        if (is_null($uid)) {
+            return false;
+        }
         if (isset($userBufferId[$uid])) {
             return $userBufferId[$uid];
         }
@@ -96,7 +93,7 @@ class User {
     }
 
     public function getUserLoginsById($uid) {
-        $getLogins = $this->db->prepare("SELECT service, service_uid FROM user_logins WHERE uid = :uid");
+        $getLogins = $this->db->prepare("SELECT identity_provider as service, user_id as service_uid FROM user_links WHERE uid = :uid");
         $getLogins->bindParam(":uid", $uid, \PDO::PARAM_INT);
         $getLogins->execute();
         return $getLogins->fetchAll(\PDO::FETCH_ASSOC);
