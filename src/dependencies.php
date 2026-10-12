@@ -100,7 +100,7 @@ $container[\pxls\Action\Login::class] = function ($c) {
         $settings['authentication']['issuer'],
         $settings['authentication']['secure'],
     );
-    return new \pxls\Action\Login($provider, $c->get('database'));
+    return new \pxls\Action\Login($c->get('renderer'), $provider, $c->get('database'));
 };
 $container[\pxls\Action\Logout::class] = function ($c) {
     return new \pxls\Action\Logout();

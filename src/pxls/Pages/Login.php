@@ -7,10 +7,16 @@ use Slim\Http\Response;
 
 final class Login
 {
+    private \Slim\Views\Twig $renderer;
     private \OidcProvider $provider;
     private \PDO $db;
 
-    public function __construct(\OidcProvider $provider, \PDO $db) {
+    public function __construct(
+        \Slim\Views\Twig $renderer,
+        \OidcProvider $provider,
+        \PDO $db
+    ) {
+        $this->renderer = $renderer;
         $this->provider = $provider;
         $this->db = $db;
     }
@@ -19,6 +25,14 @@ final class Login
     {   
         if (isset($_GET['code'])) {
             return $this->login($_GET['code'], $_GET['state'], $response);
+        }
+
+        if (isset($_GET['error'])) {
+            $data = [
+                'error_code' => $_GET['error'],
+                'error_description' => $_GET['error_description']
+            ];
+            return $this->renderer->render($response, 'error/login.html.twig', $data);
         }
 
         if (empty($_SESSION['user_id'])) {
