@@ -46,8 +46,10 @@ class User {
         // come from the config and not be hardcoded. On that matter, there's 
         // also hardcoding of roles all over the place—like the master template.
         // Oh well.
-        $roles_sort_order = ["staff", "trialmod", "moderator", "developer", "administrator"];
-        $usr["roles"] = array_values(array_intersect($roles_sort_order, $roles));
+        $roles_sort_order = ["administrator", "developer", "moderator", "trialmod", "staff"];
+        $staff_roles = array_values(array_intersect($roles_sort_order, $roles));
+        $other_roles = array_values(array_diff($roles, $roles_sort_order));
+        $usr["roles"] = array_values(array_merge($staff_roles, $other_roles));
         return $usr;
     }
 
