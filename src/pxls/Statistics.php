@@ -16,7 +16,7 @@ class Statistics {
     }
 
     public function activeSessions() {
-        return $this->db->query("SELECT COUNT(id) AS total FROM sessions")->fetch(\PDO::FETCH_OBJ)->total;
+        return $this->db->query("SELECT COUNT(*) AS total FROM sessions")->fetch(\PDO::FETCH_OBJ)->total;
     }
 
     public function pixelsPlaced($time=0) {

@@ -4,6 +4,8 @@
 use pxls\Action\NotifyController;
 
 $app->get('/', \pxls\Action\Home::class)->setName('home');
+$app->get('/login', \pxls\Action\Login::class)->setName('login');
+$app->get('/logout', \pxls\Action\Logout::class)->setName('logout');
 $app->get('/logs', \pxls\Action\LogPage::class)->setName('logs');
 $app->get('/reports', \pxls\Action\ReportList::class)->setName('reportList');
 $app->get('/pixels', \pxls\Action\Pixels::class)->setName('pixels');

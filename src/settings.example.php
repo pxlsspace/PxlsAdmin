@@ -55,7 +55,11 @@ return [
         ],
 
         'authentication' => [
-            //this designates the TokenAuth's `secure` setting. Should be `true` on production
+            'clientId' => 'pxls',
+            'clientSecret' => 'abc',
+            // The auth server root. Should support discovery at this url + .well-known/openid-configuration
+            'issuer' => 'https://auth.pxls.space',
+            // Can be set to false in a testing environment to allow self-signed certs.
             'secure' => true
         ],
     ],

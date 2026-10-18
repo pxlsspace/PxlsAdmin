@@ -17,8 +17,9 @@
         "slim/php-view": "^2.0",
         "monolog/monolog": "^1.17",
         "slim/twig-view": "^2.2",
-        "dyorg/slim-token-authentication": "^0.3.3",
-        "willdurand/negotiation": "^3.0"
+        "willdurand/negotiation": "^3.0",
+        "league/oauth2-client": "^2.9",
+        "firebase/php-jwt": "^7.2"
     },
     "scripts": {
         "start": "php -S 0.0.0.0:8080 -t public public/index.php"
