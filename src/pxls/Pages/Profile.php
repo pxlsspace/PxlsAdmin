@@ -82,8 +82,8 @@ final class Profile
             }, $userinfo['logins']);
             $userinfo["signup_ip_detail"] = $this->ip2loc($userinfo['signup_ip']);
             $userinfo["last_ip_detail"] = $this->ip2loc($userinfo['last_ip']);
-            $userinfo["reports_sent"] = $this->reportsSentByUser($userinfo["id"]);
-            $userinfo["reports_recv"] = $this->reportsRecvbyUser($userinfo["id"]);
+            $userinfo["reports_sent"] = $this->reportsSentByUser($userinfo["id"]) + $this->chatReportsSentByUser($userinfo["id"]);
+            $userinfo["reports_recv"] = $this->reportsRecvbyUser($userinfo["id"]) + $this->chatReportsRecvbyUser($userinfo["id"]);
             $userinfo["notes"] = $user->getUserNotesById($userinfo["id"]);
             $_legacy = $user->getBanlogFromAdminLog($userinfo["id"]);
             $_current = $user->getBanlogFromDB($userinfo['id']);
@@ -105,24 +105,103 @@ final class Profile
     }
 
     protected function reportsSentByUser($uid) {
-        $query = $this->db->prepare("SELECT r.id AS rid, r.reported AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r WHERE reported IS NOT NULL AND r.who = :uid");
+        $query = $this->db->prepare(
+            'SELECT ' .
+            'r.id AS rid, ' .
+            'r.reported AS who_id, ' .
+            "COALESCE(u.username, 'unknown') AS who_username, " .
+            'r.x, ' .
+            'r.y, ' .
+            'r.message AS rmessage, ' .
+            'r.pixel_id, ' .
+            'r.time AS rtime, ' .
+            'r.claimed_by, ' .
+            'r.closed ' .
+            'FROM reports r ' .
+            'LEFT JOIN users u ON u.id = r.reported ' .
+            'WHERE r.reported IS NOT NULL AND r.who = :uid'
+        );
         $query->bindParam(":uid", $uid, \PDO::PARAM_INT);
         $query->execute();
         while($row = $query->fetch(\PDO::FETCH_OBJ)) {
-            $getUser = new \pxls\User($this->db);
-            $reported = $getUser->getUserById($row->who);
+            $username = $row->who_id == 0 ? 'console' : $row->who_username;
+            $reported = ["id" => $row->who_id, "username" => $username];
             $this->addToTimeline($row->rtime, "report_sent", $row->rmessage, ["id"=>$row->rid, "reported"=>$reported]);
         }
         return $query->rowCount();
     }
     protected function reportsRecvbyUser($uid) {
-        $query = $this->db->prepare("SELECT r.id AS rid, r.who AS who, r.x, r.y, r.message AS rmessage, r.pixel_id, r.time AS rtime, r.claimed_by, r.closed FROM reports r WHERE reported IS NOT NULL AND r.reported = :uid;");
+        $query = $this->db->prepare(
+            'SELECT ' .
+            'r.id AS rid, ' .
+            'r.who AS who_id, ' .
+            "COALESCE(u.username, 'unknown') AS who_username, " .
+            'r.x, ' .
+            'r.y, ' .
+            'r.message AS rmessage, ' .
+            'r.pixel_id, ' .
+            'r.time AS rtime, ' .
+            'r.claimed_by, ' .
+            'r.closed ' .
+            'FROM reports r ' .
+            'LEFT JOIN users u ON u.id = r.who ' .
+            'WHERE r.reported = :uid;'
+        );
         $query->bindParam(":uid", $uid, \PDO::PARAM_INT);
         $query->execute();
         while($row = $query->fetch(\PDO::FETCH_OBJ)) {
-            $getUser = new \pxls\User($this->db);
-            $reporter = $getUser->getUserById($row->who);
+            $username = $row->who_id == 0 ? 'console' : $row->who_username;
+            $reporter = ["id" => $row->who_id, "username" => $username];
             $this->addToTimeline($row->rtime, "report_recv", $row->rmessage, ["id"=>$row->rid, "reporter"=>$reporter]);
+        }
+        return $query->rowCount();
+    }
+
+    protected function chatReportsSentByUser($uid) {
+        $query = $this->db->prepare(
+            'SELECT ' .
+            'r.id AS rid, ' .
+            'r.target AS who_id, ' .
+            "COALESCE(t.username, 'unknown') AS who_username, " .
+            'r.report_message AS rmessage, ' .
+            'r.cmid AS message_id, ' .
+            'r.time AS rtime, ' .
+            'r.claimed_by, ' .
+            'r.closed ' .
+            'FROM chat_reports r ' .
+            'LEFT JOIN users t ON t.id = r.target ' .
+            'WHERE r.initiator = :uid'
+        );
+        $query->bindParam(":uid", $uid, \PDO::PARAM_INT);
+        $query->execute();
+        while($row = $query->fetch(\PDO::FETCH_OBJ)) {
+            $username = $row->who_id == 0 ? 'console' : $row->who_username;
+            $reported = ["id" => $row->who_id, "username" => $username];
+            $this->addToTimeline($row->rtime, "chat_report_sent", $row->rmessage, ["id"=>$row->rid, "reported"=>$reported]);
+        }
+        return $query->rowCount();
+    }
+    protected function chatReportsRecvbyUser($uid) {
+        $query = $this->db->prepare(
+            'SELECT ' .
+            'r.id AS rid, ' .
+            'r.initiator AS who_id, ' .
+            "COALESCE(i.username, 'unknown') AS who_username, " .
+            'r.report_message AS rmessage, ' .
+            'r.cmid AS message_id, ' .
+            'r.time AS rtime, ' .
+            'r.claimed_by, ' .
+            'r.closed ' .
+            'FROM chat_reports r ' .
+            'LEFT JOIN users i ON i.id = r.initiator ' .
+            'WHERE r.target = :uid;'
+        );
+        $query->bindParam(":uid", $uid, \PDO::PARAM_INT);
+        $query->execute();
+        while($row = $query->fetch(\PDO::FETCH_OBJ)) {
+            $username = $row->who_id == 0 ? 'console' : $row->who_username;
+            $reporter = ["id" => $row->who_id, "username" => $username];
+            $this->addToTimeline($row->rtime, "chat_report_recv", $row->rmessage, ["id"=>$row->rid, "reporter"=>$reporter]);
         }
         return $query->rowCount();
     }

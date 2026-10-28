@@ -196,9 +196,9 @@
 
                             {% for key, item in timeline %}
                                 <li>
-                                    {% if item.scope == "report_sent" %}
+                                    {% if item.scope == "report_sent" or item.scope == "chat_report_sent" %}
                                         <i class="fa fa-question bg-yellow"></i>
-                                    {% elseif item.scope == "report_recv" %}
+                                    {% elseif item.scope == "report_recv" or item.scope == "chat_report_recv" %}
                                         <i class="fa fa-exclamation bg-red"></i>
                                     {% elseif item.scope == "signup" %}
                                         <i class="fa fa-user-plus bg-green"></i>
@@ -209,6 +209,10 @@
                                             <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> reported <a href="{{ path_for('profileId',{'id': item.id.reported.id }) }}">{{ item.id.reported.username }}</a>. (Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#report_info">{{ item.id.id }}</a>)</h3>
                                         {% elseif item.scope == "report_recv" %}
                                             <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> was reported by <a href="{{ path_for('profileId',{'id': item.id.reporter.id }) }}">{{ item.id.reporter.username }}</a>. (Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#report_info">{{ item.id.id }}</a>)</h3>
+                                        {% elseif item.scope == "chat_report_sent" %}
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> reported <a href="{{ path_for('profileId',{'id': item.id.reported.id }) }}">{{ item.id.reported.username }}</a>. (Chat Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#chat_report_modal">{{ item.id.id }}</a>)</h3>
+                                        {% elseif item.scope == "chat_report_recv" %}
+                                            <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> was reported by <a href="{{ path_for('profileId',{'id': item.id.reporter.id }) }}">{{ item.id.reporter.username }}</a>. (Chat Report ID: <a href="#" data-toggle="modal" data-reportid="{{ item.id.id }}" data-target="#chat_report_modal">{{ item.id.id }}</a>)</h3>
                                         {% elseif item.scope == "signup" %}
                                             <h3 class="timeline-header no-border"><a href="{{ path_for('profileId', {'id': userinfo.id}) }}">{{ userinfo.username }}</a> signed up.</h3>
                                         {% endif %}
