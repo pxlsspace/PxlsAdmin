@@ -95,7 +95,7 @@ final class Search
     }
 
     protected function searchByLogin($needle) {
-        $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE id IN (SELECT uid FROM user_logins WHERE CONCAT(UPPER(service), ':', UPPER(service_uid)) LIKE UPPER(:login)) LIMIT 30", [
+        $this->_performSearch("SELECT {$this::$qs} FROM users u WHERE id IN (SELECT uid FROM user_links WHERE CONCAT(UPPER(identity_provider), ':', UPPER(user_id)) LIKE UPPER(:login)) LIMIT 30", [
             ':login' => [sprintf("%%%s%%", str_replace('_', '\_', $needle)), \PDO::PARAM_STR]
         ]);
     }
