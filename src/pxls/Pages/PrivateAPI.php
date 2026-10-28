@@ -101,7 +101,7 @@ final class PrivateAPI
         global $app;
 
         $toRet = [];
-        $qSignups = $this->database->query("SELECT id,username,signup_time,ban_reason,(is_shadow_banned OR ban_expiry = '1970-01-01 01:00:00' OR (now() < ban_expiry)) AS \"banned\",signup_ip,last_ip,pixel_count FROM users ORDER BY signup_time DESC LIMIT 50");
+        $qSignups = $this->database->query("SELECT id,username,signup_time,ban_reason,(is_shadow_banned OR CAST(EXTRACT(epoch FROM ban_expiry) AS INTEGER) = 0 OR (now() < ban_expiry)) AS \"banned\",signup_ip,last_ip,pixel_count FROM users ORDER BY signup_time DESC LIMIT 50");
         $qSignups->execute();
 
         $user = new \pxls\User($this->database);
