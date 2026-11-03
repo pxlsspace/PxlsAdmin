@@ -99,6 +99,7 @@ final class Profile
             $userinfo["chatbanlog"] = $user->getChatbanlogFromDB($userinfo['id']);
             $userinfo["ip_log"] = $user->getIPLogForUser($userinfo['id']);
             $this->addToTimeline(strtotime($userinfo['signup_time']), "signup", "", 0);
+            $this->alertsSentToUser($userinfo['id']);
             return $userinfo;
         }
         return false;
@@ -202,6 +203,30 @@ final class Profile
             $username = $row->who_id == 0 ? 'console' : $row->who_username;
             $reporter = ["id" => $row->who_id, "username" => $username];
             $this->addToTimeline($row->rtime, "chat_report_recv", $row->rmessage, ["id"=>$row->rid, "reporter"=>$reporter]);
+        }
+        return $query->rowCount();
+    }
+    
+    protected function alertsSentToUser($uid) {
+        $like_query = "Sent an alert to % (UID: $uid) with the content: %";
+        $query = $this->db->prepare(
+            'SELECT ' .
+            'l.message as message, ' .
+            'l.time as time, ' .
+            'l.userid as who_id, ' .
+            "COALESCE(u.username, 'unknown') AS who_username " .
+            'FROM admin_log l ' .
+            'LEFT JOIN users u ON u.id = l.userid ' .
+            "WHERE l.message LIKE :query;"
+        );
+        $query->bindParam(":query", $like_query, \PDO::PARAM_STR);
+        $query->execute();
+        while($row = $query->fetch(\PDO::FETCH_OBJ)) {
+            $username = $row->who_id == 0 ? 'console' : $row->who_username;
+            $sender = ["id" => $row->who_id, "username" => $username];
+            $message = explode(' with the content: ', $row->message, 2)[1];
+            $content = ["sender"=>$sender, "message"=>$row->message];
+            $this->addToTimeline($row->time, "alert", $message, $content);
         }
         return $query->rowCount();
     }
