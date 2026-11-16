@@ -37,29 +37,15 @@ final class Home
         //region Statistics
         $stats = new \pxls\Statistics($this->database);
         $data['stats'] = [
-            'total_users'           => number_format($stats->getUserCount()),
-            'total_sessions'        => number_format($stats->activeSessions()),
-            'total_pixels'          => number_format($stats->pixelsPlaced(0)),
-            'total_pixels_hour'     => number_format($stats->pixelsPlaced("-1 hour")),
-            'spu_ratio'             => number_format(($stats->activeSessions() / $stats->getUserCount()),2),
-            'ppu_ratio'             => number_format(($stats->pixelsPlaced() / $stats->getUserCount()),2),
+            'total_users'       => number_format($stats->getUserCount()),
+            'active_users'      => number_format($stats->getActiveUserCount()),
+            'total_lookups'     => number_format($stats->getLookupCount()),
+            'total_sessions'    => number_format($stats->activeSessions()),
+            'total_pixels'      => number_format($stats->pixelsPlaced(0)),
+            'total_pixels_hour' => number_format($stats->pixelsPlaced("-1 hour")),
         ];
         //endregion
 
-        //region activityreport
-        $data['activity']['total_users'] = []; $data['activity']['total_pixels'] = []; $data['activity']['hourly_pixels'] = []; $data['activity']['timestamps'] = [];
-        $getActivity = $this->database->query("SELECT * FROM stats ORDER BY id DESC");
-        while($row = $getActivity->fetch(\PDO::FETCH_OBJ)) {
-            if(!in_array($row->timestamp,$data['activity']['timestamps'])) $data['activity']['timestamps'][] = $row->timestamp;
-            $data['activity'][$row->channel][] = $row->value;
-        }
-        $data['activity']['timestamps'] = array_reverse($data['activity']['timestamps']);
-        $data['activity']['total_pixels'] = array_reverse($data['activity']['total_pixels']);
-        $data['activity']['total_users'] = array_reverse($data['activity']['total_users']);
-        $data['activity']['hourly_pixels'] = array_reverse($data['activity']['hourly_pixels']);
-        //endregion
-
-        //endregion
         $this->view->render($response, 'home.html.twig', $data);
         return $response;
     }

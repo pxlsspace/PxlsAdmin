@@ -15,6 +15,16 @@ class Statistics {
         return $users->fetch(\PDO::FETCH_OBJ)->total;
     }
 
+    public function getActiveUserCount() {
+        $users = $this->db->query("SELECT COUNT(DISTINCT who) AS total FROM pixels");
+        return $users->fetch(\PDO::FETCH_OBJ)->total;
+    }
+
+    public function getLookupCount() {
+        $lookups = $this->db->query("SELECT COUNT(*) AS total FROM lookups");
+        return $lookups->fetch(\PDO::FETCH_OBJ)->total;
+    }
+
     public function activeSessions() {
         return $this->db->query("SELECT COUNT(*) AS total FROM sessions")->fetch(\PDO::FETCH_OBJ)->total;
     }

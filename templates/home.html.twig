@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-lg-2 col-xs-6">
             <!-- small box -->
-            <div class="small-box bg-green">
+            <div class="small-box bg-blue">
                 <div class="inner">
                     <h3>{{ stats.total_pixels }}</h3>
 
@@ -20,7 +20,7 @@
         </div>
         <div class="col-lg-2 col-xs-6">
             <!-- small box -->
-            <div class="small-box bg-teal">
+            <div class="small-box bg-aqua">
                 <div class="inner">
                     <h3>{{ stats.total_pixels_hour }}</h3>
 
@@ -31,7 +31,19 @@
                 </div>
             </div>
         </div>
-        <!-- ./col -->
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-green">
+                <div class="inner">
+                    <h3>{{ stats.active_users }}</h3>
+
+                    <p>Users Active This Canvas</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-person-add"></i>
+                </div>
+            </div>
+        </div>
         <div class="col-lg-2 col-xs-6">
             <!-- small box -->
             <div class="small-box bg-yellow">
@@ -45,7 +57,6 @@
                 </div>
             </div>
         </div>
-        <!-- ./col -->
         <div class="col-lg-2 col-xs-6">
             <!-- small box -->
             <div class="small-box bg-red">
@@ -59,35 +70,19 @@
                 </div>
             </div>
         </div>
-        <!-- ./col -->
         <div class="col-lg-2 col-xs-6">
             <!-- small box -->
             <div class="small-box bg-purple">
                 <div class="inner">
-                    <h3>{{ stats.spu_ratio }}</h3>
-
-                    <p>Sessions-per-User Ratio</p>
+                    <h3>{{ stats.total_lookups }}</h3>
+    
+                    <p>Lookups This Canvas</p>
                 </div>
                 <div class="icon">
-                    <i class="ion ion-close"></i>
+                    <i class="ion ion-android-search"></i>
                 </div>
             </div>
         </div>
-        <!-- ./col -->
-        <div class="col-lg-2 col-xs-6">
-            <!-- small box -->
-            <div class="small-box bg-light-blue">
-                <div class="inner">
-                    <h3>{{ stats.ppu_ratio }}</h3>
-
-                    <p>Pixels-per-User Ratio</p>
-                </div>
-                <div class="icon">
-                    <i class="ion ion-person-add"></i>
-                </div>
-            </div>
-        </div>
-        <!-- ./col -->
     </div>
     <!-- /.row -->
     <div class="row">
